@@ -2,7 +2,6 @@
 class BindableBehavior extends ModelBehavior {
 
     var $settings = array();
-    var $enabled = true;
 
     /**
      * setup
@@ -11,17 +10,20 @@ class BindableBehavior extends ModelBehavior {
      * @param $settings
      */
     function setup(&$model, $settings = array()){
-        $defaults = array('model' => 'Attachment',
-                          'filePath' => WWW_ROOT . 'bind' . DS);
+        $defaults = array('model' => 'Attachment', // attach model
+                          'filePath' => WWW_ROOT . 'bind' . DS, // default attached file path
+                          );
+
+        // Merge settings
         $this->settings = Set::merge($defaults, $settings);
 
-        // bindModel
+        // Bind model
         $model->bindModel(array('hasMany' => array($this->settings['model'] => array(
                                                                                      'className' => $this->settings['model'],
                                                                                      'foreignKey' => 'model_id',
                                                                                      'conditions' => array($this->settings['model'] . '.model' => $model->name)
                                                                                      ))), false);
-        // primalyKey
+        // Set primalyKey
         $this->primalyKey = empty($model->primalyKey) ? 'id' : $model->primalyKey;
     }
 
@@ -37,12 +39,12 @@ class BindableBehavior extends ModelBehavior {
 
     /**
      * afterFind
-     * description
      *
      * @param &$model, $result
      * @return
      */
     function afterFind(&$model, $result){
+        // TODO: format $result
         return $result;
     }
 
@@ -53,10 +55,6 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function beforeSave(&$model) {
-        if (!$this->enabled) {
-            return true;
-        }
-
         foreach ($model->data[$model->name] as $fieldName => $value) {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
@@ -95,17 +93,13 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function afterSave(&$model, $created){
-        if (!$this->enabled) {
-            return;
-        }
-
         if ($created) {
             $model_id = $model->getLastInsertId();
         } else {
             $model_id = $model->data[$model->name][$this->primalyKey];
         }
 
-        $bindFields = Set::combine($this->controller->{$modelName}->bindFields, '/field' , '/');
+        $bindFields = Set::combine($model->bindFields, '/field' , '/');
 
         // set model_id
         foreach ($model->data[$model->name] as $fieldName => $value) {
@@ -148,10 +142,6 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function beforeDelete(&$model){
-        if (!$this->enabled) {
-            return true;
-        }
-
         $query = array();
         $query['recursive'] = -1;
         $query['conditions'] = array($model->name . '.' . $this->primalyKey  => $model->id);
@@ -166,9 +156,7 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function afterDelete(&$model){
-        if (!$this->enabled) {
-            return;
-        }
+        // TODO: delete attached file and records
     }
   }
 ?>
