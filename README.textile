@@ -68,7 +68,7 @@ class PostsController extends AppController {
 }
 </pre>
 
- add.ctp with the addition of the attachment file input form:
+ The add.ctp with the addition of the attachment file input form
 <pre>
 <div class="posts form">
     <h2><?php printf(__('Add %s', true), __('Post', true)); ?></h2>
