@@ -1,0 +1,93 @@
+h1. Filebinder: Simple file attachment plugin for CakePHP
+
+h2. Usage
+
+ Example of how to attachment file.
+
+<pre>
+class Post extends AppModel {
+    var $name = 'Post';
+    var $actsAs = array('Filebinder.Bindable' => array('model' => 'Attachment'));
+    var $displayField = 'title';
+
+    var $bindFields = array(array('field' => 'attachment_file',
+                                  'tmpPath' => '/var/www/html/myapp/app/tmp/cache/',
+                                  'filePath' => '/var/www/html/myapp/app/webroot/files/',
+                                  ));
+  }
+</pre>
+
+ Applicable snippet of controller class
+
+<pre>
+<?php
+class PostsController extends AppController {
+
+    var $name = 'Posts';
+    var $components = array('Filebinder.Ring', 'Transition');
+
+    /**
+     * add
+     */
+    function add() {
+        $this->Ring->bindUp();
+        $this->Transition->checkData('add_confirm');
+        $this->Transition->clearData();
+    }
+
+    /**
+     * add_confirm
+     */
+    function add_confirm(){
+        $this->Transition->checkPrev(array('add'));
+
+        $this->Transition->automate('add_success',
+                                    false,
+                                    'add');
+        $mergedData = $this->Transition->mergedData();
+        $this->set('mergedData', $mergedData);
+    }
+
+    /**
+     * add_success
+     */
+    function add_success(){
+        $this->Transition->checkPrev(array('add',
+                                           'add_confirm'));
+        $mergedData = $this->Transition->mergedData();
+
+        if ($this->Post->save($mergedData)) {
+            $this->Transition->clearData();
+            $this->Session->setFlash(sprintf(__('The %s has been saved', true), 'post'));
+            $this->redirect(array('action' => 'index'));
+        } else {
+            $this->Session->setFlash(sprintf(__('The %s could not be saved. Please, try again.', true), 'post'), 'flash_error');
+            $this->redirect(array('action' => 'add'));
+        }
+    }
+}
+</pre>
+
+ add.ctp with the addition of the attachment file input form:
+<pre>
+<div class="posts form">
+    <h2><?php printf(__('Add %s', true), __('Post', true)); ?></h2>
+    <?php echo $this->Form->create('Post', array('action' => 'add', 'type' => 'file'));?>
+    <table class="form">
+        <tr>
+            <th><?php __('Title'); ?></th>
+            <td><?php echo $this->Form->input('title', array('type' => 'text', 'div' => false, 'label' => false));?></td>
+        </tr>
+        <tr>
+            <th><?php __('Body'); ?></th>
+            <td><?php echo $this->Form->input('body', array('div' => false, 'label' => false));?></td>
+        </tr>
+        <tr>
+            <th><?php __('Attachment File'); ?></th>
+            <td><?php echo $this->Form->input('attachment_file', array('type' => 'file', 'div' => false, 'label' => false));?></td>
+        </tr>
+    </table>
+    <?php echo $this->Form->submit(__('Submit', true));?>
+    <?php echo $this->Form->end();?>
+</div>
+</pre>
