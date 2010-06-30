@@ -11,6 +11,16 @@ class RingComponent extends Object {
     }
 
     /**
+     * startup
+     *
+     * @param &$controller
+     * @return
+     */
+    function startup(&$controller){
+        $controller->helpers[]  =  'Filebinder.Label';
+    }
+
+    /**
      * bindUp
      * set attach file
      *

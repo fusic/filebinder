@@ -105,7 +105,7 @@ class PostsController extends AppController {
     
     <?php echo h($mergedData['Post']['title']);?>
     <?php echo h($mergedData['Post']['body']);?>
-    <?php echo $this->Html->image(preg_replace('#' . WWW_ROOT . '#', '../', $mergedData['Post']['attachment_file']['tmp_bind_path']));?> 
+    <?php echo $this->Label->image($mergedData['Post']['attachment_file']['tmp_bind_path']);?> 
     <?php echo $this->Form->create('Post', array('action' => 'add_confirm'));?>   
     <?php echo $this->Form->submit(__('Submit', true));?>
     <?php echo $this->Form->end();?>
