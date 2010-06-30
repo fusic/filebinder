@@ -4,7 +4,7 @@ class RingComponent extends Object {
 
     var $tmpBindPath;
 
-    function initialize(&$controller,$settings = array()) {
+    function initialize(&$controller, $settings = array()) {
         $this->tmpBindPath = TMP . 'cache/';
 
         $this->controller = $controller;

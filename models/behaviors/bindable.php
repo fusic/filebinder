@@ -11,7 +11,8 @@ class BindableBehavior extends ModelBehavior {
      * @param $settings
      */
     function setup(&$model, $settings = array()){
-        $defaults = array('model' => 'Attachment');
+        $defaults = array('model' => 'Attachment',
+                          'filePath' => WWW_ROOT . 'bind' . DS);
         $this->settings = Set::merge($defaults, $settings);
 
         // bindModel
@@ -104,6 +105,8 @@ class BindableBehavior extends ModelBehavior {
             $model_id = $model->data[$model->name][$this->primalyKey];
         }
 
+        $bindFields = Set::combine($this->controller->{$modelName}->bindFields, '/field' , '/');
+
         // set model_id
         foreach ($model->data[$model->name] as $fieldName => $value) {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
@@ -125,7 +128,8 @@ class BindableBehavior extends ModelBehavior {
                 return false;
             }
 
-            $bindDir = WWW_ROOT . 'bind' . DS . $value['model'] . DS . $model_id . DS . $fieldName . DS;
+            $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings['filePath'] : $bindFields[$fieldName]['filePath'];
+            $bindDir = $filePath . $value['model'] . DS . $model_id . DS . $fieldName . DS;
             if (file_exists($tmpFile)) {
                 if (!file_exists($bindDir)) {
                     mkdir($bindDir, 0755, true);
