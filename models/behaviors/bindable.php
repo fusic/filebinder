@@ -21,6 +21,7 @@ class BindableBehavior extends ModelBehavior {
         $model->bindModel(array('hasMany' => array($this->settings['model'] => array(
                                                                                      'className' => $this->settings['model'],
                                                                                      'foreignKey' => 'model_id',
+                                                                                     'dependent' => true,
                                                                                      'conditions' => array($this->settings['model'] . '.model' => $model->name)
                                                                                      ))), false);
         // Set primalyKey
@@ -66,6 +67,7 @@ class BindableBehavior extends ModelBehavior {
             $bind = $value;
             $bind['model_id'] = 0;
 
+            // TODO: file object enable/disable param
             $tmpFile = $value['tmp_bind_path'];
             $fp = fopen($tmpFile, 'r');
             $ofile = fread($fp, filesize($tmpFile));
