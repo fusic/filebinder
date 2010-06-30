@@ -1,8 +1,8 @@
 h1. Filebinder: Simple file attachment plugin for CakePHP
 
-h2. Usage
+h2. Simple Usage
 
- Example of how to attachment file.
+ Example of how to attachment image file with confirm page.
 
 <pre>
 class Post extends AppModel {
@@ -11,7 +11,7 @@ class Post extends AppModel {
     var $displayField = 'title';
 
     var $bindFields = array(array('field' => 'attachment_file',
-                                  'tmpPath' => '/var/www/html/myapp/app/tmp/cache/',
+                                  'tmpPath' => '/var/www/html/myapp/app/webroot/files/cache/',
                                   'filePath' => '/var/www/html/myapp/app/webroot/files/',
                                   ));
   }
@@ -35,14 +35,13 @@ CREATE TABLE `attachments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 </pre>
 
- Applicable snippet of controller class
 
 <pre>
 <?php
 class PostsController extends AppController {
 
     var $name = 'Posts';
-    var $components = array('Filebinder.Ring', 'Transition');
+    var $components = array('Session', 'Filebinder.Ring', 'Transition');
 
     /**
      * add
@@ -86,25 +85,28 @@ class PostsController extends AppController {
 }
 </pre>
 
- The add.ctp with the addition of the attachment file input form
+ add.ctp
 <pre>
 <div class="posts form">
     <h2><?php printf(__('Add %s', true), __('Post', true)); ?></h2>
     <?php echo $this->Form->create('Post', array('action' => 'add', 'type' => 'file'));?>
-    <table class="form">
-        <tr>
-            <th><?php __('Title'); ?></th>
-            <td><?php echo $this->Form->input('title', array('type' => 'text', 'div' => false, 'label' => false));?></td>
-        </tr>
-        <tr>
-            <th><?php __('Body'); ?></th>
-            <td><?php echo $this->Form->input('body', array('div' => false, 'label' => false));?></td>
-        </tr>
-        <tr>
-            <th><?php __('Attachment File'); ?></th>
-            <td><?php echo $this->Form->input('attachment_file', array('type' => 'file', 'div' => false, 'label' => false));?></td>
-        </tr>
-    </table>
+    <?php echo $this->Form->input('title', array('type' => 'text'));?>
+    <?php echo $this->Form->input('body'));?>
+    <?php echo $this->Form->input('attachment_file', array('type' => 'file'));?>
+    <?php echo $this->Form->submit(__('Submit', true));?>
+    <?php echo $this->Form->end();?>
+</div>
+</pre>
+
+ add_confirm.ctp
+<pre>
+<div class="posts form">
+    <h2><?php printf(__('Confirm %s', true), __('Post', true)); ?></h2>
+    
+    <?php echo h($mergedData['Post']['title']);?>
+    <?php echo h($mergedData['Post']['body']);?>
+    <?php echo $this->Html->image(preg_replace('#' . WWW_ROOT . '#', '../', $mergedData['Post']['attachment_file']['tmp_bind_path']));?> 
+    <?php echo $this->Form->create('Post', array('action' => 'add_confirm'));?>   
     <?php echo $this->Form->submit(__('Submit', true));?>
     <?php echo $this->Form->end();?>
 </div>
