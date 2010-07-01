@@ -18,13 +18,9 @@ class BindableBehavior extends ModelBehavior {
         // Merge settings
         $this->settings = Set::merge($defaults, $settings);
 
-        // Bind model
-        $model->bindModel(array('hasMany' => array($this->settings['model'] => array(
-                                                                                     'className' => $this->settings['model'],
-                                                                                     'foreignKey' => 'model_id',
-                                                                                     'dependent' => true,
-                                                                                     'conditions' => array($this->settings['model'] . '.model' => $model->name)
-                                                                                     ))), false);
+        App::import('Model', $this->settings['model']);
+        $this->bindedModel =& ClassRegistry::init($this->settings['model']);
+
         // Set primalyKey
         $this->primalyKey = empty($model->primalyKey) ? 'id' : $model->primalyKey;
     }
@@ -46,7 +42,36 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function afterFind(&$model, $result){
-        // TODO: format $result
+
+        $modelName = $model->name;
+        $bindFields = Set::combine($model->bindFields, '/field' , '/');
+        $model_ids = Set::extract('/' . $modelName . '/' . $this->primalyKey, $result);
+
+        $query = array();
+        $query['recursive'] = -1;
+        $query['conditions'] = array('model' => $modelName,
+                                     'model_id' => $model_ids);
+
+        $binds = $this->bindedModel->find('all', $query);
+        $binds = Set::combine($binds, array('%1$s.%2$s' , '/' . $this->settings['model'] . '/model_id', '/' . $this->settings['model'] . '/field_name'), '/' . $this->settings['model']);
+
+        if (empty($binds)) {
+            return $result;
+        }
+
+        foreach ($result as $key => $value) {
+            $model_id = $value[$modelName][$this->primalyKey];
+            foreach ($bindFields as $fieldName => $bindValue) {
+                if (array_key_exists($model_id . '.' . $fieldName, $binds)) {
+                    $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings['filePath'] : $bindFields[$fieldName]['filePath'];
+                    $fileName = $binds[$model_id . '.' . $fieldName][$this->settings['model']]['file_name'];
+                    $bind = $binds[$model_id . '.' . $fieldName][$this->settings['model']];
+                    $bind['file_path'] = $filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName;
+                    $result[$key][$modelName][$fieldName] = $bind;
+                }
+            }
+        }
+
         return $result;
     }
 
@@ -76,12 +101,12 @@ class BindableBehavior extends ModelBehavior {
                 $bind['file_object'] = base64_encode($ofile);
             }
 
-            $model->{$this->settings['model']}->create();
-            if (!$model->{$this->settings['model']}->save($bind)) {
+            $this->bindedModel->create();
+            if (!$this->bindedModel->save($bind)) {
                 return false;
             }
 
-            $bind_id = $model->{$this->settings['model']}->getLastInsertId();
+            $bind_id = $this->bindedModel->getLastInsertId();
             $model->data[$model->name][$fieldName]['bind_id']  = $bind_id;
         }
 
@@ -120,8 +145,10 @@ class BindableBehavior extends ModelBehavior {
             $bind['id'] = $bind_id;
             $bind['model_id'] = $model_id;
 
-            $model->{$this->settings['model']}->create();
-            if (!$model->{$this->settings['model']}->save($bind)) {
+
+
+            $this->bindedModel->create();
+            if (!$this->bindedModel->save($bind)) {
                 return false;
             }
 
@@ -145,6 +172,14 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function beforeDelete(&$model){
+        // Bind model
+        $model->bindModel(array('hasMany' => array($this->settings['model'] => array(
+                                                                                     'className' => $this->settings['model'],
+                                                                                     'foreignKey' => 'model_id',
+                                                                                     'dependent' => true,
+                                                                                     'conditions' => array($this->settings['model'] . '.model' => $model->name)
+                                                                                     ))), false);
+
         $query = array();
         $query['recursive'] = -1;
         $query['conditions'] = array($model->name . '.' . $this->primalyKey  => $model->id);
