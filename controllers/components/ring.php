@@ -31,7 +31,7 @@ class RingComponent extends Object {
             $modelName = $this->controller->modelClass;
         }
         if (empty($this->controller->data[$modelName])) {
-            return;
+            return true;
         }
 
         $bindFields = Set::combine($this->controller->{$modelName}->bindFields, '/field' , '/');
@@ -45,6 +45,7 @@ class RingComponent extends Object {
             }
             if ($value['error'] === 4) {
                 $this->controller->data[$modelName][$fieldName] = null;
+                continue;
             }
 
 

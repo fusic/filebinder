@@ -160,5 +160,82 @@ class BindableBehavior extends ModelBehavior {
     function afterDelete(&$model){
         // TODO: delete attached file and records
     }
+
+    /**
+     * checkExtension
+     * Validation method: check extention
+     *
+     * @param $model
+     * @param $value
+     * @param $extension
+     * @return
+     */
+    function checkExtension(&$model, $value, $extension){
+        $file = array_shift($value);
+        if (!is_array($file)) {
+            return false;
+        }
+        if (in_array('allowEmpty', $extension)) {
+            $extension = array('jpg', 'gif', 'png'); // set default
+        }
+        $tmpFilePath = $file['tmp_bind_path'];
+
+        $regexp = '/\.(' . implode('|', (array) $extension) . ')$/';
+        if (!preg_match($regexp, $tmpFilePath)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * checkContentType
+     * Validation method: check MIME type
+     *
+     * @param &$model
+     * @param $value
+     * @param $mimeType
+     * @return
+     */
+    function checkContentType(&$model, $value, $mimeType){
+        $file = array_shift($value);
+        if (!is_array($file)) {
+            return false;
+        }
+        if (in_array('allowEmpty', $mimeType)) {
+            return true;
+        }
+
+        $contentType = $file['file_content_type'];
+
+        $regexp = '#^(' . implode('|', (array) $mimeType) . ')$#';
+        if (!preg_match($regexp, $contentType)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * checkFileSize
+     * Validation method: check file size
+     *
+     * @return
+     */
+    function checkFileSize(&$model, $value, $max){
+        $file = array_shift($value);
+        if (!is_array($file)) {
+            return false;
+        }
+        if (in_array('allowEmpty', $mimeType)) {
+            return true;
+        }
+
+        $fileSize = $file['file_size'];
+
+        if ($fileSize > $max) {
+            return false;
+        }
+        return true;
+    }
+
   }
 ?>
