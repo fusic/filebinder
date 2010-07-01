@@ -24,7 +24,7 @@ CREATE TABLE `attachments` (
   `id` tinyint(4) NOT NULL AUTO_INCREMENT,
   `model` text NOT NULL,
   `model_id` int(11) NOT NULL,
-  `filed_name` text NOT NULL,
+  `field_name` text NOT NULL,
   `file_name` text NOT NULL,
   `file_content_type` text NOT NULL,
   `file_size` int(11) NOT NULL,
