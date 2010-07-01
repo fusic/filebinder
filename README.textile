@@ -17,7 +17,7 @@ class Post extends AppModel {
   }
 </pre>
 
- Create attachment table.
+ Create attachment table and model.
 
 <pre>
 CREATE TABLE `attachments` (
@@ -35,6 +35,12 @@ CREATE TABLE `attachments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 </pre>
 
+<pre>
+<?php
+class Attachment extends AppModel {
+    var $name = 'Attachment';
+  }
+</pre>
 
 <pre>
 <?php
