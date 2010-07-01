@@ -68,6 +68,14 @@ class BindableBehavior extends ModelBehavior {
                     $bind = $binds[$model_id . '.' . $fieldName][$this->settings['model']];
                     $bind['file_path'] = $filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName;
                     $result[$key][$modelName][$fieldName] = $bind;
+
+                    if ($this->settings['dbStorage'] && !file_exists($filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName)) {
+                        // create entity from record data
+                        mkdir($filePath . $modelName . DS . $model_id . DS . $fieldName . DS, 0755, true);
+                        $fp = fopen($filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName, 'w');
+                        fwrite($fp, base64_decode($bind['file_object']));
+                        fclose($fp);
+                    }
                 }
             }
         }
