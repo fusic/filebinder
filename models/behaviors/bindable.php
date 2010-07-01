@@ -281,6 +281,9 @@ class BindableBehavior extends ModelBehavior {
      * checkFileSize
      * Validation method: check file size
      *
+     * @param &$model
+     * @param $value
+     * @param $max
      * @return
      */
     function checkFileSize(&$model, $value, $max){
@@ -288,8 +291,8 @@ class BindableBehavior extends ModelBehavior {
         if (!is_array($file)) {
             return false;
         }
-        if (in_array('allowEmpty', $mimeType)) {
-            return true;
+        if (in_array('allowEmpty', $max)) {
+            return false;
         }
 
         $fileSize = $file['file_size'];
@@ -300,5 +303,33 @@ class BindableBehavior extends ModelBehavior {
         return true;
     }
 
+    /**
+     * funcCheckFile
+     * Validation method: check file with user function
+     *
+     * @param &$model
+     * @param $value
+     * @param $func
+     * @return
+     */
+    function funcCheckFile(&$model, $value, $func){
+        $file = array_shift($value);
+        if (!is_array($file)) {
+            return false;
+        }
+        if (in_array('allowEmpty', $mimeType)) {
+            return false;
+        }
+
+        $tmpFilePath = $file['tmp_bind_path'];
+
+        if (!file_exists($tmpFilePath)) {
+            return false;
+        }
+
+        $result = call_user_func($func, $tmpFilePath);
+
+        return $result;
+    }
   }
 ?>
