@@ -5,6 +5,7 @@ h2. Simple Usage
  Example of how to attachment image file with confirm page.
 
 <pre>
+<?php
 class Post extends AppModel {
     var $name = 'Post';
     var $actsAs = array('Filebinder.Bindable' => array('model' => 'Attachment'));
@@ -84,7 +85,7 @@ class PostsController extends AppController {
             $this->Session->setFlash(sprintf(__('The %s has been saved', true), 'post'));
             $this->redirect(array('action' => 'index'));
         } else {
-            $this->Session->setFlash(sprintf(__('The %s could not be saved. Please, try again.', true), 'post'), 'flash_error');
+            $this->Session->setFlash(sprintf(__('The %s could not be saved. Please, try again.', true), 'post'));
             $this->redirect(array('action' => 'add'));
         }
     }
