@@ -317,7 +317,7 @@ class BindableBehavior extends ModelBehavior {
         if (!is_array($file)) {
             return false;
         }
-        if (in_array('allowEmpty', $mimeType)) {
+        if (in_array('allowEmpty', $func)) {
             return false;
         }
 
@@ -327,7 +327,7 @@ class BindableBehavior extends ModelBehavior {
             return false;
         }
 
-        $result = call_user_func($func, $tmpFilePath);
+        $result = call_user_func(array($model, $func), $tmpFilePath);
 
         return $result;
     }
