@@ -142,13 +142,31 @@ class BindableBehavior extends ModelBehavior {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
+
+            $modelName = $model->name;
+            $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings['filePath'] : $bindFields[$fieldName]['filePath'];
+            $bindDir = $filePath . $modelName . DS . $model_id . DS . $fieldName . DS;
+
+            // Check delete_check
+            if (!empty($model->data[$model->name]['delete_' . $fieldName])) {
+                // Delete record
+                $conditions = array('model' => $modelName,
+                                    'model_id' => $model_id,
+                                    'field_name' => $fieldName);
+                $this->bindedModel->deleteAll($conditions);
+
+                if (file_exists($bindDir)) {
+                    $this->recursiveRemoveDir($bindDir);
+                }
+                continue;
+            }
+
             if (empty($value)) {
                 continue;
             }
 
             $bind_id = $value['bind_id'];
             $tmpFile = $value['tmp_bind_path'];
-            $modelName = $value['model'];
 
             $bind = array();
             $bind['id'] = $bind_id;
@@ -167,8 +185,6 @@ class BindableBehavior extends ModelBehavior {
                 return false;
             }
 
-            $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings['filePath'] : $bindFields[$fieldName]['filePath'];
-            $bindDir = $filePath . $modelName . DS . $model_id . DS . $fieldName . DS;
             if (file_exists($tmpFile)) {
                 if (file_exists($bindDir)) {
                     $this->recursiveRemoveDir($bindDir);
