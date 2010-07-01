@@ -12,6 +12,7 @@ class BindableBehavior extends ModelBehavior {
     function setup(&$model, $settings = array()){
         $defaults = array('model' => 'Attachment', // attach model
                           'filePath' => WWW_ROOT . 'bind' . DS, // default attached file path
+                          'dbStorage' => true // file entity save table
                           );
 
         // Merge settings
@@ -67,13 +68,13 @@ class BindableBehavior extends ModelBehavior {
             $bind = $value;
             $bind['model_id'] = 0;
 
-            // TODO: file object enable/disable param
-            $tmpFile = $value['tmp_bind_path'];
-            $fp = fopen($tmpFile, 'r');
-            $ofile = fread($fp, filesize($tmpFile));
-            fclose($fp);
-
-            $bind['file_object'] = base64_encode($ofile);
+            if ($this->settings['dbStorage']) {
+                $tmpFile = $value['tmp_bind_path'];
+                $fp = fopen($tmpFile, 'r');
+                $ofile = fread($fp, filesize($tmpFile));
+                fclose($fp);
+                $bind['file_object'] = base64_encode($ofile);
+            }
 
             $model->{$this->settings['model']}->create();
             if (!$model->{$this->settings['model']}->save($bind)) {
@@ -158,7 +159,34 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function afterDelete(&$model){
-        // TODO: delete attached file and records
+        $modelName = $model->name;
+        $bindFields = Set::combine($model->bindFields, '/field' , '/');
+        $model_id = $this->data[$modelName][$this->primalyKey];
+        foreach ($bindFields as $fieldName => $value) {
+            $filePath = empty($value['filePath']) ? $this->settings['filePath'] : $value['filePath'];
+            $bindDir = $filePath . $modelName . DS . $model_id . DS;
+            $this->recursiveRemovemDir($bindDir);
+        }
+    }
+
+    /**
+     * recursiveRemoveDir
+     * recursively remove directory
+     *
+     * @param $dir
+     * @return
+     */
+    function recursiveRemovemDir($dir) {
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                    if (filetype($dir."/".$object) == "dir") $this->recursiveRemovemDir($dir."/".$object); else unlink($dir."/".$object);
+                }
+            }
+            reset($objects);
+            rmdir($dir);
+        }
     }
 
     /**
