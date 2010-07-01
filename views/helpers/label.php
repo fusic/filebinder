@@ -6,14 +6,14 @@ class LabelHelper extends AppHelper {
     /**
      * image
      *
-     * @param $filePath
+     * @param $file
      * @return
      */
-    function image($filePath = null, $noImage = null){
-        if (!preg_match('#' . WWW_ROOT . '#', $filePath)) {
+    function image($file = null, $noImage = null){
+        if (empty($file['file_path']) || !preg_match('#' . WWW_ROOT . '#', $file['file_path'])) {
             return $noImage;
         }
-        $src = preg_replace('#' . WWW_ROOT . '#', '../', $filePath);
+        $src = preg_replace('#' . WWW_ROOT . '#', '../', $file['file_path']);
         return $this->Html->image($src);
     }
 

@@ -76,6 +76,8 @@ class BindableBehavior extends ModelBehavior {
                         fwrite($fp, base64_decode($bind['file_object']));
                         fclose($fp);
                     }
+                } else {
+                    $result[$key][$modelName][$fieldName] = null;
                 }
             }
         }
