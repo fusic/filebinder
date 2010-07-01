@@ -327,7 +327,11 @@ class BindableBehavior extends ModelBehavior {
             return false;
         }
 
-        $result = call_user_func(array($model, $func), $tmpFilePath);
+        if (function_exists($func)) {
+            $result = call_user_func($func, $tmpFilePath);
+        } else {
+            $result = call_user_func(array($model, $func), $tmpFilePath);
+        }
 
         return $result;
     }

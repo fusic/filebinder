@@ -13,10 +13,35 @@ class Post extends AppModel {
     var $actsAs = array('Filebinder.Bindable' => array('model' => 'Attachment'));
     var $displayField = 'title';
 
-    var $bindFields = array(array('field' => 'attachment_file',
+    var $bindFields = array(array('field' => 'image',
                                   'tmpPath' => '/var/www/html/myapp/app/webroot/files/cache/',
                                   'filePath' => '/var/www/html/myapp/app/webroot/files/',
                                   ));
+
+    var $validate = array('title' => array('notempty'),
+                          'image' => array('allowExtention' => array('rule' => array('checkExtension', array('jpg')),
+                                                                    'allowEmpty' => true),
+                                           'illegalCode' => array('rule' => array('funcCheckFile', 'checkIllegalCode'),
+                                                                 'allowEmpty' => true))
+                          );
+
+    /**
+     * checkIllegalCode
+     * check include illegal code
+     *
+     * @param $filePath
+     * @return
+     */
+    function checkIllegalCode($filePath){
+        $fp = fopen($filePath, "r");
+        $ofile = fread($fp, filesize($filePath));
+        fclose($fp);
+
+        if (preg_match('/<\\?php./i', $ofile)) {
+            return false;
+        }
+        return true;
+    }
   }
 </pre>
 
@@ -101,7 +126,7 @@ class PostsController extends AppController {
     <?php echo $this->Form->create('Post', array('action' => 'add', 'type' => 'file'));?>
     <?php echo $this->Form->input('title', array('type' => 'text'));?>
     <?php echo $this->Form->input('body'));?>
-    <?php echo $this->Form->input('attachment_file', array('type' => 'file'));?>
+    <?php echo $this->Form->input('image', array('type' => 'file'));?>
     <?php echo $this->Form->submit(__('Submit', true));?>
     <?php echo $this->Form->end();?>
 </div>
@@ -114,7 +139,7 @@ class PostsController extends AppController {
     
     <?php echo h($mergedData['Post']['title']);?>
     <?php echo h($mergedData['Post']['body']);?>
-    <?php echo $this->Label->image($mergedData['Post']['attachment_file']['tmp_bind_path']);?> 
+    <?php echo $this->Label->image($mergedData['Post']['image']['tmp_bind_path']);?> 
     <?php echo $this->Form->create('Post', array('action' => 'add_confirm'));?>   
     <?php echo $this->Form->submit(__('Submit', true));?>
     <?php echo $this->Form->end();?>
