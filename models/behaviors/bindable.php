@@ -2,6 +2,7 @@
 class BindableBehavior extends ModelBehavior {
 
     var $settings = array();
+    var $withObject = false;
 
     /**
      * setup
@@ -36,6 +37,17 @@ class BindableBehavior extends ModelBehavior {
     }
 
     /**
+     * withObject
+     * find attachment with file object
+     *
+     * @param $arg
+     * @return
+     */
+    function withObject(){
+        $this->withObject = true;
+    }
+
+    /**
      * afterFind
      *
      * @param &$model, $result
@@ -48,18 +60,28 @@ class BindableBehavior extends ModelBehavior {
         $model_ids = Set::extract('/' . $modelName . '/' . $this->primalyKey, $result);
 
         $query = array();
+        $query['fields'] = array('model_id',
+                                 'field_name',
+                                 'file_name',
+                                 'file_content_type',
+                                 'file_size',
+                                 'created',
+                                 'modified');
+        // with Object
+        if ($this->withObject) {
+            $query['fields'][] = 'file_object';
+        }
+
         $query['recursive'] = -1;
         $query['conditions'] = array('model' => $modelName,
                                      'model_id' => $model_ids);
 
         $binds = $this->bindedModel->find('all', $query);
         $binds = Set::combine($binds, array('%1$s.%2$s' , '/' . $this->settings['model'] . '/model_id', '/' . $this->settings['model'] . '/field_name'), '/' . $this->settings['model']);
-
-        if (empty($binds)) {
-            return $result;
-        }
-
         foreach ($result as $key => $value) {
+            if (empty($value[$modelName])) {
+                continue;
+            }
             $model_id = $value[$modelName][$this->primalyKey];
             foreach ($bindFields as $fieldName => $bindValue) {
                 if (array_key_exists($model_id . '.' . $fieldName, $binds)) {
