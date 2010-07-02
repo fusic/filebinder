@@ -2,9 +2,16 @@ h1. Filebinder: Simple file attachment plugin for CakePHP
 
 !http://github.com/fusic/filebinder/raw/master/filebinder.png!
 
+h2. Feature
+
+* Simple settings
+* Compatible with Transition Component
+* Multi attachement
+* Selectalble file store method (DB storage or not)
+
 h2. Simple Usage
 
- Example of how to attachment image file with confirm page.
+ Example of how to add image file with confirm page.
 
 <pre>
 <?php
