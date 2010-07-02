@@ -12,7 +12,7 @@ class BindableBehavior extends ModelBehavior {
      */
     function setup(&$model, $settings = array()){
         $defaults = array('model' => 'Attachment', // attach model
-                          'filePath' => WWW_ROOT . 'bind' . DS, // default attached file path
+                          'filePath' => WWW_ROOT . 'img' . DS, // default attached file path
                           'dbStorage' => true // file entity save table
                           );
 

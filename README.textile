@@ -15,17 +15,23 @@ Put `filebinder' directory on app/plugins in your CakePHP application.
 
 h2. Filebinder outline image
 
-h3. Simple attachment
+Filebinder manage 'virtual table' and entity.
+
+h3. 'Simple attachment' model image
 
 !http://github.com/fusic/filebinder/raw/master/documents/filebinder_image.png!
 
-h3. Multi fields
+h3. 'Multi fields' model image
 
 !http://github.com/fusic/filebinder/raw/master/documents/filebinder_multi_fields.png!
 
-h3. Multi models
+h3. 'Multi models' model image
 
 !http://github.com/fusic/filebinder/raw/master/documents/filebinder_multi_models.png!
+
+h3. Entity file path image
+
+!http://github.com/fusic/filebinder/raw/master/documents/filebinder_filepath.png!
 
 h2. Usage
 
