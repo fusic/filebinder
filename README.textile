@@ -9,9 +9,13 @@ h2. Feature
 * Multi attachement
 * Selectalble file store method (DB storage or not)
 
+h2. Installation
+
+Put `filebinder' directory on app/plugins in your CakePHP application.
+
 h2. Simple Usage
 
- Example of how to add image file with confirm page.
+Example of how to add image file with confirm page.
 
 <pre>
 <?php
