@@ -62,7 +62,8 @@ class BindableBehavior extends ModelBehavior {
         $model_ids = Set::extract('/' . $modelName . '/' . $this->primalyKey, $result);
 
         $query = array();
-        $query['fields'] = array('model_id',
+        $query['fields'] = array('id',
+                                 'model_id',
                                  'field_name',
                                  'file_name',
                                  'file_content_type',
@@ -94,10 +95,24 @@ class BindableBehavior extends ModelBehavior {
                     $result[$key][$modelName][$fieldName] = $bind;
 
                     if ($this->settings['dbStorage'] && !file_exists($filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName)) {
-                        // create entity from record data
+
+                        /**
+                         * create entity from record data
+                         */
+                        if ($this->withObject) {
+                            $fileObject = $bind['file_object'];
+                        } else {
+                            $all = $this->bindedModel->findById($bind['id']);
+                            $fileObject = $all[$this->settings['model']]['file_object'];
+                        }
+
+                        if (!$fileObject) {
+                            continue;
+                        }
+
                         mkdir($filePath . $modelName . DS . $model_id . DS . $fieldName . DS, 0755, true);
                         $fp = fopen($filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName, 'w');
-                        fwrite($fp, base64_decode($bind['file_object']));
+                        fwrite($fp, base64_decode($fileObject));
                         fclose($fp);
                     }
                 } else {
