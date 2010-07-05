@@ -57,7 +57,7 @@ class BindableBehavior extends ModelBehavior {
      */
     function afterFind(&$model, $result){
 
-        $modelName = $model->name;
+        $modelName = $model->alias;
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
         $model_ids = Set::extract('/' . $modelName . '/' . $this->primalyKey, $result);
 
@@ -116,7 +116,8 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function beforeSave(&$model) {
-        foreach ($model->data[$model->name] as $fieldName => $value) {
+        $modelName = $model->alias;
+        foreach ($model->data[$modelName] as $fieldName => $value) {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
@@ -141,7 +142,7 @@ class BindableBehavior extends ModelBehavior {
             }
 
             $bind_id = $this->bindedModel->getLastInsertId();
-            $model->data[$model->name][$fieldName]['bind_id']  = $bind_id;
+            $model->data[$modelName][$fieldName]['bind_id']  = $bind_id;
         }
 
         return true;
@@ -155,26 +156,27 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function afterSave(&$model, $created){
+        $modelName = $model->alias;
+
         if ($created) {
             $model_id = $model->getLastInsertId();
         } else {
-            $model_id = $model->data[$model->name][$this->primalyKey];
+            $model_id = $model->data[$modelName][$this->primalyKey];
         }
 
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
 
         // set model_id
-        foreach ($model->data[$model->name] as $fieldName => $value) {
+        foreach ($model->data[$modelName] as $fieldName => $value) {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
 
-            $modelName = $model->name;
             $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings['filePath'] : $bindFields[$fieldName]['filePath'];
             $bindDir = $filePath . $modelName . DS . $model_id . DS . $fieldName . DS;
 
             // Check delete_check
-            if (!empty($model->data[$model->name]['delete_' . $fieldName])) {
+            if (!empty($model->data[$modelName]['delete_' . $fieldName])) {
                 // Delete record
                 $conditions = array('model' => $modelName,
                                     'model_id' => $model_id,
@@ -229,6 +231,8 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function beforeDelete(&$model){
+        $modelName = $model->alias;
+
         // Bind model
         $model->bindModel(array('hasMany' => array($this->settings['model'] => array(
                                                                                      'className' => $this->settings['model'],
@@ -239,7 +243,7 @@ class BindableBehavior extends ModelBehavior {
 
         $query = array();
         $query['recursive'] = -1;
-        $query['conditions'] = array($model->name . '.' . $this->primalyKey  => $model->id);
+        $query['conditions'] = array($modelName . '.' . $this->primalyKey  => $model->id);
         $this->data = $model->find('first', $query);
         return true;
     }
@@ -251,22 +255,22 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function afterDelete(&$model){
-        $modelName = $model->name;
+        $modelName = $model->alias;
         $model_id = $this->data[$modelName][$this->primalyKey];
-        return $this->deleteEntity($modelName, $model_id);
+        return $this->deleteEntity($model_id);
     }
 
     /**
      * deleteEntity
      *
-     * @param string $modelName
      * @param mixed $model_id
      * @return
      */
-    function deleteEntity($modelName = null, $model_id = null){
-        if (!$modelName || !$model_id) {
+    function deleteEntity($model_id = null){
+        if (!$model_id) {
             return false;
         }
+        $modelName = $this->model->alias;
         $bindFields = Set::combine($this->model->bindFields, '/field' , '/');
         $result = true;
         foreach ($bindFields as $fieldName => $value) {
