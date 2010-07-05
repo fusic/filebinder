@@ -16,6 +16,8 @@ class BindableBehavior extends ModelBehavior {
                           'dbStorage' => true // file entity save table
                           );
 
+        $this->model = $model;
+
         // Merge settings
         $this->settings = Set::merge($defaults, $settings);
 
@@ -250,13 +252,31 @@ class BindableBehavior extends ModelBehavior {
      */
     function afterDelete(&$model){
         $modelName = $model->name;
-        $bindFields = Set::combine($model->bindFields, '/field' , '/');
         $model_id = $this->data[$modelName][$this->primalyKey];
+        return $this->deleteEntity($modelName, $model_id);
+    }
+
+    /**
+     * deleteEntity
+     *
+     * @param string $modelName
+     * @param mixed $model_id
+     * @return
+     */
+    function deleteEntity($modelName = null, $model_id = null){
+        if (!$modelName || !$model_id) {
+            return false;
+        }
+        $bindFields = Set::combine($this->model->bindFields, '/field' , '/');
+        $result = true;
         foreach ($bindFields as $fieldName => $value) {
             $filePath = empty($value['filePath']) ? $this->settings['filePath'] : $value['filePath'];
             $bindDir = $filePath . $modelName . DS . $model_id . DS;
-            $this->recursiveRemoveDir($bindDir);
+            if (!$this->recursiveRemoveDir($bindDir)) {
+                $result = false;
+            }
         }
+        return $result;
     }
 
     /**
@@ -275,8 +295,9 @@ class BindableBehavior extends ModelBehavior {
                 }
             }
             reset($objects);
-            rmdir($dir);
+            return rmdir($dir);
         }
+        return false;
     }
 
     /**
