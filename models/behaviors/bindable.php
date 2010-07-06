@@ -60,13 +60,12 @@ class BindableBehavior extends ModelBehavior {
         if (empty($model->bindFields)) {
             return $queryData;
         }
-
+        $this->bindFields = Set::combine($model->bindFields, '/field' , '/');
         if (empty($queryData['fields'])) {
             return $queryData;
         }
 
         $modelName = $model->alias;
-        $this->bindFields = Set::combine($model->bindFields, '/field' , '/');
         $fields = (array) $queryData['fields'];
         $flip = array_flip($fields);
         foreach ($this->bindFields as $fieldName => $data) {
