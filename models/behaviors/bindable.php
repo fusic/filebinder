@@ -149,10 +149,12 @@ class BindableBehavior extends ModelBehavior {
 
             if ($this->settings['dbStorage']) {
                 $tmpFile = $value['tmp_bind_path'];
-                $fp = fopen($tmpFile, 'r');
-                $ofile = fread($fp, filesize($tmpFile));
-                fclose($fp);
-                $bind['file_object'] = base64_encode($ofile);
+                if (file_exists($value['tmp_bind_path'])) {
+                    $fp = fopen($tmpFile, 'r');
+                    $ofile = fread($fp, filesize($tmpFile));
+                    fclose($fp);
+                    $bind['file_object'] = base64_encode($ofile);
+                }
             }
 
             $this->bindedModel->create();
