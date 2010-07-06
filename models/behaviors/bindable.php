@@ -50,6 +50,37 @@ class BindableBehavior extends ModelBehavior {
     }
 
     /**
+     * beforeFind
+     *
+     * @param &$model
+     * @param $queryData
+     * @return
+     */
+    function beforeFind(&$model, $queryData = null){
+        if (empty($model->bindFields)) {
+            return $queryData;
+        }
+
+        if (empty($queryData['fields'])) {
+            return $queryData;
+        }
+
+        $modelName = $model->alias;
+        $this->bindFields = Set::combine($model->bindFields, '/field' , '/');
+        $fields = (array) $queryData['fields'];
+        $flip = array_flip($fields);
+        foreach ($this->bindFields as $fieldName => $data) {
+            unset($flip[$modelName . '.' . $fieldName]);
+            unset($flip[$fieldName]);
+            if (!in_array($modelName . '.' . $fieldName, $fields) && !in_array($fieldName, $fields)) {
+                unset($this->bindFields[$fieldName]);
+            }
+        }
+        $queryData['fields'] = array_flip($flip);
+        return $queryData;
+    }
+
+    /**
      * afterFind
      *
      * @param &$model, $result
@@ -58,11 +89,11 @@ class BindableBehavior extends ModelBehavior {
     function afterFind(&$model, $result){
 
         $modelName = $model->alias;
-        if (empty($model->bindFields)) {
+        if (empty($model->bindFields) || empty($this->bindFields)) {
             return $result;
         }
 
-        $bindFields = Set::combine($model->bindFields, '/field' , '/');
+        $bindFields = $this->bindFields;
         $model_ids = Set::extract('/' . $modelName . '/' . $this->primalyKey, $result);
 
         $query = array();
