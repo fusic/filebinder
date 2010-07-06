@@ -58,6 +58,10 @@ class BindableBehavior extends ModelBehavior {
     function afterFind(&$model, $result){
 
         $modelName = $model->alias;
+        if (empty($model->bindFields)) {
+            return $result;
+        }
+
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
         $model_ids = Set::extract('/' . $modelName . '/' . $this->primalyKey, $result);
 
@@ -136,7 +140,7 @@ class BindableBehavior extends ModelBehavior {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
-            if (empty($value)) {
+            if (empty($value) || empty($value['tmp_bind_path'])) {
                 continue;
             }
 
@@ -204,7 +208,7 @@ class BindableBehavior extends ModelBehavior {
                 continue;
             }
 
-            if (empty($value)) {
+            if (empty($value) || empty($value['tmp_bind_path'])) {
                 continue;
             }
 
