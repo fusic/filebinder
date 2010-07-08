@@ -40,10 +40,10 @@ class RingComponent extends Object {
             if (!in_array($fieldName, Set::extract('/field', $this->controller->{$modelName}->bindFields))) {
                 continue;
             }
-            if (!is_array($value) || empty($value['tmp_name']) || !isset($value['error'])) {
+            if (!is_array($value) || !isset($value['error'])) {
                 continue;
             }
-            if ($value['error'] === 4) {
+            if ($value['error'] == 4) {
                 $this->controller->data[$modelName][$fieldName] = null;
                 continue;
             }
