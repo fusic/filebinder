@@ -21,6 +21,7 @@ class BindableBehavior extends ModelBehavior {
         // Merge settings
         $this->settings = Set::merge($defaults, $settings);
 
+        $this->model->bindedModel = $this->settings['model'];
         App::import('Model', $this->settings['model']);
         $this->bindedModel =& ClassRegistry::init($this->settings['model']);
 
@@ -97,6 +98,7 @@ class BindableBehavior extends ModelBehavior {
 
         $query = array();
         $query['fields'] = array('id',
+                                 'model',
                                  'model_id',
                                  'field_name',
                                  'file_name',
@@ -126,6 +128,7 @@ class BindableBehavior extends ModelBehavior {
                     $fileName = $binds[$model_id . '.' . $fieldName][$this->settings['model']]['file_name'];
                     $bind = $binds[$model_id . '.' . $fieldName][$this->settings['model']];
                     $bind['file_path'] = $filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName;
+                    $bind['bindedModel'] = $this->bindedModel->alias;
                     $result[$key][$modelName][$fieldName] = $bind;
 
                     if ($this->settings['dbStorage'] && !file_exists($filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName)) {

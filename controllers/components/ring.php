@@ -3,7 +3,15 @@
 class RingComponent extends Object {
 
     var $tmpBindPath;
+    var $components = array('Session');
 
+    /**
+     * initialize
+     *
+     * @param &$controller
+     * @param $settions
+     * @return
+     */
     function initialize(&$controller, $settings = array()) {
         $this->tmpBindPath = TMP . 'cache/';
 
@@ -18,6 +26,8 @@ class RingComponent extends Object {
      */
     function startup(&$controller){
         $controller->helpers[]  =  'Filebinder.Label';
+
+        $this->Session->write('Filebinder.hash', Security::hash(time()));
     }
 
     /**
