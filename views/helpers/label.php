@@ -10,9 +10,21 @@ class LabelHelper extends AppHelper {
      * @return
      */
     function image($file = null, $options = array()){
+        $hash = $this->Session->read('Filebinder.hash');
         $filePath = empty($file['file_path']) ? (empty($file['tmp_bind_path']) ? false : $file['tmp_bind_path']) : $file['file_path'];
-        if (!$filePath || !preg_match('#' . WWW_ROOT . '#', $filePath)) {
-            return empty($options['noImage']) ? '' : $options['noImage'];
+        if (!$filePath) {
+            return empty($options['noFile']) ? '' : $options['noFile'];
+        }
+        if (!preg_match('#' . WWW_ROOT . '#', $filePath)) {
+            return $this->Html->image(array('admin' => false,
+                                                               'plugin' => 'filebinder',
+                                                               'controller' => 'filebinder',
+                                                               'action' => 'loader',
+                                                               $file['model'],
+                                                               $file['model_id'],
+                                                               $file['field_name'],
+                                                               Security::hash($file['model'] . $file['model_id'] . $file['field_name'] . $hash),
+                                                               $file['file_name']), $options);
         }
         $src = preg_replace('#' . WWW_ROOT . '#', '../', $filePath);
         unset($options['noImage']);
@@ -28,7 +40,10 @@ class LabelHelper extends AppHelper {
     function link($file = null, $options = array()){
         $hash = $this->Session->read('Filebinder.hash');
         $filePath = empty($file['file_path']) ? (empty($file['tmp_bind_path']) ? false : $file['tmp_bind_path']) : $file['file_path'];
-        if (!$filePath || !preg_match('#' . WWW_ROOT . '#', $filePath)) {
+        if (!$filePath) {
+            return empty($options['noFile']) ? '' : $options['noFile'];
+        }
+        if (!preg_match('#' . WWW_ROOT . '#', $filePath)) {
             return $this->Html->link($file['file_name'], array('admin' => false,
                                                                'plugin' => 'filebinder',
                                                                'controller' => 'filebinder',

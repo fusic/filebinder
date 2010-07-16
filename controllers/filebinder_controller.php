@@ -42,7 +42,7 @@ class FilebinderController extends FilebinderAppController {
 
         header('Content-Disposition: attachment; filename="'. $fileName .'"');
         header('Content-Length: '. filesize($filePath));
-        header('Content-Type: application/octet-stream');
+        header('Content-Type: ' . $fileContentType);
         readfile($filePath);
     }
 
