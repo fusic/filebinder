@@ -215,6 +215,10 @@ class BindableBehavior extends ModelBehavior {
         if ($created) {
             $model_id = $model->getLastInsertId();
         } else {
+            if (empty($model->data[$modelName][$this->primalyKey])) {
+                // SoftDeletable
+                return;
+            }
             $model_id = $model->data[$modelName][$this->primalyKey];
         }
 
