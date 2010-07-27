@@ -15,6 +15,7 @@ class LabelHelper extends AppHelper {
         if (!$filePath) {
             return empty($options['noFile']) ? '' : $options['noFile'];
         }
+        unset($options['noFile']);
         if (!preg_match('#' . WWW_ROOT . '#', $filePath)) {
             return $this->Html->image(array('admin' => false,
                                                                'plugin' => 'filebinder',
@@ -27,7 +28,6 @@ class LabelHelper extends AppHelper {
                                                                $file['file_name']), $options);
         }
         $src = preg_replace('#' . WWW_ROOT . '#', '../', $filePath);
-        unset($options['noImage']);
         return $this->Html->image($src, $options);
     }
 
@@ -43,6 +43,7 @@ class LabelHelper extends AppHelper {
         if (!$filePath) {
             return empty($options['noFile']) ? '' : $options['noFile'];
         }
+        unset($options['noFile']);
         if (!preg_match('#' . WWW_ROOT . '#', $filePath)) {
             return $this->Html->link($file['file_name'], array('admin' => false,
                                                                'plugin' => 'filebinder',
