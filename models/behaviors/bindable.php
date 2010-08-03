@@ -429,7 +429,7 @@ class BindableBehavior extends ModelBehavior {
         if (!is_array($file)) {
             return false;
         }
-        if (in_array('allowEmpty', $max)) {
+        if (in_array('allowEmpty', $file)) {
             return false;
         }
 
