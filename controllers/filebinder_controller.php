@@ -40,7 +40,15 @@ class FilebinderController extends FilebinderAppController {
         $fileContentType = $file[$model][$fieldName]['file_content_type'];
         $filePath = $file[$model][$fieldName]['file_path'];
 
-        header('Content-Disposition: attachment; filename="'. $fileName .'"');
+        if (!file_exists($filePath)) {
+            die(__('No file',true));
+        }
+        if (strstr(env('HTTP_USER_AGENT'), 'MSIE')) {
+            $fileName = mb_convert_encoding($fileName,  "SJIS", "UTF-8");
+            header('Content-Disposition: inline; filename="'. $fileName .'"');
+        } else {
+            header('Content-Disposition: attachment; filename="'. $fileName .'"');
+        }
         header('Content-Length: '. filesize($filePath));
         header('Content-Type: ' . $fileContentType);
         readfile($filePath);
