@@ -11,16 +11,17 @@ class BindableBehavior extends ModelBehavior {
      * @param $settings
      */
     function setup(&$model, $settings = array()){
-        $defaults = array('model' => 'Attachment', // attach model
+        $defaults = array('model' => 'Attachment', // attachment model
                           'filePath' => WWW_ROOT . 'img' . DS, // default attached file path
-                          'dbStorage' => true // file entity save table
+                          'dbStorage' => true, // file entity save table
+                          'beforeAttach' => null, // hook function
+                          'afterAttach' => null // hook function
                           );
 
         $this->model = $model;
 
         // Merge settings
         $this->settings = Set::merge($defaults, $settings);
-
         $this->model->bindedModel = $this->settings['model'];
         App::import('Model', $this->settings['model']);
         $this->bindedModel =& ClassRegistry::init($this->settings['model']);
@@ -118,7 +119,7 @@ class BindableBehavior extends ModelBehavior {
         $binds = $this->bindedModel->find('all', $query);
         $binds = Set::combine($binds, array('%1$s.%2$s' , '/' . $this->settings['model'] . '/model_id', '/' . $this->settings['model'] . '/field_name'), '/' . $this->settings['model']);
         foreach ($result as $key => $value) {
-            if (empty($value[$modelName])) {
+            if (empty($result[$key][$modelName])) {
                 continue;
             }
             $model_id = $value[$modelName][$this->primalyKey];
@@ -148,9 +149,27 @@ class BindableBehavior extends ModelBehavior {
                         }
 
                         mkdir($filePath . $modelName . DS . $model_id . DS . $fieldName . DS, 0755, true);
-                        $fp = fopen($filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName, 'w');
+                        $bindFile = $filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName;
+                        $fp = fopen($bindFile , 'w');
                         fwrite($fp, base64_decode($fileObject));
                         fclose($fp);
+
+                        if (file_exists($bindFile)) {
+                            /**
+                             * afterAttach
+                             */
+                            if (!empty($this->settings['afterAttach'])) {
+                                $res = false;
+                                if (function_exists($this->settings['afterAttach'])) {
+                                    $res = call_user_func($this->settings['afterAttach'], $bindFile);
+                                } else {
+                                    $res = call_user_func(array($model, $this->settings['afterAttach']), $bindFile);
+                                }
+                                if (!$res) {
+                                    return false;
+                                }
+                            }
+                        }
                     }
                 } else {
                     $result[$key][$modelName][$fieldName] = null;
@@ -180,9 +199,27 @@ class BindableBehavior extends ModelBehavior {
             $bind = $value;
             $bind['model_id'] = 0;
 
-            if ($this->settings['dbStorage']) {
-                $tmpFile = $value['tmp_bind_path'];
-                if (file_exists($value['tmp_bind_path'])) {
+            $tmpFile = $value['tmp_bind_path'];
+            if (file_exists($tmpFile)) {
+                /**
+                 * beforeAttach
+                 */
+                if (!empty($this->settings['beforeAttach'])) {
+                    $res = false;
+                    if (function_exists($this->settings['beforeAttach'])) {
+                        $res = call_user_func($this->settings['beforeAttach'], $tmpFile);
+                    } else {
+                        $res = call_user_func(array($model, $this->settings['beforeAttach']), $tmpFile);
+                    }
+                    if (!$res) {
+                        return false;
+                    }
+                }
+
+                /**
+                 * dbStorage
+                 */
+                if ($this->settings['dbStorage']) {
                     $fp = fopen($tmpFile, 'r');
                     $ofile = fread($fp, filesize($tmpFile));
                     fclose($fp);
@@ -275,8 +312,25 @@ class BindableBehavior extends ModelBehavior {
                 if (file_exists($bindDir)) {
                     $this->recursiveRemoveDir($bindDir);
                 }
+                $bindFile = $bindDir . $value['file_name'];
                 mkdir($bindDir, 0755, true);
-                rename($tmpFile, $bindDir . $value['file_name']);
+                rename($tmpFile, $bindFile);
+            }
+            if (file_exists($bindFile)) {
+                /**
+                 * afterAttach
+                 */
+                if (!empty($this->settings['afterAttach'])) {
+                    $res = false;
+                    if (function_exists($this->settings['afterAttach'])) {
+                        $res = call_user_func($this->settings['afterAttach'], $bindFile);
+                    } else {
+                        $res = call_user_func(array($model, $this->settings['afterAttach']), $bindFile);
+                    }
+                    if (!$res) {
+                        return false;
+                    }
+                }
             }
         }
 

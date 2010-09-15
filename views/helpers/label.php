@@ -11,7 +11,8 @@ class LabelHelper extends AppHelper {
      */
     function image($file = null, $options = array()){
         $hash = $this->Session->read('Filebinder.hash');
-        $filePath = empty($file['file_path']) ? (empty($file['tmp_bind_path']) ? false : $file['tmp_bind_path']) : $file['file_path'];
+        $prefix = empty($options['prefix']) ? '' : $options['prefix'];
+        $filePath = empty($file['file_path']) ? (empty($file['tmp_bind_path']) ? false : $file['tmp_bind_path']) : preg_replace('#/([^/]+)$#' , '/' . $prefix . '$1' , $file['file_path']);
         if (!$filePath) {
             return empty($options['noFile']) ? '' : $options['noFile'];
         }
@@ -24,7 +25,7 @@ class LabelHelper extends AppHelper {
                                             $file['model_id'],
                                             $file['field_name'],
                                             Security::hash($file['model'] . $file['model_id'] . $file['field_name'] . $hash),
-                                            $file['file_name']), $options);
+                                            $prefix . $file['file_name']), $options);
         }
         $src = preg_replace('#' . WWW_ROOT . '#', '../', $filePath);
         unset($options['noImage']);
@@ -39,7 +40,8 @@ class LabelHelper extends AppHelper {
      */
     function link($file = null, $options = array()){
         $hash = $this->Session->read('Filebinder.hash');
-        $filePath = empty($file['file_path']) ? (empty($file['tmp_bind_path']) ? false : $file['tmp_bind_path']) : $file['file_path'];
+        $prefix = empty($options['prefix']) ? '' : $options['prefix'];
+        $filePath = empty($file['file_path']) ? (empty($file['tmp_bind_path']) ? false : $file['tmp_bind_path']) : preg_replace('#/([^/]+)$#' , '/' . $prefix . '$1' , $file['file_path']);
         $fileTitle = empty($options['title']) ? $file['file_name'] : $options['title'];
         unset($options['title']);
         if (!$filePath) {
@@ -54,7 +56,7 @@ class LabelHelper extends AppHelper {
                                                        $file['model_id'],
                                                        $file['field_name'],
                                                        Security::hash($file['model'] . $file['model_id'] . $file['field_name'] . $hash),
-                                                       $file['file_name']), $options);
+                                                       $prefix . $file['file_name']), $options);
         }
         $src = preg_replace('#' . WWW_ROOT . '#', '../', $filePath);
         return $this->Html->link($file['file_name'], $src);
