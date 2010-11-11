@@ -279,7 +279,7 @@ class BindableBehavior extends ModelBehavior {
                 $this->bindedModel->deleteAll($conditions);
 
                 if (file_exists($bindDir)) {
-                    $this->recursiveRemoveDir($bindDir);
+                    $this->removeDir($bindDir);
                 }
                 continue;
             }
@@ -310,7 +310,7 @@ class BindableBehavior extends ModelBehavior {
 
             if (file_exists($tmpFile)) {
                 if (file_exists($bindDir)) {
-                    $this->recursiveRemoveDir($bindDir);
+                    $this->removeDir($bindDir);
                 }
                 $bindFile = $bindDir . $value['file_name'];
                 mkdir($bindDir, 0755, true);
@@ -388,7 +388,7 @@ class BindableBehavior extends ModelBehavior {
         foreach ($bindFields as $fieldName => $value) {
             $filePath = empty($value['filePath']) ? $this->settings['filePath'] : $value['filePath'];
             $bindDir = $filePath . $modelName . DS . $model_id . DS;
-            if (!$this->recursiveRemoveDir($bindDir)) {
+            if (!$this->removeDir($bindDir)) {
                 $result = false;
             }
         }
@@ -396,24 +396,16 @@ class BindableBehavior extends ModelBehavior {
     }
 
     /**
-     * recursiveRemoveDir
-     * recursively remove directory
+     * removeDir
+     * remove directory
      *
      * @param $dir
      * @return
      */
-    function recursiveRemoveDir($dir) {
-        if (is_dir($dir)) {
-            $objects = scandir($dir);
-            foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
-                    if (filetype($dir."/".$object) == "dir") $this->recursiveRemoveDir($dir."/".$object); else unlink($dir."/".$object);
-                }
-            }
-            reset($objects);
-            return rmdir($dir);
-        }
-        return false;
+    function removeDir($dir) {
+        App::import('Lib', 'Folder');
+        $folder = new Folder($dir);
+        return $folder->delete();
     }
 
     /**
@@ -509,8 +501,14 @@ class BindableBehavior extends ModelBehavior {
         if (!is_array($file)) {
             return false;
         }
-        if (in_array('allowEmpty', $func)) {
-            return false;
+        if (is_array($func)) {
+            if (in_array('allowEmpty', $func)) {
+                return false;
+            }
+        } else {
+            if ($func === 'allowEmpty') {
+                return false;
+            }
         }
 
         $tmpFilePath = $file['tmp_bind_path'];

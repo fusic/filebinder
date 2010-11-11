@@ -13,7 +13,7 @@ class RingComponent extends Object {
      * @return
      */
     function initialize(&$controller, $settings = array()) {
-        $this->tmpBindPath = TMP . 'cache/';
+        $this->tmpBindPath = TMP . 'cache/'; // default tmp file path
 
         $this->controller = $controller;
     }
