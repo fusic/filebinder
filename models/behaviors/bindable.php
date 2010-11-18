@@ -279,7 +279,7 @@ class BindableBehavior extends ModelBehavior {
                 $this->bindedModel->deleteAll($conditions);
 
                 if (file_exists($bindDir)) {
-                    $this->removeDir($bindDir);
+                    $this->recursiveRemoveDir($bindDir);
                 }
                 continue;
             }
@@ -310,7 +310,7 @@ class BindableBehavior extends ModelBehavior {
 
             if (file_exists($tmpFile)) {
                 if (file_exists($bindDir)) {
-                    $this->removeDir($bindDir);
+                    $this->recursiveRemoveDir($bindDir);
                 }
                 $bindFile = $bindDir . $value['file_name'];
                 mkdir($bindDir, 0755, true);
@@ -388,7 +388,7 @@ class BindableBehavior extends ModelBehavior {
         foreach ($bindFields as $fieldName => $value) {
             $filePath = empty($value['filePath']) ? $this->settings['filePath'] : $value['filePath'];
             $bindDir = $filePath . $modelName . DS . $model_id . DS;
-            if (!$this->removeDir($bindDir)) {
+            if (!$this->recursiveRemoveDir($bindDir)) {
                 $result = false;
             }
         }
@@ -396,16 +396,24 @@ class BindableBehavior extends ModelBehavior {
     }
 
     /**
-     * removeDir
-     * remove directory
+     * recursiveRemoveDir
+     * recursively remove directory
      *
      * @param $dir
      * @return
      */
-    function removeDir($dir) {
-        App::import('Lib', 'Folder');
-        $folder = new Folder($dir);
-        return $folder->delete();
+    function recursiveRemoveDir($dir) {
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                    if (filetype($dir."/".$object) == "dir") $this->recursiveRemoveDir($dir."/".$object); else unlink($dir."/".$object);
+                }
+            }
+            reset($objects);
+            return rmdir($dir);
+        }
+        return false;
     }
 
     /**
@@ -462,15 +470,15 @@ class BindableBehavior extends ModelBehavior {
     }
 
     /**
-     * checkFileSize
-     * Validation method: check file size
+     * checkMaxFileSize
+     * Validation method: check min file size
      *
      * @param &$model
      * @param $value
      * @param $max
      * @return
      */
-    function checkFileSize(&$model, $value, $max){
+    function checkMaxFileSize(&$model, $value, $max){
         $file = array_shift($value);
         if (!is_array($file)) {
             return false;
@@ -481,10 +489,61 @@ class BindableBehavior extends ModelBehavior {
 
         $fileSize = $file['file_size'];
 
-        if ($fileSize > $max) {
+        if ($fileSize >= $max) {
             return false;
         }
         return true;
+    }
+
+    /**
+     * checkMinFileSize
+     * Validation method: check min file size
+     *
+     * @param &$model
+     * @param $value
+     * @param $min
+     * @return
+     */
+    function checkMinFileSize(&$model, $value, $min){
+        $file = array_shift($value);
+        if (!is_array($file)) {
+            return false;
+        }
+        if (in_array('allowEmpty', $file)) {
+            return false;
+        }
+
+        $fileSize = $file['file_size'];
+
+        if ($fileSize <= $min) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * checkFileSize
+     * Validation method: check file size
+     *
+     * @param &$model
+     * @param $value
+     * @param $max
+     * @return
+     */
+    function checkFileSize(&$model, $value, $max){
+        return $this->checkMaxFileSize($model, $value, $max);
+    }
+
+    /**
+     * notEmptyFile
+     * Validation method: check is empty
+     *
+     * @param &$model
+     * @param $value
+     * @return
+     */
+    function notEmptyFile(&$model, $value){
+        return $this->checkMinFileSize($model, $value, -1);
     }
 
     /**
@@ -501,14 +560,8 @@ class BindableBehavior extends ModelBehavior {
         if (!is_array($file)) {
             return false;
         }
-        if (is_array($func)) {
-            if (in_array('allowEmpty', $func)) {
-                return false;
-            }
-        } else {
-            if ($func === 'allowEmpty') {
-                return false;
-            }
+        if (in_array('allowEmpty', $func)) {
+            return false;
         }
 
         $tmpFilePath = $file['tmp_bind_path'];
