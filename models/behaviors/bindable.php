@@ -26,8 +26,8 @@ class BindableBehavior extends ModelBehavior {
         App::import('Model', $this->settings['model']);
         $this->bindedModel =& ClassRegistry::init($this->settings['model']);
 
-        // Set primalyKey
-        $this->primalyKey = empty($model->primalyKey) ? 'id' : $model->primalyKey;
+        // Set primaryKey
+        $this->primaryKey = empty($model->primaryKey) ? 'id' : $model->primaryKey;
     }
 
     /**
@@ -95,7 +95,7 @@ class BindableBehavior extends ModelBehavior {
         }
 
         $bindFields = $this->bindFields;
-        $model_ids = Set::extract('/' . $modelName . '/' . $this->primalyKey, $result);
+        $model_ids = Set::extract('/' . $modelName . '/' . $this->primaryKey, $result);
 
         $query = array();
         $query['fields'] = array('id',
@@ -122,7 +122,7 @@ class BindableBehavior extends ModelBehavior {
             if (empty($result[$key][$modelName])) {
                 continue;
             }
-            $model_id = $value[$modelName][$this->primalyKey];
+            $model_id = $value[$modelName][$this->primaryKey];
             foreach ($bindFields as $fieldName => $bindValue) {
                 if (array_key_exists($model_id . '.' . $fieldName, $binds)) {
                     $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings['filePath'] : $bindFields[$fieldName]['filePath'];
@@ -252,11 +252,11 @@ class BindableBehavior extends ModelBehavior {
         if ($created) {
             $model_id = $model->getLastInsertId();
         } else {
-            if (empty($model->data[$modelName][$this->primalyKey])) {
+            if (empty($model->data[$modelName][$this->primaryKey])) {
                 // SoftDeletable
                 return;
             }
-            $model_id = $model->data[$modelName][$this->primalyKey];
+            $model_id = $model->data[$modelName][$this->primaryKey];
         }
 
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
@@ -355,7 +355,7 @@ class BindableBehavior extends ModelBehavior {
 
         $query = array();
         $query['recursive'] = -1;
-        $query['conditions'] = array($modelName . '.' . $this->primalyKey  => $model->id);
+        $query['conditions'] = array($modelName . '.' . $this->primaryKey  => $model->id);
         $this->data = $model->find('first', $query);
         return true;
     }
@@ -368,7 +368,7 @@ class BindableBehavior extends ModelBehavior {
      */
     function afterDelete(&$model){
         $modelName = $model->alias;
-        $model_id = $this->data[$modelName][$this->primalyKey];
+        $model_id = $this->data[$modelName][$this->primaryKey];
         return $this->deleteEntity($model_id);
     }
 
