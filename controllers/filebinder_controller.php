@@ -15,12 +15,12 @@ class FilebinderController extends FilebinderAppController {
      * @param string $hash
      * @return
      */
-    function loader($model = null, $model_id = null, $fieldName = null, $hash = null){
+    function loader($model = null, $model_id = null, $fieldName = null, $hash = null, $fileName){
         $this->layout = false;
         $this->autoRender = false;
         Configure::write('debug', 0);
 
-        if (!$model || !$model_id || !$fieldName || !$hash) {
+        if (!$model || $model_id == null || !$fieldName || !$hash) {
             return;
         }
         if (Security::hash($model . $model_id . $fieldName . $this->Session->read('Filebinder.hash')) !== $hash) {
@@ -29,16 +29,22 @@ class FilebinderController extends FilebinderAppController {
 
         $this->loadModel($model);
 
-        $query = array();
-        $query['recursive'] = -1;
-        $query['fields'] = array('id',
-                                 $fieldName);
-        $query['conditions'] = array('id' => $model_id);
-        $file = $this->{$model}->find('first', $query);
+        if ($model_id == 0) {
+            // tmp file
+            $tmpPath = empty($this->{$model}->bindFields[$fieldName]['tmpPath']) ? TMP . 'cache/' : $this->{$model}->bindFields[$fieldName]['tmpPath'];
+            $filePath = $tmpPath . $fileName;
+        } else {
+            $query = array();
+            $query['recursive'] = -1;
+            $query['fields'] = array('id',
+                                     $fieldName);
+            $query['conditions'] = array('id' => $model_id);
+            $file = $this->{$model}->find('first', $query);
 
-        $fileName = $file[$model][$fieldName]['file_name'];
-        $fileContentType = $file[$model][$fieldName]['file_content_type'];
-        $filePath = $file[$model][$fieldName]['file_path'];
+            $fileName = $file[$model][$fieldName]['file_name'];
+            $fileContentType = $file[$model][$fieldName]['file_content_type'];
+            $filePath = $file[$model][$fieldName]['file_path'];
+        }
 
         if (!file_exists($filePath)) {
             die(__('No file',true));
@@ -49,8 +55,19 @@ class FilebinderController extends FilebinderAppController {
         } else {
             header('Content-Disposition: attachment; filename="'. $fileName .'"');
         }
+
         header('Content-Length: '. filesize($filePath));
-        header('Content-Type: ' . $fileContentType);
+        if (!empty($fileContentType)) {
+            header('Content-Type: ' . $fileContentType);
+        } else if (class_exists('FInfo')) {
+            $info  =  new FInfo(FILEINFO_MIME_TYPE);
+            $fileContentType = $info->file($filePath);
+            header('Content-Type: ' . $fileContentType);
+        } else if (function_exists('mime_content_type')) {
+            $fileContentType = mime_content_type($filePath);
+            header('Content-Type: ' . $fileContentType);
+        }                        
+
         readfile($filePath);
     }
 
