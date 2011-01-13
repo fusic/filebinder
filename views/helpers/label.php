@@ -59,6 +59,10 @@ class LabelHelper extends AppHelper {
             return false;
         }
         if (!preg_match('#' . WWW_ROOT . '#', $filePath)) {
+            if (!empty($file['tmp_bind_path']) && empty($file['model_id'])) {
+                $file['model_id'] = 0;
+                $file['file_name'] = preg_replace('#.+/([^/]+)$#' , '$1' , $file['tmp_bind_path']);
+            }
             return array('admin' => false,
                          'plugin' => 'filebinder',
                          'controller' => 'filebinder',
