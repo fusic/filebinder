@@ -55,7 +55,7 @@ class LabelHelper extends AppHelper {
         $hash = $this->Session->read('Filebinder.hash');
         $prefix = empty($options['prefix']) ? '' : $options['prefix'];
         $filePath = empty($file['file_path']) ? (empty($file['tmp_bind_path']) ? false : $file['tmp_bind_path']) : preg_replace('#/([^/]+)$#' , '/' . $prefix . '$1' , $file['file_path']);
-        if (!empty($file) || !$filePath) {
+        if (empty($file) || !$filePath) {
             return false;
         }
         if (!preg_match('#' . WWW_ROOT . '#', $filePath)) {
