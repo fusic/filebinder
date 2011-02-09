@@ -417,6 +417,31 @@ class BindableBehavior extends ModelBehavior {
     }
 
     /**
+     * alphaNumericFileName
+     * Validation method: alpha number only
+     *
+     * @param $
+     * @return
+     */
+    function alphaNumericFileName(&$model, $value){
+        $file = array_shift($value);
+        if (!is_array($file)) {
+            return false;
+        }
+        if (in_array('allowEmpty', $file)) {
+            return false;
+        }
+
+        $fileName = $file['file_name'];
+
+        // alphaNumeric + .
+        if (!preg_match('/^[\p{Ll}\p{Lm}\p{Lo}\p{Lt}\p{Lu}\p{Nd}.]+$/mu', $fileName)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * checkExtension
      * Validation method: check extention
      *
