@@ -76,11 +76,11 @@ class Post extends AppModel {
   }
 </pre>
 
- Create attachment table and model.
+ Create attachment table.
 
 <pre>
 CREATE TABLE `attachments` (
-  `id` tinyint(4) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `model` text NOT NULL,
   `model_id` int(11) NOT NULL,
   `field_name` text NOT NULL,
@@ -92,13 +92,6 @@ CREATE TABLE `attachments` (
   `modified` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-</pre>
-
-<pre>
-<?php
-class Attachment extends AppModel {
-    var $name = 'Attachment';
-  }
 </pre>
 
 <pre>
