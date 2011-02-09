@@ -90,7 +90,7 @@ class BindableBehavior extends ModelBehavior {
     function afterFind(&$model, $result){
 
         $modelName = $model->alias;
-        if (empty($model->bindFields) || empty($this->bindFields)) {
+        if (empty($model->bindFields) || empty($this->bindFields || empty($result))) {
             return $result;
         }
 
