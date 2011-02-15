@@ -290,6 +290,7 @@ class BindableBehavior extends ModelBehavior {
 
             $bind_id = $value['bind_id'];
             $tmpFile = $value['tmp_bind_path'];
+            $bindFile = null;
 
             $bind = array();
             $bind['id'] = $bind_id;
@@ -316,7 +317,7 @@ class BindableBehavior extends ModelBehavior {
                 mkdir($bindDir, 0755, true);
                 rename($tmpFile, $bindFile);
             }
-            if (file_exists($bindFile)) {
+            if ($bindFile && file_exists($bindFile)) {
                 /**
                  * afterAttach
                  */
