@@ -26,7 +26,9 @@ class RingComponent extends Object {
     function startup(&$controller){
         $controller->helpers[]  =  'Filebinder.Label';
 
-        $this->Session->write('Filebinder.hash', Security::hash(time()));
+        if (!isset($controller->noUpdateHash) || !$controller->noUpdateHash) {
+            $this->Session->write('Filebinder.hash', Security::hash(time()));
+        }
     }
 
     /**
