@@ -586,7 +586,7 @@ class BindableBehavior extends ModelBehavior {
         if (!is_array($file)) {
             return false;
         }
-        if (in_array('allowEmpty', $func)) {
+        if (is_array($func) && in_array('allowEmpty', $func)) {
             return false;
         }
 

@@ -81,7 +81,45 @@ class RingComponent extends Object {
 
             $this->controller->data[$modelName][$fieldName] = $ring;
         }
+
+        // recover uploaded file
+        if ($this->Session->check('Filebinder.' . $modelName)) {
+            $sessionData = $this->Session->read('Filebinder.' . $modelName);
+            foreach ($sessionData as $fieldName => $value) {
+                if (empty($this->controller->data[$modelName][$fieldName])) {
+                    $this->controller->data[$modelName][$fieldName] = $value;
+                }
+            }
+        }
     }
 
+    /**
+     * bindDown
+     * Check $this->data and recover uploaded file with session
+     *
+     * @return
+     */
+    function bindDown($modelName = null){
+        if (empty($modelName)) {
+            $modelName = $this->controller->modelClass;
+        }
+
+        $this->Session->delete('Filebinder.' . $modelName);
+
+        $bindFields = Set::combine($this->controller->{$modelName}->bindFields, '/field' , '/');
+
+        foreach ($this->controller->data[$modelName] as $fieldName => $value) {
+            if (!in_array($fieldName, Set::extract('/field', $this->controller->{$modelName}->bindFields))) {
+                continue;
+            }
+            if (!is_array($value)) {
+                continue;
+            }
+            if (isset($this->controller->{$modelName}->validationErrors[$fieldName])) {
+                continue;
+            }
+            $this->Session->write('Filebinder.' . $modelName . '.' . $fieldName, $value);
+        }
+    }
 
   }
