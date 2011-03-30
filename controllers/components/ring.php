@@ -42,7 +42,8 @@ class RingComponent extends Object {
             $modelName = $this->controller->modelClass;
         }
         if (empty($this->controller->data[$modelName])) {
-            return true;
+            $this->Session->delete('Filebinder.' . $modelName);
+            return;
         }
 
         $bindFields = Set::combine($this->controller->{$modelName}->bindFields, '/field' , '/');
@@ -103,8 +104,10 @@ class RingComponent extends Object {
         if (empty($modelName)) {
             $modelName = $this->controller->modelClass;
         }
-
         $this->Session->delete('Filebinder.' . $modelName);
+        if (empty($this->controller->data[$modelName])) {
+            return;
+        }
 
         $bindFields = Set::combine($this->controller->{$modelName}->bindFields, '/field' , '/');
 

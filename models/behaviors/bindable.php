@@ -459,7 +459,11 @@ class BindableBehavior extends ModelBehavior {
         if (in_array('allowEmpty', $extension)) {
             $extension = array('jpg', 'gif', 'png'); // set default
         }
-        $tmpFilePath = $file['tmp_bind_path'];
+        if (empty($file['tmp_bind_path']) && empty($file['file_path'])) {
+            return false;
+        }
+
+        $tmpFilePath = empty($file['tmp_bind_path']) ? $file['file_path'] : $file['tmp_bind_path'];
 
         $regexp = '/\.(' . implode('|', (array) $extension) . ')$/';
         if (!preg_match($regexp, $tmpFilePath)) {
@@ -586,11 +590,18 @@ class BindableBehavior extends ModelBehavior {
         if (!is_array($file)) {
             return false;
         }
-        if (is_array($func) && in_array('allowEmpty', $func)) {
+        if (is_array($func)) {
+            return false;
+        }
+        if (in_array('allowEmpty', $file)) {
             return false;
         }
 
-        $tmpFilePath = $file['tmp_bind_path'];
+        if (empty($file['tmp_bind_path']) && empty($file['file_path'])) {
+            return false;
+        }
+
+        $tmpFilePath = empty($file['tmp_bind_path']) ? $file['file_path'] : $file['tmp_bind_path'];
 
         if (!file_exists($tmpFilePath)) {
             return false;
