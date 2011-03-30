@@ -90,7 +90,7 @@ class BindableBehavior extends ModelBehavior {
     function afterFind(&$model, $result){
 
         $modelName = $model->alias;
-        if (empty($model->bindFields) || empty($this->bindFields)) {
+        if (empty($model->bindFields) || empty($this->bindFields) || empty($result)) {
             return $result;
         }
 
@@ -290,6 +290,7 @@ class BindableBehavior extends ModelBehavior {
 
             $bind_id = $value['bind_id'];
             $tmpFile = $value['tmp_bind_path'];
+            $bindFile = null;
 
             $bind = array();
             $bind['id'] = $bind_id;
@@ -316,7 +317,7 @@ class BindableBehavior extends ModelBehavior {
                 mkdir($bindDir, 0755, true);
                 rename($tmpFile, $bindFile);
             }
-            if (file_exists($bindFile)) {
+            if ($bindFile && file_exists($bindFile)) {
                 /**
                  * afterAttach
                  */
@@ -414,6 +415,31 @@ class BindableBehavior extends ModelBehavior {
             return rmdir($dir);
         }
         return false;
+    }
+
+    /**
+     * alphaNumericFileName
+     * Validation method: alpha number only
+     *
+     * @param $
+     * @return
+     */
+    function alphaNumericFileName(&$model, $value){
+        $file = array_shift($value);
+        if (!is_array($file)) {
+            return false;
+        }
+        if (in_array('allowEmpty', $file)) {
+            return false;
+        }
+
+        $fileName = $file['file_name'];
+
+        // alphaNumeric + .
+        if (!preg_match('/^[\p{Ll}\p{Lm}\p{Lo}\p{Lt}\p{Lu}\p{Nd}.]+$/mu', $fileName)) {
+            return false;
+        }
+        return true;
     }
 
     /**

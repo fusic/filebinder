@@ -4,6 +4,7 @@ class FilebinderController extends FilebinderAppController {
     var $name = 'Filebinder';
     var $uses = array();
     var $components = array('Session');
+    var $noUpdateHash = true;
 
     /**
      * loader
@@ -66,8 +67,9 @@ class FilebinderController extends FilebinderAppController {
         } else if (function_exists('mime_content_type')) {
             $fileContentType = mime_content_type($filePath);
             header('Content-Type: ' . $fileContentType);
-        }                        
+        }
 
+        ob_end_clean(); // clean
         readfile($filePath);
     }
 
