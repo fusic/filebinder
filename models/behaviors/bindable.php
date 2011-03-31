@@ -197,6 +197,7 @@ class BindableBehavior extends ModelBehavior {
             }
 
             $bind = $value;
+            $bind['model'] = $modelName;
             $bind['model_id'] = 0;
 
             $tmpFile = $value['tmp_bind_path'];
