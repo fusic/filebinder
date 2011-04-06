@@ -129,7 +129,7 @@ class BindableBehavior extends ModelBehavior {
                     $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings[$model->alias]['filePath'] : $bindFields[$fieldName]['filePath'];
                     $fileName = $binds[$model_id . '.' . $fieldName][$this->settings[$model->alias]['model']]['file_name'];
                     $bind = $binds[$model_id . '.' . $fieldName][$this->settings[$model->alias]['model']];
-                    $bind['file_path'] = $filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName;
+                    $bind['file_path'] = $filePath . $model->transferTo(array_diff_key($bind, Set::normalize(array('file_object'))));
                     $bind['bindedModel'] = $this->bindedModel->alias;
                     $result[$key][$modelName][$fieldName] = $bind;
 
@@ -230,12 +230,12 @@ class BindableBehavior extends ModelBehavior {
             }
 
             $this->bindedModel->create();
-            if (!$this->bindedModel->save($bind)) {
+            if (!$data = $this->bindedModel->save($bind)) {
                 return false;
             }
 
             $bind_id = $this->bindedModel->getLastInsertId();
-            $model->data[$modelName][$fieldName]['bind_id']  = $bind_id;
+            $model->data[$modelName][$fieldName] = $data[$this->bindedModel->alias] + array('id' => $bind_id);
         }
 
         return true;
@@ -270,7 +270,8 @@ class BindableBehavior extends ModelBehavior {
             }
 
             $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings[$model->alias]['filePath'] : $bindFields[$fieldName]['filePath'];
-            $bindDir = $filePath . $modelName . DS . $model_id . DS . $fieldName . DS;
+            $bindFile = $filePath . $model->transferTo(array_diff_key(array('model_id' => $model_id) + $value, Set::normalize(array('tmp_bind_path'))));
+            $bindDir = dirname($bindFile);
 
             // Check delete_check
             if (!empty($model->data[$modelName]['delete_' . $fieldName])) {
@@ -290,12 +291,10 @@ class BindableBehavior extends ModelBehavior {
                 continue;
             }
 
-            $bind_id = $value['bind_id'];
             $tmpFile = $value['tmp_bind_path'];
-            $bindFile = null;
 
             $bind = array();
-            $bind['id'] = $bind_id;
+            $bind['id'] = $value['id'];
             $bind['model_id'] = $model_id;
 
             // Delete Current record
@@ -315,7 +314,6 @@ class BindableBehavior extends ModelBehavior {
                 if (file_exists($bindDir)) {
                     $this->recursiveRemoveDir($bindDir);
                 }
-                $bindFile = $bindDir . $value['file_name'];
                 mkdir($bindDir, 0755, true);
                 rename($tmpFile, $bindFile);
             }
@@ -373,6 +371,33 @@ class BindableBehavior extends ModelBehavior {
         $modelName = $model->alias;
         $model_id = $this->data[$modelName][$this->primaryKey];
         return $this->deleteEntity($model_id);
+    }
+
+    /**
+     * Generate save path for binded file
+     *
+     * Notice: Don't use a random string.
+     * This method used by afterSave and afterFind method,
+     * When a random string is used, it doesn't generate correct file path.
+     *
+     * @param Model &$model
+     * @param array $data binded file data
+     *   - id: binded model id
+     *   - model: model name
+     *   - model_id: model id
+     *   - field_name: binding field name
+     *   - file_name: uploaded file name
+     *   - file_content_type: uploaded file content type
+     *   - file_size: uploaded file size
+     *   - created: created date
+     *   - modified: modified date
+     * @return string file path
+     * @see BindableBehavior::afterSave()
+     * @see BindableBehavior::afterFind()
+     */
+    function transferTo(&$model, $data)
+    {
+        return $model->alias . DS . $data['model_id'] . DS . $data['field_name'] . DS . $data['file_name'];
     }
 
     /**
