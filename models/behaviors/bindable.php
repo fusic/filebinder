@@ -520,6 +520,7 @@ class BindableBehavior extends ModelBehavior {
         }
 
         $fileSize = $file['file_size'];
+        $max = $this->calcFileSizeUnit($max);
 
         if ($fileSize >= $max) {
             return false;
@@ -546,6 +547,7 @@ class BindableBehavior extends ModelBehavior {
         }
 
         $fileSize = $file['file_size'];
+        $min = $this->calcFileSizeUnit($min);
 
         if ($fileSize <= $min) {
             return false;
@@ -617,5 +619,30 @@ class BindableBehavior extends ModelBehavior {
 
         return $result;
     }
-  }
-?>
+
+    /**
+     * Calculate file size by unit
+     *
+     * e.g.) 100KB -> 1024000
+     *
+     * @param $size mixed
+     * @return int file size
+     */
+    function calcFileSizeUnit($size)
+    {
+        $units = array(
+            'KB' => 1024,
+            'MB' => 1048576,
+            'GB' => 1073741824
+        );
+
+        if (is_numeric($size) || is_int($size)) {
+            return $size;
+
+        } else if (is_string($size) && preg_match('/^([0-9]+(?:\.[0-9]+)?)(' . implode('|', array_keys($units)) . ')$/', $size, $matches)) {
+            return $matches[1] * $units[$matches[2]];
+        }
+
+        return false;
+    }
+}
