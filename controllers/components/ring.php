@@ -46,20 +46,65 @@ class RingComponent extends Object {
             return;
         }
 
-        $bindFields = Set::combine($this->controller->{$modelName}->bindFields, '/field' , '/');
+        reset($this->controller->data[$modelName]);
+        $key = key($this->controller->data[$modelName]);
+        $value = current($this->controller->data[$modelName]);
 
-        foreach ($this->controller->data[$modelName] as $fieldName => $value) {
-            if (!in_array($fieldName, Set::extract('/field', $this->controller->{$modelName}->bindFields))) {
+        if (is_int($key) && is_array($value)) { // hasMany model data
+            foreach ($this->controller->data[$modelName] as $i => $data) {
+                $this->_bindUp($modelName, $this->controller->data[$modelName][$i], $i);
+            }
+
+        } else { // single model data
+            $this->_bindUp($modelName, $this->controller->data[$modelName]);
+        }
+    }
+
+    /**
+     * bindDown
+     * Check $this->data and recover uploaded file with session
+     *
+     * @return
+     */
+    function bindDown($modelName = null){
+        if (empty($modelName)) {
+            $modelName = $this->controller->modelClass;
+        }
+        $this->Session->delete('Filebinder.' . $modelName);
+        if (empty($this->controller->data[$modelName])) {
+            return;
+        }
+
+        reset($this->controller->data[$modelName]);
+        $key = key($this->controller->data[$modelName]);
+        $value = current($this->controller->data[$modelName]);
+
+        if (is_int($key) && is_array($value)) { // hasMany model data
+            foreach ($this->controller->data[$modelName] as $i => $data) {
+                $this->_bindDown($modelName, $this->controller->data[$modelName][$i], $i);
+            }
+
+        } else { // single model data
+            $this->_bindDown($modelName, $this->controller->data[$modelName]);
+        }
+    }
+
+    function _bindUp($modelName, &$data, $i = null)
+    {
+        $model = $this->_getModel($modelName);
+        $bindFields = Set::combine($model->bindFields, '/field' , '/');
+
+        foreach ($data as $fieldName => $value) {
+            if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
             if (!is_array($value) || !isset($value['error'])) {
                 continue;
             }
             if ($value['error'] == 4) {
-                $this->controller->data[$modelName][$fieldName] = null;
+                $data[$fieldName] = null;
                 continue;
             }
-
 
             $fileName = $value['name'];
             $tmpFile = $value['tmp_name'];
@@ -80,49 +125,55 @@ class RingComponent extends Object {
                           'file_size' => $fileSize,
                           'tmp_bind_path' => $tmpBindPath);
 
-            $this->controller->data[$modelName][$fieldName] = $ring;
+            $data[$fieldName] = $ring;
         }
 
-        // recover uploaded file
-        if ($this->Session->check('Filebinder.' . $modelName)) {
-            $sessionData = $this->Session->read('Filebinder.' . $modelName);
+        $sessionKey = is_int($i) ? "Filebinder.{$modelName}.{$i}" : "Filebinder.{$modelName}";
+
+        if ($this->Session->check($sessionKey)) {
+            $sessionData = $this->Session->read($sessionKey);
             foreach ($sessionData as $fieldName => $value) {
-                if (empty($this->controller->data[$modelName][$fieldName])) {
-                    $this->controller->data[$modelName][$fieldName] = $value;
+                if (empty($data[$fieldName])) {
+                    $data[$fieldName] = $value;
                 }
             }
         }
     }
 
-    /**
-     * bindDown
-     * Check $this->data and recover uploaded file with session
-     *
-     * @return
-     */
-    function bindDown($modelName = null){
-        if (empty($modelName)) {
-            $modelName = $this->controller->modelClass;
-        }
-        $this->Session->delete('Filebinder.' . $modelName);
-        if (empty($this->controller->data[$modelName])) {
-            return;
-        }
+    function _bindDown($modelName, $data, $i = null)
+    {
+        $model = $this->_getModel($modelName);
+        $sessionKey = is_int($i) ? "Filebinder.{$modelName}.{$i}." : "Filebinder.{$modelName}.";
 
-        $bindFields = Set::combine($this->controller->{$modelName}->bindFields, '/field' , '/');
-
-        foreach ($this->controller->data[$modelName] as $fieldName => $value) {
-            if (!in_array($fieldName, Set::extract('/field', $this->controller->{$modelName}->bindFields))) {
+        foreach ($data as $fieldName => $value) {
+            if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
             if (!is_array($value)) {
                 continue;
             }
-            if (isset($this->controller->{$modelName}->validationErrors[$fieldName])) {
+            if (isset($model->validationErrors[$fieldName])) {
                 continue;
             }
-            $this->Session->write('Filebinder.' . $modelName . '.' . $fieldName, $value);
+
+            $this->Session->write($sessionKey . $fieldName, $value);
         }
     }
 
+    function _getModel($modelName)
+    {
+        $model = null;
+
+        if (!empty($this->controller->{$modelName})) {
+            $model = $this->controller->{$modelName};
+
+        } else if (!empty($this->controller->{$this->controller->modelClass}->{$modelName})) {
+            $model = $this->controller->{$this->controller->modelClass}->{$modelName};
+
+        } else {
+            $model = ClassRegistry::init($modelName);
+        }
+
+        return $model;
+    }
   }
