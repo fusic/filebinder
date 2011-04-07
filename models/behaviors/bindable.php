@@ -269,6 +269,10 @@ class BindableBehavior extends ModelBehavior {
                 continue;
             }
 
+            if (empty($value) || empty($value['tmp_bind_path'])) {
+                continue;
+            }
+
             $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings[$model->alias]['filePath'] : $bindFields[$fieldName]['filePath'];
             $bindFile = $filePath . $model->transferTo(array_diff_key(array('model_id' => $model_id) + $value, Set::normalize(array('tmp_bind_path'))));
             $bindDir = dirname($bindFile);
@@ -284,10 +288,6 @@ class BindableBehavior extends ModelBehavior {
                 if (file_exists($bindDir)) {
                     $this->recursiveRemoveDir($bindDir);
                 }
-                continue;
-            }
-
-            if (empty($value) || empty($value['tmp_bind_path'])) {
                 continue;
             }
 
@@ -664,7 +664,7 @@ class BindableBehavior extends ModelBehavior {
         if (is_numeric($size) || is_int($size)) {
             return $size;
 
-        } else if (is_string($size) && preg_match('/^([0-9]+(?:\.[0-9]+)?)(' . implode('|', array_keys($units)) . ')$/', $size, $matches)) {
+        } else if (is_string($size) && preg_match('/^([0-9]+(?:\.[0-9]+)?)(' . implode('|', array_keys($units)) . ')$/i', $size, $matches)) {
             return $matches[1] * $units[$matches[2]];
         }
 
