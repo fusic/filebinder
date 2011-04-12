@@ -2,6 +2,7 @@
 class BindableBehavior extends ModelBehavior {
 
     var $settings = array();
+    var $_deleteData = array();
 
     /**
      * setup
@@ -357,7 +358,7 @@ class BindableBehavior extends ModelBehavior {
         $query = array();
         $query['recursive'] = -1;
         $query['conditions'] = array($modelName . '.' . $this->primaryKey  => $model->id);
-        $this->data = $model->find('first', $query);
+        $this->_deleteData = $model->find('first', $query);
         return true;
     }
 
@@ -368,9 +369,7 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function afterDelete(&$model){
-        $modelName = $model->alias;
-        $model_id = $this->data[$modelName][$this->primaryKey];
-        return $this->deleteEntity($model_id);
+        return $this->deleteEntity($model);
     }
 
     /**
@@ -406,20 +405,21 @@ class BindableBehavior extends ModelBehavior {
      * @param mixed $model_id
      * @return
      */
-    function deleteEntity($model_id = null){
-        if (!$model_id) {
+    function deleteEntity(&$model){
+        if (!$this->_deleteData[$model->alias][$model->primaryKey]) {
             return false;
         }
-        $modelName = $this->model->alias;
-        $bindFields = Set::combine($this->model->bindFields, '/field' , '/');
+        $bindFields = Set::combine($model->bindFields, '/field' , '/');
         $result = true;
         foreach ($bindFields as $fieldName => $value) {
             $filePath = empty($value['filePath']) ? $this->settings[$model->alias]['filePath'] : $value['filePath'];
-            $bindDir = $filePath . $modelName . DS . $model_id . DS;
+            $bindFile = $filePath . $model->transferTo(array_diff_key($this->_deleteData[$model->alias][$fieldName], Set::normalize(array('file_path', 'bindedModel'))));
+            $bindDir = dirname($bindFile);
             if (!$this->recursiveRemoveDir($bindDir)) {
                 $result = false;
             }
         }
+        $this->_deleteData = array();
         return $result;
     }
 
