@@ -2,7 +2,7 @@
 class BindableBehavior extends ModelBehavior {
 
     var $settings = array();
-    var $_deleteData = array();
+    var $runtime = array();
 
     /**
      * setup
@@ -358,7 +358,8 @@ class BindableBehavior extends ModelBehavior {
         $query = array();
         $query['recursive'] = -1;
         $query['conditions'] = array($modelName . '.' . $this->primaryKey  => $model->id);
-        $this->_deleteData = $model->find('first', $query);
+        $data = $model->find('first', $query);
+        $this->runtime[$model->alias]['deletedData'] = isset($data[$model->alias]) ? $data[$model->alias] : array();
         return true;
     }
 
@@ -406,20 +407,23 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function deleteEntity(&$model){
-        if (!$this->_deleteData[$model->alias][$model->primaryKey]) {
+        if (empty($this->runtime[$model->alias]['deletedData'][$model->primaryKey])) {
             return false;
         }
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
         $result = true;
         foreach ($bindFields as $fieldName => $value) {
             $filePath = empty($value['filePath']) ? $this->settings[$model->alias]['filePath'] : $value['filePath'];
-            $bindFile = $filePath . $model->transferTo(array_diff_key($this->_deleteData[$model->alias][$fieldName], Set::normalize(array('file_path', 'bindedModel'))));
+            $bindFile = $filePath . $model->transferTo(array_diff_key(
+                $this->runtime[$model->alias]['deletedData'][$fieldName],
+                Set::normalize(array('file_path', 'bindedModel'
+            ))));
             $bindDir = dirname($bindFile);
             if (!$this->recursiveRemoveDir($bindDir)) {
                 $result = false;
             }
         }
-        $this->_deleteData = array();
+        $this->runtime[$model->alias]['deleteData'] = array();
         return $result;
     }
 
