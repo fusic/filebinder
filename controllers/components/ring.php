@@ -37,7 +37,7 @@ class RingComponent extends Object {
      *
      * @return
      */
-    function bindUp ($modelName = null){
+    function bindUp($modelName = null){
         if (empty($modelName)) {
             $modelName = $this->controller->modelClass;
         }
@@ -46,9 +46,8 @@ class RingComponent extends Object {
             return;
         }
 
-        reset($this->controller->data[$modelName]);
+        $value = reset($this->controller->data[$modelName]);
         $key = key($this->controller->data[$modelName]);
-        $value = current($this->controller->data[$modelName]);
 
         if (is_int($key) && is_array($value)) { // hasMany model data
             foreach ($this->controller->data[$modelName] as $i => $data) {
@@ -75,9 +74,8 @@ class RingComponent extends Object {
             return;
         }
 
-        reset($this->controller->data[$modelName]);
+        $value = reset($this->controller->data[$modelName]);
         $key = key($this->controller->data[$modelName]);
-        $value = current($this->controller->data[$modelName]);
 
         if (is_int($key) && is_array($value)) { // hasMany model data
             foreach ($this->controller->data[$modelName] as $i => $data) {
@@ -112,7 +110,6 @@ class RingComponent extends Object {
             $fileSize = filesize($tmpFile);
 
             $tmpPath = empty($bindFields[$fieldName]['tmpPath']) ? $this->tmpBindPath : $bindFields[$fieldName]['tmpPath'];
-
             $tmpBindPath = $tmpPath . 'ring_' . Security::hash($modelName . $fieldName . $fileName . time()) . $fileName;
 
             // move_uploaded_file
