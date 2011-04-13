@@ -96,10 +96,10 @@ class RingComponent extends Object {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
-            if (!is_array($value) || !isset($value['error'])) {
+            if (!$this->_checkFileUploaded($value)) {
                 continue;
             }
-            if ($value['error'] == 4) {
+            if ($value['error'] == UPLOAD_ERR_NO_FILE) {
                 $data[$fieldName] = null;
                 continue;
             }
@@ -146,7 +146,7 @@ class RingComponent extends Object {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
-            if (!is_array($value)) {
+            if (!$this->_checkBindUpped($value)) {
                 continue;
             }
             if (isset($model->validationErrors[$fieldName])) {
@@ -172,5 +172,34 @@ class RingComponent extends Object {
         }
 
         return $model;
+    }
+
+    function _checkFileUploaded($array) {
+        if (!is_array($array)) {
+            return false;
+        }
+
+        $keys = array('name', 'type', 'tmp_name', 'error', 'size');
+        return $this->_checkKeyExists($array, $keys);
+    }
+
+    function _checkBindUpped($array) {
+        if (!is_array($array)) {
+            return false;
+        }
+
+        $keys = array('field_name', 'file_name', 'file_content_type', 'file_size', 'tmp_bind_path');
+        return $this->_checkKeyExists($array, $keys);
+    }
+
+    function _checkKeyExists($array, $keys)
+    {
+        $diff = array_intersect_key(Set::normalize($keys), $array);
+
+        if (count($keys) !== count($diff)) {
+            return false;
+        }
+
+        return true;
     }
   }
