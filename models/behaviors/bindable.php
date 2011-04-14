@@ -388,7 +388,8 @@ class BindableBehavior extends ModelBehavior {
     /**
      * deleteEntity
      *
-     * @param mixed $modelId
+     * @param Model $&model
+     * @param mixed $modelId The model id
      * @return
      */
     function deleteEntity(&$model, $modelId = null){
@@ -671,6 +672,15 @@ class BindableBehavior extends ModelBehavior {
         return false;
     }
 
+    /**
+     * Find attached file data from binded model
+     *
+     * @param &$Model $model
+     * @param mixed $modelId The model id
+     * @param mixed $fields The fields that searches in string or array
+     * @return array
+     * @access protected
+     */
     function _findBindedFields(&$model, $modelId, $fields = array())
     {
         $query = array(
