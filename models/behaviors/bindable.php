@@ -657,17 +657,14 @@ class BindableBehavior extends ModelBehavior {
      */
     function calcFileSizeUnit($size)
     {
-        $units = array(
-            'KB' => 1024,
-            'MB' => 1048576,
-            'GB' => 1073741824
-        );
+        $units = array('K', 'M', 'G', 'T');
+        $byte = 1024;
 
         if (is_numeric($size) || is_int($size)) {
             return $size;
 
-        } else if (is_string($size) && preg_match('/^([0-9]+(?:\.[0-9]+)?)(' . implode('|', array_keys($units)) . ')$/i', $size, $matches)) {
-            return $matches[1] * $units[$matches[2]];
+        } else if (is_string($size) && preg_match('/^([0-9]+(?:\.[0-9]+)?)(' . implode('|', $units) . ')B?$/i', $size, $matches)) {
+            return $matches[1] * pow($byte, array_search($matches[2], $units) + 1);
         }
 
         return false;
