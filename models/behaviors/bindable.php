@@ -312,7 +312,7 @@ class BindableBehavior extends ModelBehavior {
 
             if (file_exists($tmpFile)) {
                 if (file_exists($bindDir)) {
-                    $this->recursiveRemoveDir($bindDir);
+                    $this->_recursiveRemoveDir($bindDir);
                 }
                 mkdir($bindDir, 0755, true);
                 rename($tmpFile, $bindFile);
@@ -416,7 +416,7 @@ class BindableBehavior extends ModelBehavior {
                 Set::normalize(array('file_path', 'bindedModel'))
             ));
             $bindDir = dirname($bindFile);
-            if (!$this->recursiveRemoveDir($bindDir)) {
+            if (!$this->_recursiveRemoveDir($bindDir)) {
                 $result = false;
             }
         }
@@ -430,13 +430,14 @@ class BindableBehavior extends ModelBehavior {
      *
      * @param $dir
      * @return
+     * @access protected
      */
-    function recursiveRemoveDir($dir) {
+    function _recursiveRemoveDir($dir) {
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
-                    if (filetype($dir."/".$object) == "dir") $this->recursiveRemoveDir($dir."/".$object); else unlink($dir."/".$object);
+                    if (filetype($dir."/".$object) == "dir") $this->_recursiveRemoveDir($dir."/".$object); else unlink($dir."/".$object);
                 }
             }
             reset($objects);
