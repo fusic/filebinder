@@ -73,9 +73,9 @@ class LabelHelper extends AppHelper {
                          Security::hash($file['model'] . $file['model_id'] . $file['field_name'] . $hash),
                          $prefix . $file['file_name']);
         }
-        $src = preg_replace('#' . WWW_ROOT . '#', '../', $filePath);
+        $src = preg_replace('#' . WWW_ROOT . '#', DS, $filePath);
         unset($options['noImage']);
         return $src;
     }
 
-  }
+}
