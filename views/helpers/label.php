@@ -63,15 +63,32 @@ class LabelHelper extends AppHelper {
                 $file['model_id'] = 0;
                 $file['file_name'] = preg_replace('#.+/([^/]+)$#' , '$1' , $file['tmp_bind_path']);
             }
-            return array('admin' => false,
-                         'plugin' => 'filebinder',
-                         'controller' => 'filebinder',
-                         'action' => 'loader',
-                         $file['model'],
-                         $file['model_id'],
-                         $file['field_name'],
-                         Security::hash($file['model'] . $file['model_id'] . $file['field_name'] . $hash),
-                         $prefix . $file['file_name']);
+
+            // over 1.3
+            $prefixes = Configure::read('Routing.prefixes');
+
+            if (!$prefixes && Configure::read('Routing.admin')) {
+                $prefixes = Configure::read('Routing.admin');
+            }
+
+            $url = array();
+
+            foreach ((array)$prefixes as $prefix) {
+                $url[$prefix] = false;
+            }
+
+            $url = array_merge($url, array(
+                 'plugin' => 'filebinder',
+                 'controller' => 'filebinder',
+                 'action' => 'loader',
+                 $file['model'],
+                 $file['model_id'],
+                 $file['field_name'],
+                 Security::hash($file['model'] . $file['model_id'] . $file['field_name'] . $hash),
+                 $prefix . $file['file_name']
+            ));
+
+            return $url;
         }
         $src = preg_replace('#' . WWW_ROOT . '#', DS, $filePath);
         unset($options['noImage']);
