@@ -87,6 +87,14 @@ class RingComponent extends Object {
         }
     }
 
+    /**
+     * bindUp support method
+     *
+     * @param string $modelName
+     * @param array &$data
+     * @param int $i
+     * @access protected
+     */
     function _bindUp($modelName, &$data, $i = null)
     {
         $model = $this->_getModel($modelName);
@@ -137,6 +145,14 @@ class RingComponent extends Object {
         }
     }
 
+    /**
+     * bindDown support method
+     *
+     * @param string $modelName
+     * @param array $data
+     * @param int $i
+     * @access protected
+     */
     function _bindDown($modelName, $data, $i = null)
     {
         $model = $this->_getModel($modelName);
@@ -157,6 +173,13 @@ class RingComponent extends Object {
         }
     }
 
+    /**
+     * Find the model automatically
+     *
+     * @param string $modelName
+     * @access Model
+     * @access protected
+     */
     function _getModel($modelName)
     {
         $model = null;
@@ -174,6 +197,13 @@ class RingComponent extends Object {
         return $model;
     }
 
+    /**
+     * Check whether array is valid uploaded-data
+     *
+     * @param $array The array of uploaded-data
+     * @return bool
+     * @access protected
+     */
     function _checkFileUploaded($array) {
         if (!is_array($array)) {
             return false;
@@ -183,6 +213,12 @@ class RingComponent extends Object {
         return $this->_checkKeyExists($array, $keys);
     }
 
+    /**
+     * Check whether array is valid bind-upped data
+     *
+     * @param $array The array of bind-upped data
+     * @return bool
+     */
     function _checkBindUpped($array) {
         if (!is_array($array)) {
             return false;
@@ -192,6 +228,14 @@ class RingComponent extends Object {
         return $this->_checkKeyExists($array, $keys);
     }
 
+    /**
+     * Check whether array has keys
+     *
+     * @param $array The array
+     * @param $keys The array of keys
+     * @return bool
+     * @access protected
+     */
     function _checkKeyExists($array, $keys)
     {
         $diff = array_intersect_key(Set::normalize($keys), $array);
