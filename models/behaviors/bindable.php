@@ -361,9 +361,15 @@ class BindableBehavior extends ModelBehavior {
     /**
      * Generate save path for binded file
      *
-     * Notice: Don't use a random string.
+     * Notice: Don't use a random string or same functions.
      * This method used by afterSave and afterFind method,
      * When a random string is used, it doesn't generate correct file path.
+     *
+     * Bad function example:
+     *   - mt_rand()
+     *   - time()
+     *   - uniqid()
+     *   - etc..
      *
      * @param Model &$model
      * @param array $data binded file data
