@@ -3,6 +3,7 @@ class RingComponent extends Object {
 
     var $tmpBindPath;
     var $components = array('Session');
+    var $_autoBindDown = array();
 
     /**
      * initialize
@@ -32,12 +33,26 @@ class RingComponent extends Object {
     }
 
     /**
+     * Before render
+     *
+     * @param &$controller
+     */
+    function beforeRender(&$controller){
+        if ($this->_autoBindDown) {
+            foreach ($this->_autoBindDown as $i => $bindDownModel) {
+                $this->bindDown($bindDownModel);
+                unset($this->_autoBindDown[$i]);
+            }
+        }
+    }
+
+    /**
      * bindUp
      * set attach file
      *
      * @return
      */
-    function bindUp($modelName = null){
+    function bindUp($modelName = null, $withBindDown = false){
         if (empty($modelName)) {
             $modelName = $this->controller->modelClass;
         }
@@ -59,6 +74,10 @@ class RingComponent extends Object {
 
         } else { // single model data
             $this->_bindUp($model, $this->controller->data[$model->alias]);
+        }
+
+        if ($withBindDown && !in_array($model->alias, $this->_autoBindDown)) {
+            $this->_autoBindDown[] = $model->alias;
         }
     }
 
