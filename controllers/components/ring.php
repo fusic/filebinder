@@ -128,10 +128,7 @@ class RingComponent extends Object {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
-            if (!$this->_checkFileUploaded($value)) {
-                continue;
-            }
-            if ($value['error'] == UPLOAD_ERR_NO_FILE) {
+            if (!$this->_checkFileUploaded($value) || $value['error'] == UPLOAD_ERR_NO_FILE) {
                 $data[$fieldName] = null;
                 continue;
             }
