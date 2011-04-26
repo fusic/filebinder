@@ -1,7 +1,6 @@
 <?php
 class RingComponent extends Object {
 
-    var $tmpBindPath;
     var $components = array('Session');
     var $_autoBindDown = array();
 
@@ -13,8 +12,6 @@ class RingComponent extends Object {
      * @return
      */
     function initialize(&$controller, $settings = array()) {
-        $this->tmpBindPath = TMP . 'cache/'; // default tmp file path
-
         $this->controller = $controller;
     }
 
@@ -138,7 +135,7 @@ class RingComponent extends Object {
             $contentType = $value['type'];
             $fileSize = filesize($tmpFile);
 
-            $tmpPath = empty($bindFields[$fieldName]['tmpPath']) ? $this->tmpBindPath : $bindFields[$fieldName]['tmpPath'];
+            $tmpPath = empty($bindFields[$fieldName]['tmpPath']) ? TMP . 'cache/' : $bindFields[$fieldName]['tmpPath'];
             $tmpBindPath = $tmpPath . 'ring_' . Security::hash($model->alias . $fieldName . $fileName . time()) . $fileName;
 
             // move_uploaded_file
