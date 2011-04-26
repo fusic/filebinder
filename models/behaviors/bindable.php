@@ -16,8 +16,8 @@ class BindableBehavior extends ModelBehavior {
                           'dbStorage' => true, // file entity save table
                           'beforeAttach' => null, // hook function
                           'afterAttach' => null, // hook function
-                          'withObject' => false,
-                          'exchangeFile' => true,
+                          'withObject' => false, // find attachment with file object
+                          'exchangeFile' => true, // save new file after deleting old file
                           );
 
         $defaultRuntime = array('bindedModel' => null,
