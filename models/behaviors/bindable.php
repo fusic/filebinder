@@ -165,12 +165,7 @@ class BindableBehavior extends ModelBehavior {
                              * afterAttach
                              */
                             if (!empty($this->settings[$model->alias]['afterAttach'])) {
-                                $res = false;
-                                if (function_exists($this->settings[$model->alias]['afterAttach'])) {
-                                    $res = call_user_func($this->settings[$model->alias]['afterAttach'], $bindFile);
-                                } else {
-                                    $res = call_user_func(array($model, $this->settings[$model->alias]['afterAttach']), $bindFile);
-                                }
+                                $res = $this->_userfunc($model, $this->settings[$model->alias]['afterAttach'], array($bindFile));
                                 if (!$res) {
                                     return false;
                                 }
@@ -212,12 +207,7 @@ class BindableBehavior extends ModelBehavior {
                  * beforeAttach
                  */
                 if (!empty($this->settings[$model->alias]['beforeAttach'])) {
-                    $res = false;
-                    if (function_exists($this->settings[$model->alias]['beforeAttach'])) {
-                        $res = call_user_func($this->settings[$model->alias]['beforeAttach'], $tmpFile);
-                    } else {
-                        $res = call_user_func(array($model, $this->settings[$model->alias]['beforeAttach']), $tmpFile);
-                    }
+                    $res = $this->_userfunc($model, $this->settings[$model->alias]['beforeAttach'], array($tmpFile));
                     if (!$res) {
                         return false;
                     }
@@ -322,12 +312,7 @@ class BindableBehavior extends ModelBehavior {
                  * afterAttach
                  */
                 if (!empty($this->settings[$model->alias]['afterAttach'])) {
-                    $res = false;
-                    if (function_exists($this->settings[$model->alias]['afterAttach'])) {
-                        $res = call_user_func($this->settings[$model->alias]['afterAttach'], $bindFile);
-                    } else {
-                        $res = call_user_func(array($model, $this->settings[$model->alias]['afterAttach']), $bindFile);
-                    }
+                    $res = $this->_userfunc($model, $this->settings[$model->alias]['afterAttach'], array($bindFile));
                     if (!$res) {
                         return false;
                     }
@@ -719,5 +704,39 @@ class BindableBehavior extends ModelBehavior {
         }
 
         return $data;
+    }
+
+    /**
+     * Call user function
+     *
+     * @param &$model Model
+     * @param $function mixed The callable function name
+     * @param $args array The arguments array
+     * @return mixed
+     * @access protected
+     */
+    function _userfunc(&$model, $function, $args = array()) {
+        if (is_array($function) && count($function) > 1) {
+            list($class, $method) = $function;
+
+            if (is_callable(array($class, $method))) {
+                if (is_object($class) && is_a('Object', $class)) {
+                    return $class->dispatchMethod($method, $args);
+
+                } else {
+                    return call_user_func_array(array($class, $method), $args);
+                }
+            }
+
+        } else if (is_string($function)) {
+            if (function_exists($function)) {
+                return call_user_func_array($function, $args);
+
+            } else if (method_exists($model, $function)) {
+                return $model->dispatchMethod($function, $args);
+            }
+        }
+
+        return false;
     }
 }
