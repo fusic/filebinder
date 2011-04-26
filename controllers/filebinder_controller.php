@@ -16,7 +16,7 @@ class FilebinderController extends FilebinderAppController {
      * @param string $hash
      * @return
      */
-    function loader($model = null, $model_id = null, $fieldName = null, $hash = null, $fileName){
+    function loader($model = null, $model_id = null, $fieldName = null, $hash = null, $fileName = null){
         $this->layout = false;
         $this->autoRender = false;
         Configure::write('debug', 0);
@@ -42,7 +42,9 @@ class FilebinderController extends FilebinderAppController {
             $query['conditions'] = array('id' => $model_id);
             $file = $this->{$model}->find('first', $query);
 
-            $fileName = $file[$model][$fieldName]['file_name'];
+            if (empty($fileName)) {
+                $fileName = $file[$model][$fieldName]['file_name'];
+            }
             $fileContentType = $file[$model][$fieldName]['file_content_type'];
             $filePath = $file[$model][$fieldName]['file_path'];
         }
