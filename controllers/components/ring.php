@@ -49,7 +49,7 @@ class RingComponent extends Object {
      *
      * @return
      */
-    function bindUp($modelName = null, $withBindDown = false){
+    function bindUp($modelName = null, $autoBindDown = false){
         if (empty($modelName)) {
             $modelName = $this->controller->modelClass;
         }
@@ -73,7 +73,7 @@ class RingComponent extends Object {
             $this->_bindUp($model, $this->controller->data[$model->alias]);
         }
 
-        if ($withBindDown && !in_array($model->alias, $this->_autoBindDown)) {
+        if ($autoBindDown && !in_array($model->alias, $this->_autoBindDown)) {
             $this->_autoBindDown[] = $model->alias;
         }
     }
