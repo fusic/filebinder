@@ -231,10 +231,9 @@ class BindableBehavior extends ModelBehavior {
             $tmpFile = $value['tmp_bind_path'];
 
             if (file_exists($tmpFile)) {
-                if (file_exists($bindDir)) {
-                    $this->_recursiveRemoveDir($bindDir);
+                if (!is_dir($bindDir)) {
+                    mkdir($bindDir, 0755, true);
                 }
-                mkdir($bindDir, 0755, true);
                 rename($tmpFile, $bindFile);
             }
             if ($bindFile && file_exists($bindFile)) {
