@@ -173,18 +173,32 @@ class BindableBehavior extends ModelBehavior {
         }
 
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
+        $fields = Set::extract('/field', $model->bindFields);
+        $deleteFields = array();
+
+        foreach ($fields as $field) {
+            $deleteFields[] = 'delete_' . $field;
+        }
 
         // set model_id
         foreach ($model->data[$modelName] as $fieldName => $value) {
-            if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
+            if (in_array($fieldName, $deleteFields)) {
+                $delete = true;
+                $fieldName = substr($fieldName, 7);
+
+            } else if (in_array($fieldName, $fields)) {
+                $delete = false;
+
+            } else {
                 continue;
             }
 
             $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings[$model->alias]['filePath'] : $bindFields[$fieldName]['filePath'];
+            if ($delete || (!$created && !empty($value['tmp_bind_path']))) {
+                unset($model->data[$modelName]['delete_' . $fieldName]);
 
-            if ((!$created && !empty($value['tmp_bind_path'])) || !empty($model->data[$modelName]['delete_' . $fieldName])) {
                 if (
-                    ($this->settings[$model->alias]['exchangeFile'] || !empty($model->data[$modelName]['delete_' . $fieldName]))
+                    ($delete || $this->settings[$model->alias]['exchangeFile'])
                     && ($currentBindedFields = $this->_findBindedFields($model, $model_id, $fieldName))
                 ) {
                     $this->runtime[$model->alias]['deleteFields'] = $currentBindedFields;
@@ -198,7 +212,7 @@ class BindableBehavior extends ModelBehavior {
                 ));
             }
 
-            if (empty($value['tmp_bind_path'])) {
+            if (!is_array($value) || empty($value['tmp_bind_path'])) {
                 continue;
             }
 
