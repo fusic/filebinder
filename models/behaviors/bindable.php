@@ -150,7 +150,9 @@ class BindableBehavior extends ModelBehavior {
                             continue;
                         }
 
-                        mkdir($filePath . $modelName . DS . $model_id . DS . $fieldName . DS, 0755, true);
+                        if (!file_exists($filePath . $modelName . DS . $model_id . DS . $fieldName)) {
+                            mkdir($filePath . $modelName . DS . $model_id . DS . $fieldName . DS, 0755, true);
+                        }
                         $bindFile = $filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName;
                         $fp = fopen($bindFile , 'w');
                         fwrite($fp, base64_decode($fileObject));
