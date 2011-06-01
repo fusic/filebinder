@@ -101,7 +101,8 @@ class RingComponent extends Object {
             if (!is_array($value) || !isset($value['error'])) {
                 continue;
             }
-            if ($value['error'] == 4) {
+
+            if ($value['error'] == 4 || !empty($this->controller->data[$modelName]['delete_' . $fieldName])) {
                 $data[$fieldName] = null;
                 continue;
             }
@@ -133,7 +134,7 @@ class RingComponent extends Object {
         if ($this->Session->check($sessionKey)) {
             $sessionData = $this->Session->read($sessionKey);
             foreach ($sessionData as $fieldName => $value) {
-                if (empty($data[$fieldName])) {
+                if (empty($data[$fieldName]) && empty($this->controller->data[$modelName]['delete_' . $fieldName])) {
                     $data[$fieldName] = $value;
                 }
             }

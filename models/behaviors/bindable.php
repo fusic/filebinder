@@ -196,6 +196,7 @@ class BindableBehavior extends ModelBehavior {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
+
             if (empty($value) || empty($value['tmp_bind_path'])) {
                 continue;
             }
@@ -272,13 +273,16 @@ class BindableBehavior extends ModelBehavior {
                 continue;
             }
 
-            if (empty($value) || empty($value['tmp_bind_path'])) {
-                continue;
-            }
-
             $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings[$model->alias]['filePath'] : $bindFields[$fieldName]['filePath'];
-            $bindFile = $filePath . $model->transferTo(array_diff_key(array('model_id' => $model_id) + $value, Set::normalize(array('tmp_bind_path'))));
-            $bindDir = dirname($bindFile);
+
+            if (!empty($value)) {
+                $bindFile = $filePath . $model->transferTo(array_diff_key(array('model_id' => $model_id) + $value, Set::normalize(array('tmp_bind_path'))));
+                $bindDir = dirname($bindFile);
+            } else {
+                // for delete_check
+                $bindFile = false;
+                $bindDir = $filePath . $model->transferTo(array_diff_key(array('model_id' => $model_id) + array('field_name' => $fieldName, 'file_name' => ''), Set::normalize(array('tmp_bind_path'))));
+            }
 
             // Check delete_check
             if (!empty($model->data[$modelName]['delete_' . $fieldName])) {
@@ -291,6 +295,10 @@ class BindableBehavior extends ModelBehavior {
                 if (file_exists($bindDir)) {
                     $this->recursiveRemoveDir($bindDir);
                 }
+                continue;
+            }
+
+            if (empty($value) || empty($value['tmp_bind_path'])) {
                 continue;
             }
 
@@ -397,8 +405,7 @@ class BindableBehavior extends ModelBehavior {
      * @see BindableBehavior::afterSave()
      * @see BindableBehavior::afterFind()
      */
-    function transferTo(&$model, $data)
-    {
+    function transferTo(&$model, $data) {
         return $model->alias . DS . $data['model_id'] . DS . $data['field_name'] . DS . $data['file_name'];
     }
 
