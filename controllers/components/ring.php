@@ -145,12 +145,16 @@ class RingComponent extends Object {
     {
         $model = $this->_getModel($modelName);
         $sessionKey = is_int($i) ? "Filebinder.{$modelName}.{$i}." : "Filebinder.{$modelName}.";
-
         foreach ($data as $fieldName => $value) {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
             if (!is_array($value)) {
+                continue;
+            }
+            // file upload error
+            if (empty($value['file_size'])) {
+                $this->controller->data[$modelName][$fieldName] = null;
                 continue;
             }
             if (isset($model->validationErrors[$fieldName])) {

@@ -201,6 +201,12 @@ class BindableBehavior extends ModelBehavior {
                 continue;
             }
 
+            if (empty($value['file_size'])) {
+                $model->data[$modelName][$fieldName] = null;
+                $model->invalidate($fieldName, __('Validation Error: File Upload Error', true));
+                return false;
+            }
+
             $bind = $value;
             $bind['model'] = $modelName;
             $bind['model_id'] = 0;
