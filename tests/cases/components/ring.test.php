@@ -11,7 +11,7 @@ class FilebinderPost extends CakeTestModel{
 }
 
 /**
- * 
+ *
  *
  *
  * @params
@@ -60,7 +60,7 @@ class RingComponentTest extends CakeTestCase{
      * @return
      */
     function testBindUp(){
-        $tmpPath = TMP . DS . 'tests' . DS . 'bindup.png';
+        $tmpPath = TMP . 'tests' . DS . 'bindup.png';
 
         // set test.png
         $this->_setTestFile($tmpPath);
@@ -68,7 +68,7 @@ class RingComponentTest extends CakeTestCase{
         $this->Controller->FilebinderPost->bindFields = array(
                                                               array('field' => 'logo',
                                                                     'tmpPath'  => CACHE,
-                                                                    'filePath' => TMP . DS . 'tests' . DS,
+                                                                    'filePath' => TMP . 'tests' . DS,
                                                                     ),
                                                               );
 
@@ -95,7 +95,7 @@ class RingComponentTest extends CakeTestCase{
      * @return
      */
     function testBindUp_move_uploaded_file(){
-        $tmpPath = TMP . DS . 'tests' . DS . 'bindup.png';
+        $tmpPath = TMP . 'tests' . DS . 'bindup.png';
 
         // set test.png
         $this->_setTestFile($tmpPath);
@@ -103,7 +103,7 @@ class RingComponentTest extends CakeTestCase{
         $this->Controller->FilebinderPost->bindFields = array(
                                                               array('field' => 'logo',
                                                                     'tmpPath'  => CACHE,
-                                                                    'filePath' => TMP . DS . 'tests' . DS,
+                                                                    'filePath' => TMP . 'tests' . DS,
                                                                     ),
                                                               );
 
@@ -131,7 +131,7 @@ class RingComponentTest extends CakeTestCase{
      * @return
      */
     function test_bindDown(){
-        $tmpPath = TMP . DS . 'tests' . DS . 'binddown.png';
+        $tmpPath = TMP . 'tests' . DS . 'binddown.png';
 
         // set test.png
         $this->_setTestFile($tmpPath);
@@ -139,7 +139,7 @@ class RingComponentTest extends CakeTestCase{
         $this->Controller->FilebinderPost->bindFields = array(
                                                               array('field' => 'logo',
                                                                     'tmpPath'  => CACHE,
-                                                                    'filePath' => TMP . DS . 'tests' . DS,
+                                                                    'filePath' => TMP . 'tests' . DS,
                                                                     ),
                                                               );
 

@@ -28,7 +28,6 @@ class AttachmentFixture extends CakeTestFixture {
             'file_content_type' => 'image/png',
             'file_size' => '771311',
             'file_object' => '',
-            'parent_model_id' => 1,
             'created' => '2011-08-22 19:29:32',
             'modified' => '2011-08-22 19:29:32'
         ),
