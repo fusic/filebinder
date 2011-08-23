@@ -1,5 +1,4 @@
 <?php
-/* Attachment Fixture generated on: 2011-07-06 20:07:53 : 1309951553 */
 class AttachmentFixture extends CakeTestFixture {
     var $name = 'Attachment';
 
@@ -21,84 +20,17 @@ class AttachmentFixture extends CakeTestFixture {
 
     var $records = array(
         array(
-            'id' => 1,
-            'model' => 'LandingBlock',
+            'id' => 100,
+            'model' => 'FilebinderPost',
             'model_id' => 1,
-            'field_name' => 'firstview_photo',
-            'file_name' => 'photo.png',
+            'field_name' => 'logo',
+            'file_name' => 'logo.png',
             'file_content_type' => 'image/png',
             'file_size' => '771311',
             'file_object' => '',
             'parent_model_id' => 1,
-            'created' => '2011-04-14 19:29:32',
-            'modified' => '2011-04-14 19:29:32'
-        ),
-        array(
-            'id' => 10000041,
-            'model' => 'LandingBlock',
-            'model_id' => 1000004,
-            'field_name' => 'voice_type_image',
-            'file_name' => 'photo.png',
-            'file_content_type' => 'image/png',
-            'file_size' => '771311',
-            'file_object' => '',
-            'parent_model_id' => 1,
-            'created' => '2011-04-14 19:29:32',
-            'modified' => '2011-04-14 19:29:32'
-        ),
-        array(
-            'id' => 10000042,
-            'model' => 'LandingBlock',
-            'model_id' => 1000004,
-            'field_name' => 'voice_type_voice0_photo',
-            'file_name' => 'photo.png',
-            'file_content_type' => 'image/png',
-            'file_size' => '771311',
-            'file_object' => '',
-            'parent_model_id' => 1,
-            'created' => '2011-04-14 19:29:32',
-            'modified' => '2011-04-14 19:29:32'
-        ),
-        array(
-            'id' => 10000043,
-            'model' => 'LandingBlock',
-            'model_id' => 1000004,
-            'field_name' => 'voice_type_voice1_photo',
-            'file_name' => 'photo.png',
-            'file_content_type' => 'image/png',
-            'file_size' => '771311',
-            'file_object' => '',
-            'parent_model_id' => 1,
-            'created' => '2011-04-14 19:29:32',
-            'modified' => '2011-04-14 19:29:32'
-        ),
-        array(
-            'id' => 10000044,
-            'model' => 'LandingBlock',
-            'model_id' => 1000004,
-            'field_name' => 'voice_type_voice2_photo',
-            'file_name' => 'photo.png',
-            'file_content_type' => 'image/png',
-            'file_size' => '771311',
-            'file_object' => '',
-            'parent_model_id' => 1,
-            'created' => '2011-04-14 19:29:32',
-            'modified' => '2011-04-14 19:29:32'
-        ),
-
-        // landing.test.php
-        array(
-            'id' => 20000001,
-            'model' => 'Landing',
-            'model_id' => 1,
-            'field_name' => 'brand_logo',
-            'file_name' => 'test.png',
-            'file_content_type' => 'image/png',
-            'file_size' => '771311',
-            'file_object' => '',
-            'parent_model_id' => 1,
-            'created' => '2011-04-14 19:29:32',
-            'modified' => '2011-04-14 19:29:32'
+            'created' => '2011-08-22 19:29:32',
+            'modified' => '2011-08-22 19:29:32'
         ),
     );
 }
