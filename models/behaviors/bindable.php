@@ -16,7 +16,8 @@ class BindableBehavior extends ModelBehavior {
                           'dbStorage' => true, // file entity save table
                           'beforeAttach' => null, // hook function
                           'afterAttach' => null, // hook function
-                          'withObject' => false
+                          'withObject' => false,
+                          'exchangeFile' => true,
                           );
 
         $this->model = $model;
@@ -281,52 +282,39 @@ class BindableBehavior extends ModelBehavior {
 
             $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings[$model->alias]['filePath'] : $bindFields[$fieldName]['filePath'];
 
-            if (!empty($value)) {
-                $bindFile = $filePath . $model->transferTo(array_diff_key(array('model_id' => $model_id) + $value, Set::normalize(array('tmp_bind_path'))));
-                $bindDir = dirname($bindFile);
-            } else {
-                // for delete_check
-                $bindFile = false;
-                $bindDir = $filePath . $model->transferTo(array_diff_key(array('model_id' => $model_id) + array('field_name' => $fieldName, 'file_name' => ''), Set::normalize(array('tmp_bind_path'))));
-            }
-
-            // Check delete_check
-            if (!empty($model->data[$modelName]['delete_' . $fieldName])) {
-
-                // Delete record
-                $conditions = array('model' => $modelName,
-                                    'model_id' => $model_id,
-                                    'field_name' => $fieldName);
-                $this->bindedModel->deleteAll($conditions);
-
-                if (file_exists($bindDir)) {
-                    $this->recursiveRemoveDir($bindDir);
+            if ((!$created && !empty($value['tmp_bind_path'])) || !empty($model->data[$modelName]['delete_' . $fieldName])) {
+                if (
+                    ($this->settings[$model->alias]['exchangeFile'] || !empty($model->data[$modelName]['delete_' . $fieldName]))
+                    && ($currentBindedFields = $this->_findBindedFields($model, $model_id, $fieldName))
+                ) {
+                    $this->runtime[$model->alias]['deleteFields'] = $currentBindedFields;
+                    $this->deleteEntity($model);
                 }
+
+                $this->bindedModel->deleteAll(array(
+                    'model' => $modelName,
+                    'model_id' => $model_id,
+                    'field_name' => $fieldName
+                ));
+            }
+
+            if (empty($value['tmp_bind_path'])) {
                 continue;
             }
 
-            if (empty($value) || empty($value['tmp_bind_path'])) {
-                continue;
-            }
-
-            $tmpFile = $value['tmp_bind_path'];
+            $bindFile = $filePath . $model->transferTo(array_diff_key(array('model_id' => $model_id) + $value, Set::normalize(array('tmp_bind_path'))));
+            $bindDir = dirname($bindFile);
 
             $bind = array();
             $bind['id'] = $value['id'];
             $bind['model_id'] = $model_id;
 
-            // Delete Current record
-            if (!$created) {
-                $conditions = array('model' => $modelName,
-                                    'model_id' => $model_id,
-                                    'field_name' => $fieldName);
-                $this->bindedModel->deleteAll($conditions);
-            }
-
             $this->bindedModel->create();
             if (!$this->bindedModel->save($bind)) {
                 return false;
             }
+
+            $tmpFile = $value['tmp_bind_path'];
 
             if (file_exists($tmpFile)) {
                 if (file_exists($bindDir)) {
