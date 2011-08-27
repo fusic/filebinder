@@ -20,16 +20,19 @@ class BindableBehavior extends ModelBehavior {
                           'exchangeFile' => true,
                           );
 
-        $this->model = $model;
+        $defaultRuntime = array('bindedModel' => null,
+                                'primaryKey' => 'id',
+                                'deleteFields' => array(),
+                                );
 
-        // Merge settings
+        // Default settings
         $this->settings[$model->alias] = Set::merge($defaults, $settings);
-        $this->model->bindedModel = $this->settings[$model->alias]['model'];
-        App::import('Model', $this->settings[$model->alias]['model']);
-        $this->bindedModel =& ClassRegistry::init($this->settings[$model->alias]['model']);
+        $this->runtime[$model->alias] = $defaultRuntime;
 
-        // Set primaryKey
-        $this->primaryKey = empty($model->primaryKey) ? 'id' : $model->primaryKey;
+        // Set runtimes
+        App::import('Model', $this->settings[$model->alias]['model']);
+        $this->runtime[$model->alias]['bindedModel'] =& ClassRegistry::init($this->settings[$model->alias]['model']);
+        $this->runtime[$model->alias]['primaryKey'] = empty($model->primaryKey) ? 'id' : $model->primaryKey;
     }
 
     /**
@@ -98,7 +101,7 @@ class BindableBehavior extends ModelBehavior {
         }
 
         $bindFields = $this->bindFields;
-        $model_ids = Set::extract('/' . $modelName . '/' . $this->primaryKey, $result);
+        $model_ids = Set::extract('/' . $modelName . '/' . $this->runtime[$model->alias]['primaryKey'], $result);
 
         $query = array();
         $query['fields'] = array('id',
@@ -119,20 +122,20 @@ class BindableBehavior extends ModelBehavior {
         $query['conditions'] = array('model' => $modelName,
                                      'model_id' => $model_ids);
 
-        $binds = $this->bindedModel->find('all', $query);
+        $binds = $this->runtime[$model->alias]['bindedModel']->find('all', $query);
         $binds = Set::combine($binds, array('%1$s.%2$s' , '/' . $this->settings[$model->alias]['model'] . '/model_id', '/' . $this->settings[$model->alias]['model'] . '/field_name'), '/' . $this->settings[$model->alias]['model']);
         foreach ($result as $key => $value) {
             if (empty($result[$key][$modelName])) {
                 continue;
             }
-            $model_id = $value[$modelName][$this->primaryKey];
+            $model_id = $value[$modelName][$this->runtime[$model->alias]['primaryKey']];
             foreach ($bindFields as $fieldName => $bindValue) {
                 if (array_key_exists($model_id . '.' . $fieldName, $binds)) {
                     $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings[$model->alias]['filePath'] : $bindFields[$fieldName]['filePath'];
                     $fileName = $binds[$model_id . '.' . $fieldName][$this->settings[$model->alias]['model']]['file_name'];
                     $bind = $binds[$model_id . '.' . $fieldName][$this->settings[$model->alias]['model']];
                     $bind['file_path'] = $filePath . $model->transferTo(array_diff_key($bind, Set::normalize(array('file_object'))));
-                    $bind['bindedModel'] = $this->bindedModel->alias;
+                    $bind['bindedModel'] = $this->runtime[$model->alias]['bindedModel']->alias;
                     $result[$key][$modelName][$fieldName] = $bind;
 
                     if ($this->settings[$model->alias]['dbStorage'] && !file_exists($filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName)) {
@@ -143,7 +146,7 @@ class BindableBehavior extends ModelBehavior {
                         if ($this->settings[$model->alias]['withObject']) {
                             $fileObject = $bind['file_object'];
                         } else {
-                            $all = $this->bindedModel->findById($bind['id']);
+                            $all = $this->runtime[$model->alias]['bindedModel']->findById($bind['id']);
                             $fileObject = $all[$this->settings[$model->alias]['model']]['file_object'];
                         }
 
@@ -240,13 +243,13 @@ class BindableBehavior extends ModelBehavior {
                 }
             }
 
-            $this->bindedModel->create();
-            if (!$data = $this->bindedModel->save($bind)) {
+            $this->runtime[$model->alias]['bindedModel']->create();
+            if (!$data = $this->runtime[$model->alias]['bindedModel']->save($bind)) {
                 return false;
             }
 
-            $bind_id = $this->bindedModel->getLastInsertId();
-            $model->data[$modelName][$fieldName] = $data[$this->bindedModel->alias] + array('id' => $bind_id);
+            $bind_id = $this->runtime[$model->alias]['bindedModel']->getLastInsertId();
+            $model->data[$modelName][$fieldName] = $data[$this->runtime[$model->alias]['bindedModel']->alias] + array('id' => $bind_id);
         }
 
         return true;
@@ -265,11 +268,11 @@ class BindableBehavior extends ModelBehavior {
         if ($created) {
             $model_id = $model->getLastInsertId();
         } else {
-            if (empty($model->data[$modelName][$this->primaryKey])) {
+            if (empty($model->data[$modelName][$this->runtime[$model->alias]['primaryKey']])) {
                 // SoftDeletable
                 return;
             }
-            $model_id = $model->data[$modelName][$this->primaryKey];
+            $model_id = $model->data[$modelName][$this->runtime[$model->alias]['primaryKey']];
         }
 
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
@@ -290,7 +293,7 @@ class BindableBehavior extends ModelBehavior {
                     $this->deleteEntity($model);
                 }
 
-                $this->bindedModel->deleteAll(array(
+                $this->runtime[$model->alias]['bindedModel']->deleteAll(array(
                     'model' => $modelName,
                     'model_id' => $model_id,
                     'field_name' => $fieldName
@@ -308,8 +311,8 @@ class BindableBehavior extends ModelBehavior {
             $bind['id'] = $value['id'];
             $bind['model_id'] = $model_id;
 
-            $this->bindedModel->create();
-            if (!$this->bindedModel->save($bind)) {
+            $this->runtime[$model->alias]['bindedModel']->create();
+            if (!$this->runtime[$model->alias]['bindedModel']->save($bind)) {
                 return false;
             }
 
@@ -697,10 +700,14 @@ class BindableBehavior extends ModelBehavior {
             $query['conditions']['field_name'] = $fields;
         }
 
-        $data = $this->bindedModel->find('all', $query);
+        $data = $this->runtime[$model->alias]['bindedModel']->find('all', $query);
 
         if ($data) {
-            $data = Set::combine($data, '{n}.' . $this->bindedModel->alias . '.field_name', '{n}.' .  $this->bindedModel->alias);
+            $data = Set::combine(
+                $data,
+                '{n}.' . $this->runtime[$model->alias]['bindedModel']->alias . '.field_name',
+                '{n}.' .  $this->runtime[$model->alias]['bindedModel']->alias
+            );
         }
 
         return $data;
