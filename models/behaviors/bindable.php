@@ -292,6 +292,7 @@ class BindableBehavior extends ModelBehavior {
 
             // Check delete_check
             if (!empty($model->data[$modelName]['delete_' . $fieldName])) {
+
                 // Delete record
                 $conditions = array('model' => $modelName,
                                     'model_id' => $model_id,

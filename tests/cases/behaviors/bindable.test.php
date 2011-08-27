@@ -178,6 +178,49 @@ class BindableTestCase extends CakeTestCase{
     }
 
     /**
+     * testDelete_bindedFileOnly
+     *
+     * @return
+     */
+    function testDelete_bindedFileOnly(){
+        $tmpPath = TMP . 'tests' . DS . 'bindup.png';
+        $filePath = TMP . 'tests' . DS;
+
+        // set test.png
+        $this->_setTestFile($tmpPath);
+
+        $this->FilebinderPost->bindFields = array(
+                                                  array('field' => 'logo',
+                                                        'tmpPath'  => CACHE,
+                                                        'filePath' => $filePath,
+                                                        ),
+                                                  );
+
+        $data = array('FilebinderPost' => array('title' => 'Title',
+                                                'logo' => array('model' => 'FilebinderPost',
+                                                                'field_name' => 'logo',
+                                                                'file_name' => 'logo.png',
+                                                                'file_content_type' => 'image/png',
+                                                                'file_size' => 1395,
+                                                                'tmp_bind_path' => $tmpPath
+                                                                )));
+        $result = $this->FilebinderPost->save($data);
+        $id = $this->FilebinderPost->getLastInsertId();
+        $query = array();
+        $query['conditions'] = array('FilebinderPost.id' => $id);
+        $result = $this->FilebinderPost->find('first', $query);
+
+        $data = array('FilebinderPost' => array('id' => $id,
+                                                'title' => 'Title',
+                                                'logo' => null,
+                                                'delete_logo' => '1',
+                                                ));
+        $this->FilebinderPost->save($data);
+
+        $this->assertIdentical(file_exists($result['FilebinderPost']['logo']['file_path']), false);
+    }
+
+    /**
      * _setTestFile
      *
      * @return
