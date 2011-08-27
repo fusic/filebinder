@@ -36,6 +36,6 @@ class LabelTest extends CakeTestCase {
                       'field_name' => 'logo',
                       'file_name' => 'logo.png');
         $result = $this->Label->_makeSrc($file);
-        $this->assertIdentical($result, '/file/FilebinderPost/1/logo/logo.png');
+        $this->assertIdentical($result, '/files/FilebinderPost/1/logo/logo.png');
     }
 }
