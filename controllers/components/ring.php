@@ -23,7 +23,7 @@ class RingComponent extends Object {
      * @param &$controller
      * @return
      */
-    function startup(&$controller){
+    function startup(&$controller) {
         $controller->helpers[]  =  'Filebinder.Label';
 
         if (!isset($controller->noUpdateHash) || !$controller->noUpdateHash) {
@@ -37,7 +37,7 @@ class RingComponent extends Object {
      *
      * @return
      */
-    function bindUp ($modelName = null){
+    function bindUp($modelName = null) {
         if (empty($modelName)) {
             $modelName = $this->controller->modelClass;
         }
@@ -46,9 +46,8 @@ class RingComponent extends Object {
             return;
         }
 
-        reset($this->controller->data[$modelName]);
+        $value = reset($this->controller->data[$modelName]);
         $key = key($this->controller->data[$modelName]);
-        $value = current($this->controller->data[$modelName]);
 
         if (is_int($key) && is_array($value)) { // hasMany model data
             foreach ($this->controller->data[$modelName] as $i => $data) {
@@ -66,7 +65,7 @@ class RingComponent extends Object {
      *
      * @return
      */
-    function bindDown($modelName = null){
+    function bindDown($modelName = null) {
         if (empty($modelName)) {
             $modelName = $this->controller->modelClass;
         }
@@ -75,9 +74,8 @@ class RingComponent extends Object {
             return;
         }
 
-        reset($this->controller->data[$modelName]);
+        $value = reset($this->controller->data[$modelName]);
         $key = key($this->controller->data[$modelName]);
-        $value = current($this->controller->data[$modelName]);
 
         if (is_int($key) && is_array($value)) { // hasMany model data
             foreach ($this->controller->data[$modelName] as $i => $data) {
@@ -89,8 +87,7 @@ class RingComponent extends Object {
         }
     }
 
-    function _bindUp($modelName, &$data, $i = null)
-    {
+    function _bindUp($modelName, &$data, $i = null) {
         $model = $this->_getModel($modelName);
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
 
@@ -98,11 +95,10 @@ class RingComponent extends Object {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
-            if (!is_array($value) || !isset($value['error'])) {
+            if (!$this->_checkFileUploaded($value)) {
                 continue;
             }
-
-            if ($value['error'] == 4 || !empty($this->controller->data[$modelName]['delete_' . $fieldName])) {
+            if ($value['error'] == UPLOAD_ERR_NO_FILE || !empty($this->controller->data[$modelName]['delete_' . $fieldName])) {
                 $data[$fieldName] = null;
                 continue;
             }
@@ -113,7 +109,6 @@ class RingComponent extends Object {
             $fileSize = filesize($tmpFile);
 
             $tmpPath = empty($bindFields[$fieldName]['tmpPath']) ? $this->tmpBindPath : $bindFields[$fieldName]['tmpPath'];
-
             $tmpBindPath = $tmpPath . 'ring_' . Security::hash($modelName . $fieldName . $fileName . time()) . $fileName;
 
             // move_uploaded_file
@@ -141,15 +136,15 @@ class RingComponent extends Object {
         }
     }
 
-    function _bindDown($modelName, $data, $i = null)
-    {
+    function _bindDown($modelName, $data, $i = null) {
         $model = $this->_getModel($modelName);
         $sessionKey = is_int($i) ? "Filebinder.{$modelName}.{$i}." : "Filebinder.{$modelName}.";
         foreach ($data as $fieldName => $value) {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
-            if (!is_array($value)) {
+
+            if (!$this->_checkBindUpped($value)) {
                 continue;
             }
             // file upload error
@@ -165,8 +160,7 @@ class RingComponent extends Object {
         }
     }
 
-    function _getModel($modelName)
-    {
+    function _getModel($modelName) {
         $model = null;
 
         if (!empty($this->controller->{$modelName})) {
@@ -180,5 +174,33 @@ class RingComponent extends Object {
         }
 
         return $model;
+    }
+
+    function _checkFileUploaded($array) {
+        if (!is_array($array)) {
+            return false;
+        }
+
+        $keys = array('name', 'type', 'tmp_name', 'error', 'size');
+        return $this->_checkKeyExists($array, $keys);
+    }
+
+    function _checkBindUpped($array) {
+        if (!is_array($array)) {
+            return false;
+        }
+
+        $keys = array('field_name', 'file_name', 'file_content_type', 'file_size', 'tmp_bind_path');
+        return $this->_checkKeyExists($array, $keys);
+    }
+
+    function _checkKeyExists($array, $keys) {
+        $diff = array_intersect_key(Set::normalize($keys), $array);
+
+        if (count($keys) !== count($diff)) {
+            return false;
+        }
+
+        return true;
     }
   }

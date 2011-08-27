@@ -77,7 +77,7 @@ class RingComponentTest extends CakeTestCase{
         $this->Controller->data['FilebinderPost']['logo'] = array('name' => 'logo.png',
                                                                   'tmp_name' => $tmpPath,
                                                                   'type' => 'image/png',
-                                                                  'filesize' => 100,
+                                                                  'size' => 100,
                                                                   'error' => 0);
 
         $this->Controller->Component->init($this->Controller);
@@ -112,7 +112,7 @@ class RingComponentTest extends CakeTestCase{
         $this->Controller->data['FilebinderPost']['logo'] = array('name' => 'logo.png',
                                                                   'tmp_name' => $tmpPath,
                                                                   'type' => 'image/png',
-                                                                  'filesize' => 100,
+                                                                  'size' => 100,
                                                                   'error' => 0);
 
         $this->Controller->Component->init($this->Controller);
@@ -148,7 +148,7 @@ class RingComponentTest extends CakeTestCase{
         $this->Controller->data['FilebinderPost']['logo'] = array('name' => 'logo.png',
                                                                   'tmp_name' => $tmpPath,
                                                                   'type' => 'image/png',
-                                                                  'filesize' => 100,
+                                                                  'size' => 100,
                                                                   'error' => 0);
 
         $this->Controller->Component->init($this->Controller);
@@ -159,7 +159,6 @@ class RingComponentTest extends CakeTestCase{
         $this->Controller->Ring->bindDown();
 
         $expected = $this->Controller->data['FilebinderPost']['logo'];
-
         $this->assertIdentical($this->Controller->Session->read('Filebinder.FilebinderPost.logo'), $expected);
     }
 
