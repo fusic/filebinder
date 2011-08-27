@@ -669,8 +669,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $size mixed
      * @return int file size
      */
-    function calcFileSizeUnit($size)
-    {
+    function calcFileSizeUnit($size){
         $units = array(
             'KB' => 1024,
             'MB' => 1048576,
@@ -687,8 +686,7 @@ class BindableBehavior extends ModelBehavior {
         return false;
     }
 
-    function _findBindedFields(&$model, $modelId, $fields = array())
-    {
+    function _findBindedFields(&$model, $modelId, $fields = array()){
         $query = array(
             'conditions' => array(
                 'model' => $model->alias,
