@@ -361,21 +361,7 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function beforeDelete(&$model){
-        $modelName = $model->alias;
-
-        // Bind model
-        $model->bindModel(array('hasMany' => array($this->settings[$model->alias]['model'] => array(
-                                                                                     'className' => $this->settings[$model->alias]['model'],
-                                                                                     'foreignKey' => 'model_id',
-                                                                                     'dependent' => true,
-                                                                                     'conditions' => array($this->settings[$model->alias]['model'] . '.model' => $model->name)
-                                                                                     ))), false);
-
-        $query = array();
-        $query['recursive'] = -1;
-        $query['conditions'] = array($modelName . '.' . $this->primaryKey  => $model->id);
-        $data = $model->find('first', $query);
-        $this->runtime[$model->alias]['deletedData'] = isset($data[$model->alias]) ? $data[$model->alias] : array();
+        $this->runtime[$model->alias]['deleteFields'] = $this->_findBindedFields($model, $model->id);
         return true;
     }
 
@@ -418,27 +404,38 @@ class BindableBehavior extends ModelBehavior {
     /**
      * deleteEntity
      *
-     * @param mixed $model_id
+     * @param mixed $modelId
      * @return
      */
-    function deleteEntity(&$model){
-        if (empty($this->runtime[$model->alias]['deletedData'][$model->primaryKey])) {
+    function deleteEntity(&$model, $modelId = null){
+        $deleteFields = array();
+
+        if ($modelId) {
+            $deleteFields = $this->_findBindedFields($model, $modelId);
+
+        } else if (!empty($this->runtime[$model->alias]['deleteFields'])) {
+            $deleteFields = $this->runtime[$model->alias]['deleteFields'];
+            $this->runtime[$model->alias]['deleteFields'] = array();
+        }
+
+        if (!$deleteFields) {
             return false;
         }
+
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
         $result = true;
         foreach ($bindFields as $fieldName => $value) {
             $filePath = empty($value['filePath']) ? $this->settings[$model->alias]['filePath'] : $value['filePath'];
             $bindFile = $filePath . $model->transferTo(array_diff_key(
-                $this->runtime[$model->alias]['deletedData'][$fieldName],
-                Set::normalize(array('file_path', 'bindedModel'
-            ))));
+                $deleteFields[$fieldName],
+                Set::normalize(array('file_path', 'bindedModel'))
+            ));
             $bindDir = dirname($bindFile);
             if (!$this->recursiveRemoveDir($bindDir)) {
                 $result = false;
             }
         }
-        $this->runtime[$model->alias]['deleteData'] = array();
+
         return $result;
     }
 
@@ -688,5 +685,37 @@ class BindableBehavior extends ModelBehavior {
         }
 
         return false;
+    }
+
+    function _findBindedFields(&$model, $modelId, $fields = array())
+    {
+        $query = array(
+            'conditions' => array(
+                'model' => $model->alias,
+                'model_id' => $modelId,
+            ),
+            'fields' => array(
+                'id', 'model', 'model_id', 'field_name', 'file_name',
+                'file_content_type', 'file_size', 'created', 'modified'
+            ),
+            'recursive' => -1
+        );
+
+        if ($fields) {
+            if (is_string($fields)) {
+                App::import('Core', 'String');
+                $fields = String::tokenize($fields);
+            }
+
+            $query['conditions']['field_name'] = $fields;
+        }
+
+        $data = $this->bindedModel->find('all', $query);
+
+        if ($data) {
+            $data = Set::combine($data, '{n}.' . $this->bindedModel->alias . '.field_name', '{n}.' .  $this->bindedModel->alias);
+        }
+
+        return $data;
     }
 }
