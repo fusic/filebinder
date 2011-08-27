@@ -90,6 +90,50 @@ class RingComponentTest extends CakeTestCase{
     }
 
     /**
+     * testBindUpInvalidUploadedFile
+     * test Ring::_checkFileUploaded
+     *
+     * @return
+     */
+    function testBindUpInvalidUploadedFile(){
+        $tmpPath = TMP . 'tests' . DS . 'bindup.png';
+
+        // set test.png
+        $this->_setTestFile($tmpPath);
+
+        $this->Controller->FilebinderPost->bindFields = array(
+                                                              array('field' => 'logo',
+                                                                    'tmpPath'  => CACHE,
+                                                                    'filePath' => TMP . 'tests' . DS,
+                                                                    ),
+                                                              );
+
+        $this->Controller->data = array('FilebinderPost' => array());
+        $this->Controller->data['FilebinderPost']['title'] = 'Title';
+        $this->Controller->data['FilebinderPost']['logo'] = array('name' => 'logo.png',
+                                                                  'tmp_name' => $tmpPath,
+                                                                  'invalid_key' => 'invalid', // invalid field
+                                                                  'size' => 100,
+                                                                  'error' => 0);
+
+        $this->Controller->Component->init($this->Controller);
+        $this->Controller->Component->initialize($this->Controller);
+        $this->Controller->beforeFilter();
+
+        $this->Controller->Ring->bindUp();
+
+        $expected = array('FilebinderPost' => array('title' => 'Title',
+                                                    'logo' => array('name' => 'logo.png',
+                                                                    'tmp_name' => $tmpPath,
+                                                                    'invalid_key' => 'invalid', // invalid field
+                                                                    'size' => 100,
+                                                                    'error' => 0)));
+
+        // no change
+        $this->assertIdentical($this->Controller->data, $expected);
+    }
+
+    /**
      * testBindUp_move_uploaded_file
      *
      * @return
