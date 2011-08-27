@@ -221,6 +221,66 @@ class BindableTestCase extends CakeTestCase{
     }
 
     /**
+     * testUpdateBindedFile
+     *
+     * @return
+     */
+    function testUpdateFile(){
+        $tmpPath = TMP . 'tests' . DS . 'bindup.png';
+        $tmpPath2 = TMP . 'tests' . DS . 'bindup2.png';
+        $filePath = TMP . 'tests' . DS;
+
+        // set test.png
+        $this->_setTestFile($tmpPath);
+        $this->_setTestFile($tmpPath2);
+
+        $this->FilebinderPost->bindFields = array(
+                                                  array('field' => 'logo',
+                                                        'tmpPath'  => CACHE,
+                                                        'filePath' => $filePath,
+                                                        ),
+                                                  );
+
+        $data = array('FilebinderPost' => array('title' => 'Title',
+                                                'logo' => array('model' => 'FilebinderPost',
+                                                                'field_name' => 'logo',
+                                                                'file_name' => 'logo.png', // file_name:logo.png
+                                                                'file_content_type' => 'image/png',
+                                                                'file_size' => 1395,
+                                                                'tmp_bind_path' => $tmpPath
+                                                                )));
+        $result = $this->FilebinderPost->save($data);
+        $id = $this->FilebinderPost->getLastInsertId();
+        $query = array();
+        $query['conditions'] = array('FilebinderPost.id' => $id);
+        $result = $this->FilebinderPost->find('first', $query);
+
+        $data = array('FilebinderPost' => array('id' => $id,
+                                                'title' => 'Title',
+                                                'logo' => array('model' => 'FilebinderPost',
+                                                                'field_name' => 'logo',
+                                                                'file_name' => 'logo2.png', // file_name:logo2.png
+                                                                'file_content_type' => 'image/png',
+                                                                'file_size' => 1395,
+                                                                'tmp_bind_path' => $tmpPath2
+                                                                )));
+        $result2 = $this->FilebinderPost->save($data);
+        $this->assertIdentical(file_exists($result['FilebinderPost']['logo']['file_path']), false);
+        $id = $this->FilebinderPost->getLastInsertId();
+        $query = array();
+        $query['conditions'] = array('FilebinderPost.id' => $id);
+        $result2 = $this->FilebinderPost->find('first', $query);
+
+        // rm file
+        if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
+            unlink($result['FilebinderPost']['logo']['file_path']);
+        }
+        if (file_exists($result2['FilebinderPost']['logo']['file_path'])) {
+            unlink($result2['FilebinderPost']['logo']['file_path']);
+        }
+    }
+
+    /**
      * _setTestFile
      *
      * @return

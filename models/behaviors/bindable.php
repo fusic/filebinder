@@ -281,7 +281,6 @@ class BindableBehavior extends ModelBehavior {
             }
 
             $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings[$model->alias]['filePath'] : $bindFields[$fieldName]['filePath'];
-
             if ((!$created && !empty($value['tmp_bind_path'])) || !empty($model->data[$modelName]['delete_' . $fieldName])) {
                 if (
                     ($this->settings[$model->alias]['exchangeFile'] || !empty($model->data[$modelName]['delete_' . $fieldName]))
@@ -323,6 +322,7 @@ class BindableBehavior extends ModelBehavior {
                 mkdir($bindDir, 0755, true);
                 rename($tmpFile, $bindFile);
             }
+
             if ($bindFile && file_exists($bindFile)) {
                 /**
                  * afterAttach
