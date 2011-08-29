@@ -1,8 +1,8 @@
 <?php
 class RingComponent extends Object {
 
-    var $tmpBindPath;
     var $components = array('Session');
+    var $_autoBindDown = array();
 
     /**
      * initialize
@@ -12,8 +12,6 @@ class RingComponent extends Object {
      * @return
      */
     function initialize(&$controller, $settings = array()) {
-        $this->tmpBindPath = TMP . 'cache/'; // default tmp file path
-
         $this->controller = $controller;
     }
 
@@ -32,12 +30,26 @@ class RingComponent extends Object {
     }
 
     /**
+     * Before render
+     *
+     * @param &$controller
+     */
+    function beforeRender(&$controller){
+        if ($this->_autoBindDown) {
+            foreach ($this->_autoBindDown as $i => $bindDownModel) {
+                $this->bindDown($bindDownModel);
+                unset($this->_autoBindDown[$i]);
+            }
+        }
+    }
+
+    /**
      * bindUp
      * set attach file
      *
      * @return
      */
-    function bindUp($modelName = null) {
+    function bindUp($modelName = null, $autoBindDown = false){
         if (empty($modelName)) {
             $modelName = $this->controller->modelClass;
         }
@@ -59,6 +71,10 @@ class RingComponent extends Object {
 
         } else { // single model data
             $this->_bindUp($model, $this->controller->data[$model->alias]);
+        }
+
+        if ($autoBindDown && !in_array($model->alias, $this->_autoBindDown)) {
+            $this->_autoBindDown[] = $model->alias;
         }
     }
 
@@ -108,10 +124,8 @@ class RingComponent extends Object {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
-            if (!$this->_checkFileUploaded($value)) {
-                continue;
-            }
-            if ($value['error'] == UPLOAD_ERR_NO_FILE || !empty($this->controller->data[$model->alias]['delete_' . $fieldName])) {
+
+            if (!$this->_checkFileUploaded($value) || $value['error'] == UPLOAD_ERR_NO_FILE || !empty($this->controller->data[$model->alias]['delete_' . $fieldName])) {
                 $data[$fieldName] = null;
                 continue;
             }
@@ -121,7 +135,7 @@ class RingComponent extends Object {
             $contentType = $value['type'];
             $fileSize = filesize($tmpFile);
 
-            $tmpPath = empty($bindFields[$fieldName]['tmpPath']) ? $this->tmpBindPath : $bindFields[$fieldName]['tmpPath'];
+            $tmpPath = empty($bindFields[$fieldName]['tmpPath']) ? TMP . 'cache/' : $bindFields[$fieldName]['tmpPath'];
             $tmpBindPath = $tmpPath . 'ring_' . Security::hash($model->alias . $fieldName . $fileName . time()) . $fileName;
 
             // move_uploaded_file
@@ -142,7 +156,7 @@ class RingComponent extends Object {
         if ($this->Session->check($sessionKey)) {
             $sessionData = $this->Session->read($sessionKey);
             foreach ($sessionData as $fieldName => $value) {
-                if (empty($data[$fieldName]) && empty($this->controller->data[$modelName]['delete_' . $fieldName])) {
+                if (empty($data[$fieldName]) && empty($this->controller->data[$model->alias]['delete_' . $fieldName])) {
                     $data[$fieldName] = $value;
                 }
             }

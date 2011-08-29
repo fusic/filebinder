@@ -16,8 +16,8 @@ class BindableBehavior extends ModelBehavior {
                           'dbStorage' => true, // file entity save table
                           'beforeAttach' => null, // hook function
                           'afterAttach' => null, // hook function
-                          'withObject' => false,
-                          'exchangeFile' => true,
+                          'withObject' => false, // find attachment with file object
+                          'exchangeFile' => true, // save new file after deleting old file
                           );
 
         $defaultRuntime = array('bindedModel' => null,
@@ -94,98 +94,7 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function afterFind(&$model, $result){
-
-        $modelName = $model->alias;
-        if (empty($model->bindFields) || empty($this->bindFields) || empty($result)) {
-            return $result;
-        }
-
-        $bindFields = $this->bindFields;
-        $model_ids = Set::extract('/' . $modelName . '/' . $this->runtime[$model->alias]['primaryKey'], $result);
-
-        $query = array();
-        $query['fields'] = array('id',
-                                 'model',
-                                 'model_id',
-                                 'field_name',
-                                 'file_name',
-                                 'file_content_type',
-                                 'file_size',
-                                 'created',
-                                 'modified');
-        // with Object
-        if ($this->settings[$model->alias]['withObject']) {
-            $query['fields'][] = 'file_object';
-        }
-
-        $query['recursive'] = -1;
-        $query['conditions'] = array('model' => $modelName,
-                                     'model_id' => $model_ids);
-
-        $binds = $this->runtime[$model->alias]['bindedModel']->find('all', $query);
-        $binds = Set::combine($binds, array('%1$s.%2$s' , '/' . $this->settings[$model->alias]['model'] . '/model_id', '/' . $this->settings[$model->alias]['model'] . '/field_name'), '/' . $this->settings[$model->alias]['model']);
-        foreach ($result as $key => $value) {
-            if (empty($result[$key][$modelName])) {
-                continue;
-            }
-            $model_id = $value[$modelName][$this->runtime[$model->alias]['primaryKey']];
-            foreach ($bindFields as $fieldName => $bindValue) {
-                if (array_key_exists($model_id . '.' . $fieldName, $binds)) {
-                    $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings[$model->alias]['filePath'] : $bindFields[$fieldName]['filePath'];
-                    $fileName = $binds[$model_id . '.' . $fieldName][$this->settings[$model->alias]['model']]['file_name'];
-                    $bind = $binds[$model_id . '.' . $fieldName][$this->settings[$model->alias]['model']];
-                    $bind['file_path'] = $filePath . $model->transferTo(array_diff_key($bind, Set::normalize(array('file_object'))));
-                    $bind['bindedModel'] = $this->runtime[$model->alias]['bindedModel']->alias;
-                    $result[$key][$modelName][$fieldName] = $bind;
-
-                    if ($this->settings[$model->alias]['dbStorage'] && !file_exists($filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName)) {
-
-                        /**
-                         * create entity from record data
-                         */
-                        if ($this->settings[$model->alias]['withObject']) {
-                            $fileObject = $bind['file_object'];
-                        } else {
-                            $all = $this->runtime[$model->alias]['bindedModel']->findById($bind['id']);
-                            $fileObject = $all[$this->settings[$model->alias]['model']]['file_object'];
-                        }
-
-                        if (!$fileObject) {
-                            continue;
-                        }
-
-                        if (!file_exists($filePath . $modelName . DS . $model_id . DS . $fieldName)) {
-                            mkdir($filePath . $modelName . DS . $model_id . DS . $fieldName . DS, 0755, true);
-                        }
-                        $bindFile = $filePath . $modelName . DS . $model_id . DS . $fieldName . DS . $fileName;
-                        $fp = fopen($bindFile , 'w');
-                        fwrite($fp, base64_decode($fileObject));
-                        fclose($fp);
-
-                        if (file_exists($bindFile)) {
-                            /**
-                             * afterAttach
-                             */
-                            if (!empty($this->settings[$model->alias]['afterAttach'])) {
-                                $res = false;
-                                if (function_exists($this->settings[$model->alias]['afterAttach'])) {
-                                    $res = call_user_func($this->settings[$model->alias]['afterAttach'], $bindFile);
-                                } else {
-                                    $res = call_user_func(array($model, $this->settings[$model->alias]['afterAttach']), $bindFile);
-                                }
-                                if (!$res) {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    $result[$key][$modelName][$fieldName] = null;
-                }
-            }
-        }
-
-        return $result;
+        return $this->bindFile($model, $result);
     }
 
     /**
@@ -221,12 +130,7 @@ class BindableBehavior extends ModelBehavior {
                  * beforeAttach
                  */
                 if (!empty($this->settings[$model->alias]['beforeAttach'])) {
-                    $res = false;
-                    if (function_exists($this->settings[$model->alias]['beforeAttach'])) {
-                        $res = call_user_func($this->settings[$model->alias]['beforeAttach'], $tmpFile);
-                    } else {
-                        $res = call_user_func(array($model, $this->settings[$model->alias]['beforeAttach']), $tmpFile);
-                    }
+                    $res = $this->_userfunc($model, $this->settings[$model->alias]['beforeAttach'], array($tmpFile));
                     if (!$res) {
                         return false;
                     }
@@ -276,17 +180,31 @@ class BindableBehavior extends ModelBehavior {
         }
 
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
+        $fields = Set::extract('/field', $model->bindFields);
+        $deleteFields = array();
+
+        foreach ($fields as $field) {
+            $deleteFields[] = 'delete_' . $field;
+        }
 
         // set model_id
         foreach ($model->data[$modelName] as $fieldName => $value) {
-            if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
+            if (in_array($fieldName, $deleteFields)) {
+                $delete = true;
+                $fieldName = substr($fieldName, 7);
+
+            } else if (in_array($fieldName, $fields)) {
+                $delete = false;
+
+            } else {
                 continue;
             }
 
             $filePath = empty($bindFields[$fieldName]['filePath']) ? $this->settings[$model->alias]['filePath'] : $bindFields[$fieldName]['filePath'];
-            if ((!$created && !empty($value['tmp_bind_path'])) || !empty($model->data[$modelName]['delete_' . $fieldName])) {
+            if ($delete || (!$created && !empty($value['tmp_bind_path']))) {
+                unset($model->data[$modelName]['delete_' . $fieldName]);
                 if (
-                    ($this->settings[$model->alias]['exchangeFile'] || !empty($model->data[$modelName]['delete_' . $fieldName]))
+                    ($delete || $this->settings[$model->alias]['exchangeFile'])
                     && ($currentBindedFields = $this->_findBindedFields($model, $model_id, $fieldName))
                 ) {
                     $this->runtime[$model->alias]['deleteFields'] = $currentBindedFields;
@@ -300,7 +218,7 @@ class BindableBehavior extends ModelBehavior {
                 ));
             }
 
-            if (empty($value['tmp_bind_path'])) {
+            if (!is_array($value) || empty($value['tmp_bind_path'])) {
                 continue;
             }
 
@@ -319,10 +237,9 @@ class BindableBehavior extends ModelBehavior {
             $tmpFile = $value['tmp_bind_path'];
 
             if (file_exists($tmpFile)) {
-                if (file_exists($bindDir)) {
-                    $this->_recursiveRemoveDir($bindDir);
+                if (!is_dir($bindDir)) {
+                    mkdir($bindDir, 0755, true);
                 }
-                mkdir($bindDir, 0755, true);
                 rename($tmpFile, $bindFile);
             }
 
@@ -331,12 +248,7 @@ class BindableBehavior extends ModelBehavior {
                  * afterAttach
                  */
                 if (!empty($this->settings[$model->alias]['afterAttach'])) {
-                    $res = false;
-                    if (function_exists($this->settings[$model->alias]['afterAttach'])) {
-                        $res = call_user_func($this->settings[$model->alias]['afterAttach'], $bindFile);
-                    } else {
-                        $res = call_user_func(array($model, $this->settings[$model->alias]['afterAttach']), $bindFile);
-                    }
+                    $res = $this->_userfunc($model, $this->settings[$model->alias]['afterAttach'], array($bindFile));
                     if (!$res) {
                         return false;
                     }
@@ -370,9 +282,15 @@ class BindableBehavior extends ModelBehavior {
     /**
      * Generate save path for binded file
      *
-     * Notice: Don't use a random string.
+     * Notice: Don't use a random string or same functions.
      * This method used by afterSave and afterFind method,
      * When a random string is used, it doesn't generate correct file path.
+     *
+     * Bad function example:
+     *   - mt_rand()
+     *   - time()
+     *   - uniqid()
+     *   - etc..
      *
      * @param Model &$model
      * @param array $data binded file data
@@ -716,6 +634,169 @@ class BindableBehavior extends ModelBehavior {
                 '{n}.' . $this->runtime[$model->alias]['bindedModel']->alias . '.field_name',
                 '{n}.' .  $this->runtime[$model->alias]['bindedModel']->alias
             );
+        }
+
+        return $data;
+    }
+
+    /**
+     * Call user function
+     *
+     * @param &$model Model
+     * @param $function mixed The callable function name
+     * @param $args array The arguments array
+     * @return mixed
+     * @access protected
+     */
+    function _userfunc(&$model, $function, $args = array()) {
+        if (is_array($function) && count($function) > 1) {
+            list($class, $method) = $function;
+
+            if (is_callable(array($class, $method))) {
+                if (is_object($class) && is_a('Object', $class)) {
+                    return $class->dispatchMethod($method, $args);
+
+                } else {
+                    return call_user_func_array(array($class, $method), $args);
+                }
+            }
+
+        } else if (is_string($function)) {
+            if (function_exists($function)) {
+                return call_user_func_array($function, $args);
+
+            } else if (method_exists($model, $function)) {
+                return $model->dispatchMethod($function, $args);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Bind file fields
+     *
+     * @param &$model
+     * @param $data The
+     */
+    function bindFile(&$model, $data = array()) {
+        $modelName = $model->alias;
+        if (empty($model->bindFields) || empty($data)) {
+            return $data;
+        }
+
+        // Detect $data array format
+        if (isset($data[$model->alias][$model->primaryKey])) {
+            $tmpData = array($data);
+
+        } else if (isset($data[$model->alias][0][$model->primaryKey])) {
+            foreach ($data[$model->alias] as $i => $_data) {
+                $tmpData[$i] = array($model->alias => $_data);
+            }
+
+        } else if (isset($data[$model->primaryKey])) {
+            $tmpData = array(array($model->alias => $data));
+
+        } else {
+            $tmpData = $data;
+        }
+
+        $bindFields = empty($this->bindFields) ? Set::combine($model->bindFields, '/field' , '/') : $this->bindFields;
+        $model_ids = Set::extract('/' . $modelName . '/' . $this->runtime[$model->alias]['primaryKey'], $tmpData);
+
+        if (!$model_ids) {
+            return $data;
+        }
+
+        $query = array();
+        $query['fields'] = array('id',
+                                 'model',
+                                 'model_id',
+                                 'field_name',
+                                 'file_name',
+                                 'file_content_type',
+                                 'file_size',
+                                 'created',
+                                 'modified');
+        // with Object
+        if ($this->settings[$model->alias]['withObject']) {
+            $query['fields'][] = 'file_object';
+        }
+
+        $query['recursive'] = -1;
+        $query['conditions'] = array('model' => $modelName,
+                                     'model_id' => $model_ids);
+
+        $binds = $this->runtime[$model->alias]['bindedModel']->find('all', $query);
+
+        $binds = Set::combine($binds, array('%1$s.%2$s' , '/' . $this->settings[$model->alias]['model'] . '/model_id', '/' . $this->settings[$model->alias]['model'] . '/field_name'), '/' . $this->settings[$model->alias]['model']);
+        foreach ($tmpData as $key => $value) {
+            if (empty($tmpData[$key][$modelName])) {
+                continue;
+            }
+            $model_id = $value[$modelName][$this->runtime[$model->alias]['primaryKey']];
+            foreach ($bindFields as $fieldName => $bindValue) {
+                if (array_key_exists($model_id . '.' . $fieldName, $binds)) {
+                    $bind = $binds[$model_id . '.' . $fieldName][$this->settings[$model->alias]['model']];
+                    $baseDir = empty($bindFields[$fieldName]['filePath']) ? $this->settings[$model->alias]['filePath'] : $bindFields[$fieldName]['filePath'];
+                    $filePath = $baseDir . $model->transferTo(array_diff_key($bind, Set::normalize(array('file_object'))));
+                    $bind['file_path'] = $filePath;
+                    $bind['bindedModel'] = $this->runtime[$model->alias]['bindedModel']->alias;
+                    $tmpData[$key][$modelName][$fieldName] = $bind;
+
+                    if ($this->settings[$model->alias]['dbStorage'] && (!file_exists($filePath) || filemtime($filePath) < strtotime($bind['modified']))) {
+
+                        /**
+                         * create entity from record data
+                         */
+                        if ($this->settings[$model->alias]['withObject']) {
+                            $fileObject = $bind['file_object'];
+                        } else {
+                            $all = $this->runtime[$model->alias]['bindedModel']->findById($bind['id']);
+                            $fileObject = $all[$this->settings[$model->alias]['model']]['file_object'];
+                        }
+
+                        if (!$fileObject) {
+                            continue;
+                        }
+
+                        if (!is_dir(dirname($filePath))) {
+                            mkdir(dirname($filePath), 0755, true);
+                        }
+
+                        file_put_contents($filePath, base64_decode($fileObject));
+
+                        if (file_exists($filePath)) {
+                            /**
+                             * afterAttach
+                             */
+                            if (!empty($this->settings[$model->alias]['afterAttach'])) {
+                                $res = $this->_userfunc($model, $this->settings[$model->alias]['afterAttach'], array($filePath));
+
+                                if (!$res) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    $tmpData[$key][$modelName][$fieldName] = null;
+                }
+            }
+        }
+
+        // Update $data array
+        if (isset($data[$model->alias][$model->primaryKey])) {
+            $data[$model->alias] = $tmpData[0][$model->alias];
+
+        } else if (isset($data[$model->alias][0][$model->primaryKey])) {
+            $data[$model->alias] = Set::extract($tmpData, '{n}.' . $model->alias);
+
+        } else if (isset($data[$model->primaryKey])) {
+            $data = $tmpData[0][$model->alias];
+
+        } else {
+            $data = $tmpData;
         }
 
         return $data;

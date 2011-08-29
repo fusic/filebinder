@@ -92,7 +92,7 @@ class BindableTestCase extends CakeTestCase{
                           'body' => 'Filebinder.Bindable Test',
                           'created' => '2011-08-23 17:44:58',
                           'modified' => '2011-08-23 12:05:02',
-                          'logo' => null
+                          'logo' => null // Set null
                           );
 
         $this->assertEqual($result['FilebinderPost'], $expected);

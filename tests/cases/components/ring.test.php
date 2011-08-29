@@ -10,12 +10,6 @@ class FilebinderPost extends CakeTestModel{
     public $actsAs = array('Filebinder.Bindable');
 }
 
-/**
- *
- *
- *
- * @params
- */
 class FilebinderPostsTestController extends Controller{
 
     public $name = 'FilebinderPostsTest';
@@ -50,6 +44,7 @@ class RingComponentTest extends CakeTestCase{
     }
 
     function endTest() {
+        $this->Controller->Session->delete('Filebinder');
         unset($this->Controller);
         ClassRegistry::flush();
     }
@@ -119,15 +114,9 @@ class RingComponentTest extends CakeTestCase{
         $this->Controller->Component->init($this->Controller);
         $this->Controller->Component->initialize($this->Controller);
         $this->Controller->beforeFilter();
-
         $this->Controller->Ring->bindUp();
-
         $expected = array('FilebinderPost' => array('title' => 'Title',
-                                                    'logo' => array('name' => 'logo.png',
-                                                                    'tmp_name' => $tmpPath,
-                                                                    'invalid_key' => 'invalid', // invalid field
-                                                                    'size' => 100,
-                                                                    'error' => 0)));
+                                                    'logo' => null));
 
         // no change
         $this->assertIdentical($this->Controller->data, $expected);
