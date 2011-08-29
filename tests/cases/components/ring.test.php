@@ -52,7 +52,8 @@ class RingComponentTest extends CakeTestCase{
     /**
      * testBindUp
      *
-     * @return
+     * en:
+     * jpn: $this->dataが存在する場合にRing::bindUp()を実行するとアップロードされたファイル情報が整形される
      */
     function testBindUp(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
@@ -86,9 +87,9 @@ class RingComponentTest extends CakeTestCase{
 
     /**
      * testBindUpInvalidUploadedFile
-     * test Ring::_checkFileUploaded
      *
-     * @return
+     * en: test Ring::_checkFileUploaded
+     * jpn: $this->dataのファイルアップロードの値(キー)が不正な場合は該当フィールドの値にnullがセットされる
      */
     function testBindUpInvalidUploadedFile(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
@@ -118,14 +119,14 @@ class RingComponentTest extends CakeTestCase{
         $expected = array('FilebinderPost' => array('title' => 'Title',
                                                     'logo' => null));
 
-        // no change
         $this->assertIdentical($this->Controller->data, $expected);
     }
 
     /**
      * testBindUp_move_uploaded_file
      *
-     * @return
+     * en:
+     * jpn: テストケースで生成した$this->dataはダミーなのでmove_uploaded_file()はfalseなのでtmp_bind_pathにファイルは生成されない
      */
     function testBindUp_move_uploaded_file(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
@@ -161,7 +162,8 @@ class RingComponentTest extends CakeTestCase{
     /**
      * test_bindDown
      *
-     * @return
+     * en:
+     * jpn: Ring::bindDown()を実行するとアップロードファイル情報がSessionに保持される
      */
     function test_bindDown(){
         $tmpPath = TMP . 'tests' . DS . 'binddown.png';
@@ -198,7 +200,7 @@ class RingComponentTest extends CakeTestCase{
     /**
      * _setTestFile
      *
-     * @return
+     * @return Boolean
      */
     function _setTestFile($to = null){
         if (!$to) {

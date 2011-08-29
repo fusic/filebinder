@@ -29,7 +29,8 @@ class BindableTestCase extends CakeTestCase{
     /**
      * testFind
      *
-     * @return
+     * en:
+     * jpn: Model::bindFieldsに設定してある対象のデータがある場合Model::find()時に整形して取得する
      */
     function testFind(){
         $filePath = TMP . 'tests' . DS;
@@ -71,7 +72,8 @@ class BindableTestCase extends CakeTestCase{
     /**
      * testFindNoAttachment
      *
-     * @return
+     * en:
+     * jpn: 対象のデータがない場合もnull値がセットされたフィールドを生成して返す
      */
     function testFindNoAttachment(){
         $filePath = TMP . 'tests' . DS;
@@ -101,7 +103,8 @@ class BindableTestCase extends CakeTestCase{
     /**
      * testSave
      *
-     * @return
+     * en:
+     * jpn: Ring::bindUp()で整形されたデータをModel::save()したときModel::find()で正常に取得できる
      */
     function testSave(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
@@ -142,7 +145,8 @@ class BindableTestCase extends CakeTestCase{
     /**
      * testDelete
      *
-     * @return
+     * en:
+     * jpn: 削除した場合もひもづく仮想フィールドも削除される。同時に実データも削除される
      */
     function testDelete(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
@@ -180,7 +184,8 @@ class BindableTestCase extends CakeTestCase{
     /**
      * testDelete_bindedFileOnly
      *
-     * @return
+     * en:
+     * jpn: 仮想フィールドにdelete_プレフィックスをつけた値を与えたとき仮想フィールドの実ファイルを削除する
      */
     function testDelete_bindedFileOnly(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
@@ -223,7 +228,8 @@ class BindableTestCase extends CakeTestCase{
     /**
      * testUpdateBindedFile
      *
-     * @return
+     * en:
+     * jpn: 仮想フィールドの値を更新した場合、元の実データは削除される
      */
     function testUpdateFile(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
