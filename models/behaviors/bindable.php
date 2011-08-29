@@ -187,7 +187,7 @@ class BindableBehavior extends ModelBehavior {
 
         // set model_id
         foreach ($model->data[$modelName] as $fieldName => $value) {
-            if (in_array($fieldName, $deleteFields)) {
+            if (in_array($fieldName, $deleteFields) && $value) {
                 $delete = true;
                 $fieldName = substr($fieldName, 7);
 
