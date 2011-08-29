@@ -41,21 +41,24 @@ class RingComponent extends Object {
         if (empty($modelName)) {
             $modelName = $this->controller->modelClass;
         }
-        if (empty($this->controller->data[$modelName])) {
-            $this->Session->delete('Filebinder.' . $modelName);
-            return;
+        if (!$model =& $this->_getModel($modelName)) {
+            return false;
+        }
+        if (empty($this->controller->data[$model->alias])) {
+            $this->Session->delete('Filebinder.' . $model->alias);
+            return false;
         }
 
-        $value = reset($this->controller->data[$modelName]);
-        $key = key($this->controller->data[$modelName]);
+        $value = reset($this->controller->data[$model->alias]);
+        $key = key($this->controller->data[$model->alias]);
 
         if (is_int($key) && is_array($value)) { // hasMany model data
-            foreach ($this->controller->data[$modelName] as $i => $data) {
-                $this->_bindUp($modelName, $this->controller->data[$modelName][$i], $i);
+            foreach ($this->controller->data[$model->alias] as $i => $data) {
+                $this->_bindUp($model, $this->controller->data[$model->alias][$i], $i);
             }
 
         } else { // single model data
-            $this->_bindUp($modelName, $this->controller->data[$modelName]);
+            $this->_bindUp($model, $this->controller->data[$model->alias]);
         }
     }
 
@@ -69,34 +72,36 @@ class RingComponent extends Object {
         if (empty($modelName)) {
             $modelName = $this->controller->modelClass;
         }
-        $this->Session->delete('Filebinder.' . $modelName);
-        if (empty($this->controller->data[$modelName])) {
-            return;
+        if (!$model =& $this->_getModel($modelName)) {
+            return false;
+        }
+        $this->Session->delete('Filebinder.' . $model->alias);
+        if (empty($this->controller->data[$model->alias])) {
+            return false;
         }
 
-        $value = reset($this->controller->data[$modelName]);
-        $key = key($this->controller->data[$modelName]);
+        $value = reset($this->controller->data[$model->alias]);
+        $key = key($this->controller->data[$model->alias]);
 
         if (is_int($key) && is_array($value)) { // hasMany model data
-            foreach ($this->controller->data[$modelName] as $i => $data) {
-                $this->_bindDown($modelName, $this->controller->data[$modelName][$i], $i);
+            foreach ($this->controller->data[$model->alias] as $i => $data) {
+                $this->_bindDown($model, $this->controller->data[$model->alias][$i], $i);
             }
 
         } else { // single model data
-            $this->_bindDown($modelName, $this->controller->data[$modelName]);
+            $this->_bindDown($model, $this->controller->data[$model->alias]);
         }
     }
 
     /**
      * bindUp support method
      *
-     * @param string $modelName
+     * @param Model &$model
      * @param array &$data
      * @param int $i
      * @access protected
      */
-    function _bindUp($modelName, &$data, $i = null) {
-        $model = $this->_getModel($modelName);
+    function _bindUp(&$model, &$data, $i = null) {
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
 
         foreach ($data as $fieldName => $value) {
@@ -106,7 +111,7 @@ class RingComponent extends Object {
             if (!$this->_checkFileUploaded($value)) {
                 continue;
             }
-            if ($value['error'] == UPLOAD_ERR_NO_FILE || !empty($this->controller->data[$modelName]['delete_' . $fieldName])) {
+            if ($value['error'] == UPLOAD_ERR_NO_FILE || !empty($this->controller->data[$model->alias]['delete_' . $fieldName])) {
                 $data[$fieldName] = null;
                 continue;
             }
@@ -117,12 +122,12 @@ class RingComponent extends Object {
             $fileSize = filesize($tmpFile);
 
             $tmpPath = empty($bindFields[$fieldName]['tmpPath']) ? $this->tmpBindPath : $bindFields[$fieldName]['tmpPath'];
-            $tmpBindPath = $tmpPath . 'ring_' . Security::hash($modelName . $fieldName . $fileName . time()) . $fileName;
+            $tmpBindPath = $tmpPath . 'ring_' . Security::hash($model->alias . $fieldName . $fileName . time()) . $fileName;
 
             // move_uploaded_file
             move_uploaded_file($tmpFile, $tmpBindPath);
 
-            $ring = array('model' => $modelName,
+            $ring = array('model' => $model->alias,
                           'field_name' => $fieldName,
                           'file_name' => $fileName,
                           'file_content_type' => $contentType,
@@ -132,7 +137,7 @@ class RingComponent extends Object {
             $data[$fieldName] = $ring;
         }
 
-        $sessionKey = is_int($i) ? "Filebinder.{$modelName}.{$i}" : "Filebinder.{$modelName}";
+        $sessionKey = is_int($i) ? "Filebinder.{$model->alias}.{$i}" : "Filebinder.{$model->alias}";
 
         if ($this->Session->check($sessionKey)) {
             $sessionData = $this->Session->read($sessionKey);
@@ -147,14 +152,14 @@ class RingComponent extends Object {
     /**
      * bindDown support method
      *
-     * @param string $modelName
+     * @param Model &$model
      * @param array $data
      * @param int $i
      * @access protected
      */
-    function _bindDown($modelName, $data, $i = null) {
-        $model = $this->_getModel($modelName);
-        $sessionKey = is_int($i) ? "Filebinder.{$modelName}.{$i}." : "Filebinder.{$modelName}.";
+    function _bindDown(&$model, $data, $i = null) {
+        $sessionKey = is_int($i) ? "Filebinder.{$model->alias}.{$i}." : "Filebinder.{$model->alias}.";
+
         foreach ($data as $fieldName => $value) {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
@@ -183,17 +188,17 @@ class RingComponent extends Object {
      * @access Model
      * @access protected
      */
-    function _getModel($modelName) {
+    function &_getModel($modelName) {
         $model = null;
 
         if (!empty($this->controller->{$modelName})) {
-            $model = $this->controller->{$modelName};
+            $model =& $this->controller->{$modelName};
 
         } else if (!empty($this->controller->{$this->controller->modelClass}->{$modelName})) {
-            $model = $this->controller->{$this->controller->modelClass}->{$modelName};
+            $model =& $this->controller->{$this->controller->modelClass}->{$modelName};
 
         } else {
-            $model = ClassRegistry::init($modelName);
+            $model =& ClassRegistry::init($modelName);
         }
 
         return $model;
