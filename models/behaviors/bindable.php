@@ -18,8 +18,8 @@ class BindableBehavior extends ModelBehavior {
                           'afterAttach' => null, // hook function
                           'withObject' => false, // find attachment with file object
                           'exchangeFile' => true, // save new file after deleting old file
-                          'dirMode' => '0755',
-                          'fileMode' => '755',
+                          'dirMode' => 0755,
+                          'fileMode' => 0755,
                           );
 
         $defaultRuntime = array('bindedModel' => null,
