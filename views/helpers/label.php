@@ -75,8 +75,8 @@ class LabelHelper extends AppHelper {
 
             $url = array();
 
-            foreach ((array)$prefixes as $prefix) {
-                $url[$prefix] = false;
+            foreach ((array)$prefixes as $p) {
+                $url[$p] = false;
             }
 
             $url = array_merge($url, array(
