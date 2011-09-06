@@ -182,6 +182,35 @@ class BindableTestCase extends CakeTestCase{
     }
 
     /**
+     * testDeleteNoAttachment
+     *
+     * en:
+     * jpn: ྪファイルがアップされていない場合でも通常通り削除できる
+     */
+    function testDeleteNoAttachment(){
+        $filePath = TMP . 'tests' . DS;
+
+        $this->FilebinderPost->bindFields = array(
+                                                  array('field' => 'logo',
+                                                        'tmpPath'  => CACHE,
+                                                        'filePath' => $filePath,
+                                                        ),
+                                                  );
+
+        $data = array('FilebinderPost' => array('title' => 'Title',
+                                                'logo' => null));
+        $result = $this->FilebinderPost->save($data);
+        $id = $this->FilebinderPost->getLastInsertId();
+        $query = array();
+        $query['conditions'] = array('FilebinderPost.id' => $id);
+        $result = $this->FilebinderPost->find('first', $query);
+
+        $result = $this->FilebinderPost->delete($id);
+
+        $this->assertIdentical($result, true);
+    }
+
+    /**
      * testDelete_bindedFileOnly
      *
      * en:
