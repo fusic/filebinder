@@ -754,7 +754,7 @@ class BindableBehavior extends ModelBehavior {
 
                         if (
                             !file_put_contents($filePath, base64_decode($fileObject))
-                            || !chmod($filePath, $this->settings[$model->alias]['mode'])
+                            || !chmod($filePath, $this->settings[$model->alias]['fileMode'])
                         ) {
                             return false;
                         }
