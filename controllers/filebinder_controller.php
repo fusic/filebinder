@@ -32,7 +32,14 @@ class FilebinderController extends FilebinderAppController {
 
         if ($model_id == 0) {
             // tmp file
-            $tmpPath = empty($this->{$model}->bindFields[$fieldName]['tmpPath']) ? TMP . 'cache/' : $this->{$model}->bindFields[$fieldName]['tmpPath'];
+            $tmpPath = TMP . 'cache/';
+            if (!empty($this->{$model}->bindFields)) {
+                foreach ($this->{$model}->bindFields as $value) {
+                    if ($value['field'] === $fieldName && !empty($value['tmpPath'])) {
+                        $tmpPath = $value['tmpPath'];
+                    }
+                }
+            }
             $filePath = $tmpPath . $fileName;
         } else {
             $query = array();
