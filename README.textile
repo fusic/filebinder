@@ -41,7 +41,7 @@ Example of how to add image file with confirm page.
 <?php
 class Post extends AppModel {
     var $name = 'Post';
-    var $actsAs = array('Filebinder.Bindable'));
+    var $actsAs = array('Filebinder.Bindable');
     var $displayField = 'title';
 
     var $bindFields = array(array('field' => 'image',
