@@ -165,6 +165,7 @@ class PostsController extends AppController {
     <?php echo h($mergedData['Post']['body']);?>
     <?php echo $this->Label->image($mergedData['Post']['image']);?> 
     <?php echo $this->Form->create('Post', array('action' => 'add_confirm'));?>   
+    <?php echo $this->Form->input('dummy', array('type' => 'hidden'));?>
     <?php echo $this->Form->submit(__('Submit', true));?>
     <?php echo $this->Form->end();?>
 </div>
@@ -174,7 +175,7 @@ h2. License
 
 The MIT Lisence
 
-Copyright (c) 2010 Fusic Co., Ltd. (http://fusic.co.jp)
+Copyright (c) 2010-2011 Fusic Co., Ltd. (http://fusic.co.jp)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
