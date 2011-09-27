@@ -22,9 +22,11 @@ class FilebinderController extends FilebinderAppController {
         Configure::write('debug', 0);
 
         if (!$model || $model_id == null || !$fieldName || !$hash) {
+            $this->cakeError('error404');
             return;
         }
         if (Security::hash($model . $model_id . $fieldName . $this->Session->read('Filebinder.hash')) !== $hash) {
+            $this->cakeError('error404');
             return;
         }
 
@@ -32,7 +34,7 @@ class FilebinderController extends FilebinderAppController {
 
         if ($model_id == 0) {
             // tmp file
-            $tmpPath = TMP . 'cache/';
+            $tmpPath = CACHE;
             if (!empty($this->{$model}->bindFields)) {
                 foreach ($this->{$model}->bindFields as $value) {
                     if ($value['field'] === $fieldName && !empty($value['tmpPath'])) {
@@ -57,7 +59,8 @@ class FilebinderController extends FilebinderAppController {
         }
 
         if (!file_exists($filePath)) {
-            die(__('No file',true));
+            $this->cakeError('error404');
+            return;
         }
         if (strstr(env('HTTP_USER_AGENT'), 'MSIE')) {
             $fileName = mb_convert_encoding($fileName,  "SJIS", "UTF-8");

@@ -19,7 +19,7 @@ class BindableBehavior extends ModelBehavior {
                           'withObject' => false, // find attachment with file object
                           'exchangeFile' => true, // save new file after deleting old file
                           'dirMode' => 0755,
-                          'fileMode' => 0755,
+                          'fileMode' => 0644,
                           );
 
         $defaultRuntime = array('bindedModel' => null,
@@ -126,7 +126,7 @@ class BindableBehavior extends ModelBehavior {
             $bind['model_id'] = 0;
 
             $tmpFile = $value['tmp_bind_path'];
-            if (file_exists($tmpFile)) {
+            if (file_exists($tmpFile) && is_file($tmpFile)) {
                 /**
                  * beforeAttach
                  */
@@ -231,7 +231,7 @@ class BindableBehavior extends ModelBehavior {
 
             $tmpFile = $value['tmp_bind_path'];
 
-            if (file_exists($tmpFile)) {
+            if (file_exists($tmpFile) && is_file($tmpFile)) {
                 if (!is_dir(dirname($filePath))) {
                     mkdir(dirname($filePath), $this->settings[$model->alias]['dirMode'], true);
                 }
@@ -239,7 +239,7 @@ class BindableBehavior extends ModelBehavior {
                     return false;
                 }
             }
-            if ($filePath && file_exists($filePath)) {
+            if ($filePath && file_exists($filePath) && is_file($filePath)) {
                 /**
                  * afterAttach
                  */
@@ -261,7 +261,8 @@ class BindableBehavior extends ModelBehavior {
      * @return
      */
     function afterDelete(&$model){
-        return $this->deleteEntity($model, $model->id);
+        $this->deleteEntity($model, $model->id);
+        return true;
     }
 
     /**
@@ -346,7 +347,7 @@ class BindableBehavior extends ModelBehavior {
             $objects = scandir($dir);
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
-                    if (filetype($dir."/".$object) == "dir") $this->_recursiveRemoveDir($dir."/".$object); else unlink($dir."/".$object);
+                    if (filetype($dir."/".$object) == "dir") $this->_recursiveRemoveDir($dir."/".$object); else @unlink($dir."/".$object);
                 }
             }
             reset($objects);
@@ -395,7 +396,7 @@ class BindableBehavior extends ModelBehavior {
             return false;
         }
         if (in_array('allowEmpty', $extension)) {
-            $extension = array('jpg', 'gif', 'png'); // set default
+            $extension = array('jpg', 'jpeg', 'gif', 'png'); // set default
         }
         if (empty($file['tmp_bind_path']) && empty($file['file_path'])) {
             return false;
@@ -543,7 +544,7 @@ class BindableBehavior extends ModelBehavior {
 
         $tmpFilePath = empty($file['tmp_bind_path']) ? $file['file_path'] : $file['tmp_bind_path'];
 
-        if (!file_exists($tmpFilePath)) {
+        if (!file_exists($tmpFilePath) && is_file($tmpFilePath)) {
             return false;
         }
 
@@ -748,8 +749,8 @@ class BindableBehavior extends ModelBehavior {
                             mkdir(dirname($filePath), $this->settings[$model->alias]['dirMode'], true);
                         }
 
-                        if (file_exists($filePath)) {
-                            unlink($filePath);
+                        if (file_exists($filePath) && is_file($filePath)) {
+                            @unlink($filePath);
                         }
 
                         if (
@@ -759,7 +760,7 @@ class BindableBehavior extends ModelBehavior {
                             return false;
                         }
 
-                        if (file_exists($filePath)) {
+                        if (file_exists($filePath) && is_file($filePath)) {
                             /**
                              * afterAttach
                              */

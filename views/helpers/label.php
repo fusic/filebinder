@@ -23,12 +23,13 @@ class LabelHelper extends AppHelper {
      * @return
      */
     function link($file = null, $options = array()){
-        if (!$this->_makeSrc($file, $options)) {
+        $src = $this->_makeSrc($file, $options);
+        if (!$src) {
             return empty($options['noFile']) ? '' : $options['noFile'];
         }
         $fileTitle = empty($options['title']) ? $file['file_name'] : $options['title'];
         unset($options['title']);
-        return $this->Html->link($fileTitle, $this->_makeSrc($file, $options), $options);
+        return $this->Html->link($fileTitle, $src, $options);
     }
 
     /**
@@ -38,10 +39,11 @@ class LabelHelper extends AppHelper {
      * @return
      */
     function url($file = null, $options = array()){
-        if (!$this->_makeSrc($file, $options)) {
+        $src = $this->_makeSrc($file, $options);
+        if (!$src) {
             return empty($options['noFile']) ? '' : $options['noFile'];
         }
-        return $this->Html->url($this->_makeSrc($file, $options), $options);
+        return $this->Html->url($src, $options);
     }
 
     /**
@@ -93,7 +95,6 @@ class LabelHelper extends AppHelper {
             return $url;
         }
         $src = preg_replace('#' . WWW_ROOT . '#', DS, $filePath);
-        unset($options['noImage']);
         return $src;
     }
 
