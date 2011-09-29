@@ -1,6 +1,6 @@
 h1. Filebinder: Simple file attachment plugin for CakePHP
 
-!/fusic/filebinder/raw/master/documents/filebinder.png!
+!/fusic/filebinder/raw/master/Document/filebinder.png!
 
 h2. Feature
 
@@ -9,9 +9,20 @@ h2. Feature
 * Multi attachement
 * Selectalble file store method (DB storage or not)
 
+h2. Requirements
+
+* PHP >= 5.2.6
+* CakePHP >= 2.0
+
 h2. Installation
 
-Put `filebinder' directory on app/plugins in your CakePHP application.
+Put `Filebinder' directory on app/plugins in your CakePHP application.
+Then, add the following code in bootstrap.php
+
+<pre>
+<?php
+    CakePlugin::load('Filebinder');
+</pre>
 
 h2. Filebinder outline image
 
@@ -19,19 +30,19 @@ Filebinder manage 'virtual table' and entity.
 
 h3. 'Simple attachment' model image
 
-!/fusic/filebinder/raw/master/documents/filebinder_image.png!
+!/fusic/filebinder/raw/master/Document/filebinder_image.png!
 
 h3. 'Multi fields' model image
 
-!/fusic/filebinder/raw/master/documents/filebinder_multi_fields.png!
+!/fusic/filebinder/raw/master/Document/filebinder_multi_fields.png!
 
 h3. 'Multi models' model image
 
-!/fusic/filebinder/raw/master/documents/filebinder_multi_models.png!
+!/fusic/filebinder/raw/master/Document/filebinder_multi_models.png!
 
 h3. Entity file path image
 
-!/fusic/filebinder/raw/master/documents/filebinder_filepath.png!
+!/fusic/filebinder/raw/master/Document/filebinder_filepath.png!
 
 h2. Usage
 

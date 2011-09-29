@@ -1,8 +1,7 @@
 <?php
 
-App::import('Core', 'Model');
-App::import('Model', array('FilebinderPost'));
-App::import('Fixture', 'FilebinderPost');
+App::uses('Model', 'Model');
+App::uses('AppModel', 'Model');
 
 class FilebinderPost extends CakeTestModel{
 
@@ -16,12 +15,12 @@ class BindableTestCase extends CakeTestCase{
     public $fixtures = array('plugin.filebinder.attachment',
                              'plugin.filebinder.filebinder_post');
 
-    function startTest() {
+    function setUp() {
         $this->FilebinderPost = ClassRegistry::init('FilebinderPost');
         $this->FilebinderPostFixture = ClassRegistry::init('FilebinderPostFixture');
     }
 
-    function endTest() {
+    function tearDown() {
         unset($this->FilebinderPost);
         unset($this->FilebinderPostFixture);
     }
@@ -368,7 +367,7 @@ class BindableTestCase extends CakeTestCase{
         if (!$to) {
             return false;
         }
-        $from = APP . 'plugins/filebinder/tests/files/test.png';
+        $from = APP . 'Plugin/Filebinder/Test/File/test.png';
         return copy($from, $to);
     }
 }

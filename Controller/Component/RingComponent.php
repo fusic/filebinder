@@ -1,18 +1,21 @@
 <?php
-class RingComponent extends Object {
+App::uses('Security', 'Utility');
+
+class RingComponent extends Component {
 
     var $components = array('Session');
     var $_autoBindDown = array();
 
     /**
-     * initialize
+     * __construct
      *
-     * @param &$controller
-     * @param $settions
-     * @return
+     * @param ComponentCollection $collection instance for the ComponentCollection
+     * @param array $settings Settings to set to the component
+     * @return void
      */
-    function initialize(&$controller, $settings = array()) {
-        $this->controller = $controller;
+    public function __construct(ComponentCollection $collection, $settings  =  array()) {
+        $this->controller = $collection->getController();
+        parent::__construct($collection, $settings);
     }
 
     /**
@@ -56,21 +59,21 @@ class RingComponent extends Object {
         if (!$model =& $this->_getModel($modelName)) {
             return false;
         }
-        if (empty($this->controller->data[$model->alias])) {
+        if (empty($this->controller->request->data[$model->alias])) {
             $this->Session->delete('Filebinder.' . $model->alias);
             return false;
         }
 
-        $value = reset($this->controller->data[$model->alias]);
-        $key = key($this->controller->data[$model->alias]);
+        $value = reset($this->controller->request->data[$model->alias]);
+        $key = key($this->controller->request->data[$model->alias]);
 
         if (is_int($key) && is_array($value)) { // hasMany model data
-            foreach ($this->controller->data[$model->alias] as $i => $data) {
-                $this->_bindUp($model, $this->controller->data[$model->alias][$i], $i);
+            foreach ($this->controller->request->data[$model->alias] as $i => $data) {
+                $this->_bindUp($model, $this->controller->request->data[$model->alias][$i], $i);
             }
 
         } else { // single model data
-            $this->_bindUp($model, $this->controller->data[$model->alias]);
+            $this->_bindUp($model, $this->controller->request->data[$model->alias]);
         }
 
         if ($autoBindDown && !in_array($model->alias, $this->_autoBindDown)) {
@@ -92,20 +95,20 @@ class RingComponent extends Object {
             return false;
         }
         $this->Session->delete('Filebinder.' . $model->alias);
-        if (empty($this->controller->data[$model->alias])) {
+        if (empty($this->controller->request->data[$model->alias])) {
             return false;
         }
 
-        $value = reset($this->controller->data[$model->alias]);
-        $key = key($this->controller->data[$model->alias]);
+        $value = reset($this->controller->request->data[$model->alias]);
+        $key = key($this->controller->request->data[$model->alias]);
 
         if (is_int($key) && is_array($value)) { // hasMany model data
-            foreach ($this->controller->data[$model->alias] as $i => $data) {
-                $this->_bindDown($model, $this->controller->data[$model->alias][$i], $i);
+            foreach ($this->controller->request->data[$model->alias] as $i => $data) {
+                $this->_bindDown($model, $this->controller->request->data[$model->alias][$i], $i);
             }
 
         } else { // single model data
-            $this->_bindDown($model, $this->controller->data[$model->alias]);
+            $this->_bindDown($model, $this->controller->request->data[$model->alias]);
         }
     }
 
@@ -125,7 +128,7 @@ class RingComponent extends Object {
                 continue;
             }
 
-            if (!$this->_checkFileUploaded($value) || $value['error'] == UPLOAD_ERR_NO_FILE || !empty($this->controller->data[$model->alias]['delete_' . $fieldName])) {
+            if (!$this->_checkFileUploaded($value) || $value['error'] == UPLOAD_ERR_NO_FILE || !empty($this->controller->request->data[$model->alias]['delete_' . $fieldName])) {
                 $data[$fieldName] = null;
                 continue;
             }
@@ -156,7 +159,7 @@ class RingComponent extends Object {
         if ($this->Session->check($sessionKey)) {
             $sessionData = $this->Session->read($sessionKey);
             foreach ($sessionData as $fieldName => $value) {
-                if (empty($data[$fieldName]) && empty($this->controller->data[$model->alias]['delete_' . $fieldName])) {
+                if (empty($data[$fieldName]) && empty($this->controller->request->data[$model->alias]['delete_' . $fieldName])) {
                     $data[$fieldName] = $value;
                 }
             }
@@ -184,7 +187,7 @@ class RingComponent extends Object {
             }
             // file upload error
             if (empty($value['file_size'])) {
-                $this->controller->data[$modelName][$fieldName] = null;
+                $this->controller->request->data[$modelName][$fieldName] = null;
                 continue;
             }
             if (isset($model->validationErrors[$fieldName])) {

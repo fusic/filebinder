@@ -1,4 +1,6 @@
 <?php
+App::uses('AppHelper', 'View/Helper');
+
 class LabelHelper extends AppHelper {
 
     var $helpers = array('Html', 'Session');

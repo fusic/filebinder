@@ -1,4 +1,6 @@
 <?php
+App::uses('Security', 'Utility');
+
 class FilebinderController extends FilebinderAppController {
 
     var $name = 'Filebinder';
