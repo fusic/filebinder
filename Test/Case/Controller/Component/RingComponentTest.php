@@ -37,16 +37,25 @@ class RingComponentTest extends CakeTestCase{
         parent::setUp();
         $this->Controller = new FilebinderPostsTestController();
         $this->Controller->constructClasses();
-        $this->Controller->params = array(
-                                          'named' => array(),
-                                          'pass' => array(),
-                                          'url' => array());
     }
 
     public function tearDown() {
         $this->Controller->Session->delete('Filebinder');
         unset($this->Controller);
         ClassRegistry::flush();
+    }
+
+    /**
+     * testStartup
+     *
+     * en:
+     * jpn: Ring::startup()後にはhelperにFilebinder.Labelが設定される
+     */
+    public function testStartup() {
+        $this->Controller->Components->init($this->Controller);
+        $this->initialized = true;
+        $this->Controller->Ring->startup($this->Controller);
+        $this->assertTrue(in_array('Filebinder.Label', $this->Controller->helpers));
     }
 
     /**
@@ -71,16 +80,15 @@ class RingComponentTest extends CakeTestCase{
         $this->Controller->request->data = array('FilebinderPost' => array());
         $this->Controller->request->data['FilebinderPost']['title'] = 'Title';
         $this->Controller->request->data['FilebinderPost']['logo'] = array('name' => 'logo.png',
-                                                                  'tmp_name' => $tmpPath,
-                                                                  'type' => 'image/png',
-                                                                  'size' => 100,
-                                                                  'error' => 0);
+                                                                           'tmp_name' => $tmpPath,
+                                                                           'type' => 'image/png',
+                                                                           'size' => 100,
+                                                                           'error' => 0);
 
         $this->Controller->Components->init($this->Controller);
         $this->initialized = true;
         $this->Controller->beforeFilter();
         $this->Controller->Ring->bindUp();
-
         $this->assertIdentical($this->Controller->request->data['FilebinderPost']['logo']['model'], 'FilebinderPost');
     }
 
@@ -106,10 +114,10 @@ class RingComponentTest extends CakeTestCase{
         $this->Controller->request->data = array('FilebinderPost' => array());
         $this->Controller->request->data['FilebinderPost']['title'] = 'Title';
         $this->Controller->request->data['FilebinderPost']['logo'] = array('name' => 'logo.png',
-                                                                  'tmp_name' => $tmpPath,
-                                                                  'invalid_key' => 'invalid', // invalid field
-                                                                  'size' => 100,
-                                                                  'error' => 0);
+                                                                           'tmp_name' => $tmpPath,
+                                                                           'invalid_key' => 'invalid', // invalid field
+                                                                           'size' => 100,
+                                                                           'error' => 0);
 
         $this->Controller->Components->init($this->Controller);
         $this->initialized = true;
@@ -145,10 +153,10 @@ class RingComponentTest extends CakeTestCase{
         $this->Controller->request->data = array('FilebinderPost' => array());
         $this->Controller->request->data['FilebinderPost']['title'] = 'Title';
         $this->Controller->request->data['FilebinderPost']['logo'] = array('name' => 'logo.png',
-                                                                  'tmp_name' => $tmpPath,
-                                                                  'type' => 'image/png',
-                                                                  'size' => 100,
-                                                                  'error' => 0);
+                                                                           'tmp_name' => $tmpPath,
+                                                                           'type' => 'image/png',
+                                                                           'size' => 100,
+                                                                           'error' => 0);
 
         $this->Controller->Components->init($this->Controller);
         $this->initialized = true;
@@ -182,10 +190,10 @@ class RingComponentTest extends CakeTestCase{
         $this->Controller->request->data = array('FilebinderPost' => array());
         $this->Controller->request->data['FilebinderPost']['title'] = 'Title';
         $this->Controller->request->data['FilebinderPost']['logo'] = array('name' => 'logo.png',
-                                                                  'tmp_name' => $tmpPath,
-                                                                  'type' => 'image/png',
-                                                                  'size' => 100,
-                                                                  'error' => 0);
+                                                                           'tmp_name' => $tmpPath,
+                                                                           'type' => 'image/png',
+                                                                           'size' => 100,
+                                                                           'error' => 0);
 
         $this->Controller->Components->init($this->Controller);
         $this->initialized = true;

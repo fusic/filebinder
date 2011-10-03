@@ -24,9 +24,8 @@ class RingComponent extends Component {
      * @param &$controller
      * @return
      */
-    function startup(&$controller) {
+    public function startup(&$controller) {
         $controller->helpers[]  =  'Filebinder.Label';
-
         if (!isset($controller->noUpdateHash) || !$controller->noUpdateHash) {
             $this->Session->write('Filebinder.hash', Security::hash(time()));
         }
@@ -37,7 +36,7 @@ class RingComponent extends Component {
      *
      * @param &$controller
      */
-    function beforeRender(&$controller){
+    public function beforeRender(&$controller){
         if ($this->_autoBindDown) {
             foreach ($this->_autoBindDown as $i => $bindDownModel) {
                 $this->bindDown($bindDownModel);
@@ -52,7 +51,7 @@ class RingComponent extends Component {
      *
      * @return
      */
-    function bindUp($modelName = null, $autoBindDown = false){
+    public function bindUp($modelName = null, $autoBindDown = false){
         if (empty($modelName)) {
             $modelName = $this->controller->modelClass;
         }
@@ -87,7 +86,7 @@ class RingComponent extends Component {
      *
      * @return
      */
-    function bindDown($modelName = null) {
+    public function bindDown($modelName = null) {
         if (empty($modelName)) {
             $modelName = $this->controller->modelClass;
         }
@@ -120,7 +119,7 @@ class RingComponent extends Component {
      * @param int $i
      * @access protected
      */
-    function _bindUp(&$model, &$data, $i = null) {
+    private function _bindUp(&$model, &$data, $i = null) {
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
 
         foreach ($data as $fieldName => $value) {
@@ -174,7 +173,7 @@ class RingComponent extends Component {
      * @param int $i
      * @access protected
      */
-    function _bindDown(&$model, $data, $i = null) {
+    private function _bindDown(&$model, $data, $i = null) {
         $sessionKey = is_int($i) ? "Filebinder.{$model->alias}.{$i}." : "Filebinder.{$model->alias}.";
 
         foreach ($data as $fieldName => $value) {
@@ -205,7 +204,7 @@ class RingComponent extends Component {
      * @access Model
      * @access protected
      */
-    function &_getModel($modelName) {
+    private function &_getModel($modelName) {
         $model = null;
 
         if (!empty($this->controller->{$modelName})) {
@@ -228,7 +227,7 @@ class RingComponent extends Component {
      * @return bool
      * @access protected
      */
-    function _checkFileUploaded($array) {
+    private function _checkFileUploaded($array) {
         if (!is_array($array)) {
             return false;
         }
@@ -243,7 +242,7 @@ class RingComponent extends Component {
      * @param $array The array of bind-upped data
      * @return bool
      */
-    function _checkBindUpped($array) {
+    private function _checkBindUpped($array) {
         if (!is_array($array)) {
             return false;
         }
@@ -260,7 +259,7 @@ class RingComponent extends Component {
      * @return bool
      * @access protected
      */
-    function _checkKeyExists($array, $keys) {
+    private function _checkKeyExists($array, $keys) {
         $diff = array_intersect_key(Set::normalize($keys), $array);
 
         if (count($keys) !== count($diff)) {
