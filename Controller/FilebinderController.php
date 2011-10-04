@@ -24,11 +24,11 @@ class FilebinderController extends FilebinderAppController {
         Configure::write('debug', 0);
 
         if (!$model || $model_id == null || !$fieldName || !$hash) {
-            $this->cakeError('error404');
+            throw new NotFoundException(__('Invalid access'));
             return;
         }
         if (Security::hash($model . $model_id . $fieldName . $this->Session->read('Filebinder.hash')) !== $hash) {
-            $this->cakeError('error404');
+            throw new NotFoundException(__('Invalid access'));
             return;
         }
 
@@ -61,7 +61,7 @@ class FilebinderController extends FilebinderAppController {
         }
 
         if (!file_exists($filePath)) {
-            $this->cakeError('error404');
+            throw new NotFoundException(__('Invalid access'));
             return;
         }
         if (strstr(env('HTTP_USER_AGENT'), 'MSIE')) {
