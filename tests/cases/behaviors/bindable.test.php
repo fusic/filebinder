@@ -1,7 +1,6 @@
 <?php
 
 App::import('Core', 'Model');
-App::import('Model', array('FilebinderPost'));
 App::import('Fixture', 'FilebinderPost');
 
 class FilebinderPost extends CakeTestModel{
