@@ -184,7 +184,7 @@ class PostsController extends AppController {
 
 h2. License
 
-The MIT Lisence
+The MIT License
 
 Copyright (c) 2010-2011 Fusic Co., Ltd. (http://fusic.co.jp)
 
