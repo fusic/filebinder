@@ -599,7 +599,7 @@ class BindableBehavior extends ModelBehavior {
 
         if ($fields) {
             if (is_string($fields)) {
-                App::import('Core', 'String');
+                App::uses('String', 'Utility');
                 $fields = String::tokenize($fields);
             }
 
