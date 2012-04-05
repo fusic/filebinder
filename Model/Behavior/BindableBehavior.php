@@ -761,6 +761,8 @@ class BindableBehavior extends ModelBehavior {
             return $data;
         }
 
+
+
         $query = array();
         $query['fields'] = array('id',
                                  'model',
@@ -798,6 +800,9 @@ class BindableBehavior extends ModelBehavior {
 
                     if ((!file_exists($filePath) || filemtime($filePath) < strtotime($bind['modified']))) {
 
+                        /**
+                         * Database storage
+                         */
                         $dbStorage = in_array(BindableBehavior::STORAGE_DB, (array)$this->settings[$model->alias]['storage']);
                         // backward compatible
                         if (isset($this->settings[$model->alias]['dbStorage'])) {
@@ -833,17 +838,50 @@ class BindableBehavior extends ModelBehavior {
                                 ) {
                                 return false;
                             }
+                        }
 
-                            if (file_exists($filePath) && is_file($filePath)) {
-                                /**
-                                 * afterAttach
-                                 */
-                                if (!empty($this->settings[$model->alias]['afterAttach'])) {
-                                    $res = $this->_userfunc($model, $this->settings[$model->alias]['afterAttach'], array($filePath));
+                        /**
+                         * S3 storage
+                         */
+                        $s3Storage = in_array(BindableBehavior::STORAGE_S3, (array)$this->settings[$model->alias]['storage']);
+                        if ($s3Storage) {
+                            if (!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.key') || !Configure::read('Filebinder.S3.secret')) {
+                                //__('Validation Error: S3 Parameter Error');
+                                return false;
+                            }
+                            $options = array('key' => Configure::read('Filebinder.S3.key'),
+                                             'secret' => Configure::read('Filebinder.S3.secret'),
+                                             );
+                            $bucket = !empty($bindFields[$fieldName]['bucket']) ? $bindFields[$fieldName]['bucket'] : Configure::read('Filebinder.S3.bucket');
+                            if (empty($bucket)) {
+                                //__('Validation Error: S3 Parameter Error');
+                                return false;
+                            }
+                            $s3 = new AmazonS3($options);
+                            $region = !empty($bindFields[$fieldName]['region']) ? $bindFields[$fieldName]['region'] : Configure::read('Filebinder.S3.region');
+                            if (!empty($region)) {
+                                $s3->set_region($region);
+                            }
+                            $responce = $s3->get_object($bucket,
+                                                        $model->transferTo(array_diff_key($bind, Set::normalize(array('file_object')))),
+                                                           array(
+                                                                 'fileDownload' => $filePath,
+                                                                 ));
+                            if (!$responce->isOK()) {
+                                //__('Validation Error: S3 Upload Error');
+                                return false;
+                            }
+                        }
 
-                                    if (!$res) {
-                                        return false;
-                                    }
+                        if (file_exists($filePath) && is_file($filePath)) {
+                            /**
+                             * afterAttach
+                             */
+                            if (!empty($this->settings[$model->alias]['afterAttach'])) {
+                                $res = $this->_userfunc($model, $this->settings[$model->alias]['afterAttach'], array($filePath));
+
+                                if (!$res) {
+                                    return false;
                                 }
                             }
                         }
