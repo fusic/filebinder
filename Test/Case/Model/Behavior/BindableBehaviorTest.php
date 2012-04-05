@@ -473,6 +473,62 @@ class BindableTestCase extends CakeTestCase{
     }
 
     /**
+     * testDeleteS3
+     *
+     * en:
+     * jpn: 削除した場合もひもづく仮想フィールドも削除される。同時に実データ、S3のデータも削除される
+     */
+    function testDeleteS3(){
+        $tmpPath = TMP . 'tests' . DS . 'bindup.png';
+        $filePath = TMP . 'tests' . DS;
+
+        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php'))) {
+            return;
+        }
+
+        // change settings
+        $settings = $this->FilebinderPost->getSettings();
+        $settings['storage'] = BindableBehavior::STORAGE_S3;
+        $this->FilebinderPost->setSettings($settings);
+
+        // set test.png
+        $this->_setTestFile($tmpPath);
+
+        // set S3 Access Key
+        Configure::write('Filebinder.S3.key', AWS_ACCESS_KEY);
+        Configure::write('Filebinder.S3.secret', AWS_SECRET_ACCESS_KEY);
+
+        $this->FilebinderPost->bindFields = array(
+                                                  array('field' => 'logo',
+                                                        'tmpPath'  => CACHE,
+                                                        'filePath' => $filePath,
+                                                        'bucket' => AWS_S3_BUCKET,
+                                                        'acl' => AmazonS3::ACL_PUBLIC,
+                                                        ),
+                                                  );
+
+        $data = array('FilebinderPost' => array('title' => 'Title',
+                                                'logo' => array('model' => 'FilebinderPost',
+                                                                'field_name' => 'logo',
+                                                                'file_name' => 'logo.png',
+                                                                'file_content_type' => 'image/png',
+                                                                'file_size' => 1395,
+                                                                'tmp_bind_path' => $tmpPath
+                                                                )));
+        $result = $this->FilebinderPost->save($data);
+        $id = $this->FilebinderPost->getLastInsertId();
+        $query = array();
+        $query['conditions'] = array('FilebinderPost.id' => $id);
+        $result = $this->FilebinderPost->find('first', $query);
+
+        $this->FilebinderPost->delete($id);
+
+        $this->assertIdentical(file_exists($result['FilebinderPost']['logo']['file_path']), false);
+
+        $this->assertFalse(@file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
+    }
+
+    /**
      * testDeleteNoAttachment
      *
      * en:

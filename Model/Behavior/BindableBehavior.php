@@ -390,6 +390,40 @@ class BindableBehavior extends ModelBehavior {
                     continue;
                 }
 
+                /**
+                 * S3 storage
+                 */
+                $s3Storage = in_array(BindableBehavior::STORAGE_S3, (array)$this->settings[$model->alias]['storage']);
+                if ($s3Storage) {
+                    if (!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.key') || !Configure::read('Filebinder.S3.secret')) {
+                        //__('Validation Error: S3 Parameter Error');
+                        return false;
+                    }
+                    $options = array('key' => Configure::read('Filebinder.S3.key'),
+                                     'secret' => Configure::read('Filebinder.S3.secret'),
+                                     );
+                    $bucket = !empty($bindFields[$fieldName]['bucket']) ? $bindFields[$fieldName]['bucket'] : Configure::read('Filebinder.S3.bucket');
+                    if (empty($bucket)) {
+                        //__('Validation Error: S3 Parameter Error');
+                        return false;
+                    }
+                    $s3 = new AmazonS3($options);
+                    $region = !empty($bindFields[$fieldName]['region']) ? $bindFields[$fieldName]['region'] : Configure::read('Filebinder.S3.region');
+                    if (!empty($region)) {
+                        $s3->set_region($region);
+                    }
+                    $responce = $s3->delete_object($bucket,
+                                                   $model->transferTo($deleteFields[$fieldName])
+                                                   );
+                    if (!$responce->isOK()) {
+                        //__('Validation Error: S3 Delete Error');
+                        return false;
+                    }
+                }
+
+                /**
+                 * Local file
+                 */
                 $baseDir = empty($value['filePath']) ? $this->settings[$model->alias]['filePath'] : $value['filePath'];
                 $filePath = $baseDir . $model->transferTo($deleteFields[$fieldName]);
 
