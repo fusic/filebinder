@@ -1,19 +1,22 @@
 <?php
 class BindableBehavior extends ModelBehavior {
 
-    var $settings = array();
-    var $runtime = array();
+    public $settings = array();
+    public $runtime = array();
+
+    const STORAGE_DB = 'Db';
 
     /**
-     * setup
+     * setUp
      *
      * @param &$model
      * @param $settings
      */
-    function setup(&$model, $settings = array()){
+    public function setUp(&$model, $settings = array()){
         $defaults = array('model' => 'Attachment', // attachment model
                           'filePath' => WWW_ROOT . 'img' . DS, // default attached file path
-                          'dbStorage' => true, // file entity save table
+                          // 'dbStorage' => true, // backward compatible
+                          'storage' => BindableBehavior::STORAGE_DB, // file entity save table
                           'beforeAttach' => null, // hook function
                           'afterAttach' => null, // hook function
                           'withObject' => false, // find attachment with file object
@@ -42,7 +45,7 @@ class BindableBehavior extends ModelBehavior {
      * @param &$model
      * @return
      */
-    function beforeValidate(&$model){
+    public function beforeValidate(&$model){
         return true;
     }
 
@@ -54,7 +57,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $bool
      * @return
      */
-    function withObject(&$model, $bool = true){
+    public function withObject(&$model, $bool = true){
         $this->settings[$model->alias]['withObject'] = (bool)$bool;
     }
 
@@ -65,7 +68,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $queryData
      * @return
      */
-    function beforeFind(&$model, $queryData = null){
+    public function beforeFind(&$model, $queryData = null){
         if (empty($model->bindFields)) {
             return $queryData;
         }
@@ -94,7 +97,7 @@ class BindableBehavior extends ModelBehavior {
      * @param &$model, $result
      * @return
      */
-    function afterFind(&$model, $result){
+    public function afterFind(&$model, $result){
         return $this->bindFile($model, $result);
     }
 
@@ -104,7 +107,7 @@ class BindableBehavior extends ModelBehavior {
      * @param &$model
      * @return
      */
-    function beforeSave(&$model) {
+    public function beforeSave(&$model) {
         $modelName = $model->alias;
         foreach ($model->data[$modelName] as $fieldName => $value) {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
@@ -138,9 +141,14 @@ class BindableBehavior extends ModelBehavior {
                 }
 
                 /**
-                 * dbStorage
+                 * Database storage
                  */
-                if ($this->settings[$model->alias]['dbStorage']) {
+                $dbStorage = in_array(BindableBehavior::STORAGE_DB, (array)$this->settings[$model->alias]['storage']);
+                // backward compatible
+                if (isset($this->settings[$model->alias]['dbStorage'])) {
+                    $dbStorage = $this->settings[$model->alias]['dbStorage'];
+                }
+                if ($dbStorage) {
                     $bind['file_object'] = base64_encode(file_get_contents($tmpFile));
                 }
             }
@@ -164,7 +172,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $created
      * @return
      */
-    function afterSave(&$model, $created){
+    public function afterSave(&$model, $created){
         $modelName = $model->alias;
 
         if ($created) {
@@ -206,10 +214,10 @@ class BindableBehavior extends ModelBehavior {
 
                 } else {
                     $this->runtime[$model->alias]['bindedModel']->deleteAll(array(
-                        'model' => $modelName,
-                        'model_id' => $model_id,
-                        'field_name' => $fieldName
-                    ));
+                                                                                  'model' => $modelName,
+                                                                                  'model_id' => $model_id,
+                                                                                  'field_name' => $fieldName
+                                                                                  ));
                 }
             }
 
@@ -260,7 +268,7 @@ class BindableBehavior extends ModelBehavior {
      * @param &$model
      * @return
      */
-    function afterDelete(&$model){
+    public function afterDelete(&$model){
         $this->deleteEntity($model, $model->id);
         return true;
     }
@@ -293,7 +301,7 @@ class BindableBehavior extends ModelBehavior {
      * @see BindableBehavior::afterSave()
      * @see BindableBehavior::afterFind()
      */
-    function transferTo(&$model, $data) {
+    public function transferTo(&$model, $data) {
         return $model->alias . DS . $data['model_id'] . DS . $data['field_name'] . DS . $data['file_name'];
     }
 
@@ -304,16 +312,16 @@ class BindableBehavior extends ModelBehavior {
      * @param mixed $modelId The model id
      * @return
      */
-    function deleteEntity(&$model, $modelId, $fields = array()){
+    public function deleteEntity(&$model, $modelId, $fields = array()){
         if (!$deleteFields = $this->_findBindedFields($model, $modelId, $fields)) {
             return false;
         }
 
         $result = $this->runtime[$model->alias]['bindedModel']->deleteAll(array(
-            'model' => $model->alias,
-            'model_id' => $modelId,
-            'field_name' => array_keys($deleteFields)
-        ));
+                                                                                'model' => $model->alias,
+                                                                                'model_id' => $modelId,
+                                                                                'field_name' => array_keys($deleteFields)
+                                                                                ));
 
         if ($result) {
             $bindFields = Set::combine($model->bindFields, '/field' , '/');
@@ -342,7 +350,7 @@ class BindableBehavior extends ModelBehavior {
      * @return
      * @access protected
      */
-    function _recursiveRemoveDir($dir) {
+    protected function _recursiveRemoveDir($dir) {
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
@@ -363,7 +371,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $
      * @return
      */
-    function alphaNumericFileName(&$model, $value){
+    public function alphaNumericFileName(&$model, $value){
         $file = array_shift($value);
         if (!is_array($file)) {
             return false;
@@ -390,7 +398,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $extension
      * @return
      */
-    function checkExtension(&$model, $value, $extension){
+    public function checkExtension(&$model, $value, $extension){
         $file = array_shift($value);
         if (!is_array($file)) {
             return false;
@@ -420,7 +428,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $mimeType
      * @return
      */
-    function checkContentType(&$model, $value, $mimeType){
+    public function checkContentType(&$model, $value, $mimeType){
         $file = array_shift($value);
         if (!is_array($file)) {
             return false;
@@ -447,7 +455,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $max
      * @return
      */
-    function checkMaxFileSize(&$model, $value, $max){
+    public function checkMaxFileSize(&$model, $value, $max){
         $file = array_shift($value);
         if (!is_array($file)) {
             return false;
@@ -474,7 +482,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $min
      * @return
      */
-    function checkMinFileSize(&$model, $value, $min){
+    public function checkMinFileSize(&$model, $value, $min){
         $file = array_shift($value);
         if (!is_array($file)) {
             return false;
@@ -501,7 +509,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $max
      * @return
      */
-    function checkFileSize(&$model, $value, $max){
+    public function checkFileSize(&$model, $value, $max){
         return $this->checkMaxFileSize($model, $value, $max);
     }
 
@@ -513,7 +521,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $value
      * @return
      */
-    function notEmptyFile(&$model, $value){
+    public function notEmptyFile(&$model, $value){
         return $this->checkMinFileSize($model, $value, -1);
     }
 
@@ -526,7 +534,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $func
      * @return
      */
-    function funcCheckFile(&$model, $value, $func){
+    public function funcCheckFile(&$model, $value, $func){
         $file = array_shift($value);
         if (!is_array($file)) {
             return false;
@@ -561,7 +569,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $size mixed
      * @return int file size
      */
-    function calcFileSizeUnit($size) {
+    public function calcFileSizeUnit($size) {
         $units = array('K', 'M', 'G', 'T');
         $byte = 1024;
 
@@ -584,18 +592,18 @@ class BindableBehavior extends ModelBehavior {
      * @return array
      * @access protected
      */
-    function _findBindedFields(&$model, $modelId, $fields = array()) {
+    protected function _findBindedFields(&$model, $modelId, $fields = array()) {
         $query = array(
-            'conditions' => array(
-                'model' => $model->alias,
-                'model_id' => $modelId,
-            ),
-            'fields' => array(
-                'id', 'model', 'model_id', 'field_name', 'file_name',
-                'file_content_type', 'file_size', 'created', 'modified'
-            ),
-            'recursive' => -1
-        );
+                       'conditions' => array(
+                                             'model' => $model->alias,
+                                             'model_id' => $modelId,
+                                             ),
+                       'fields' => array(
+                                         'id', 'model', 'model_id', 'field_name', 'file_name',
+                                         'file_content_type', 'file_size', 'created', 'modified'
+                                         ),
+                       'recursive' => -1
+                       );
 
         if ($fields) {
             if (is_string($fields)) {
@@ -610,10 +618,10 @@ class BindableBehavior extends ModelBehavior {
 
         if ($data) {
             $data = Set::combine(
-                $data,
-                '{n}.' . $this->runtime[$model->alias]['bindedModel']->alias . '.field_name',
-                '{n}.' .  $this->runtime[$model->alias]['bindedModel']->alias
-            );
+                                 $data,
+                                 '{n}.' . $this->runtime[$model->alias]['bindedModel']->alias . '.field_name',
+                                 '{n}.' .  $this->runtime[$model->alias]['bindedModel']->alias
+                                 );
         }
 
         return $data;
@@ -628,7 +636,7 @@ class BindableBehavior extends ModelBehavior {
      * @return mixed
      * @access protected
      */
-    function _userfunc(&$model, $function, $args = array()) {
+    protected function _userfunc(&$model, $function, $args = array()) {
         if (is_array($function) && count($function) > 1) {
             list($class, $method) = $function;
 
@@ -659,7 +667,7 @@ class BindableBehavior extends ModelBehavior {
      * @param &$model
      * @param $data The
      */
-    function bindFile(&$model, $data = array()) {
+    protected function bindFile(&$model, $data = array()) {
         $modelName = $model->alias;
         if (empty($model->bindFields) || empty($data)) {
             return $data;
@@ -713,7 +721,6 @@ class BindableBehavior extends ModelBehavior {
                                      'model_id' => $model_ids);
 
         $binds = $this->runtime[$model->alias]['bindedModel']->find('all', $query);
-
         $binds = Set::combine($binds, array('%1$s.%2$s' , '/' . $this->settings[$model->alias]['model'] . '/model_id', '/' . $this->settings[$model->alias]['model'] . '/field_name'), '/' . $this->settings[$model->alias]['model']);
         foreach ($tmpData as $key => $value) {
             if (empty($tmpData[$key][$modelName])) {
@@ -729,46 +736,54 @@ class BindableBehavior extends ModelBehavior {
                     $bind['bindedModel'] = $this->runtime[$model->alias]['bindedModel']->alias;
                     $tmpData[$key][$modelName][$fieldName] = $bind;
 
-                    if ($this->settings[$model->alias]['dbStorage'] && (!file_exists($filePath) || filemtime($filePath) < strtotime($bind['modified']))) {
+                    if ((!file_exists($filePath) || filemtime($filePath) < strtotime($bind['modified']))) {
 
-                        /**
-                         * create entity from record data
-                         */
-                        if ($this->settings[$model->alias]['withObject']) {
-                            $fileObject = $bind['file_object'];
-                        } else {
-                            $all = $this->runtime[$model->alias]['bindedModel']->findById($bind['id']);
-                            $fileObject = $all[$this->settings[$model->alias]['model']]['file_object'];
+                        $dbStorage = in_array(BindableBehavior::STORAGE_DB, (array)$this->settings[$model->alias]['storage']);
+                        // backward compatible
+                        if (isset($this->settings[$model->alias]['dbStorage'])) {
+                            $dbStorage = $this->settings[$model->alias]['dbStorage'];
                         }
+                        if ($dbStorage) {
 
-                        if (!$fileObject) {
-                            continue;
-                        }
-
-                        if (!is_dir(dirname($filePath))) {
-                            mkdir(dirname($filePath), $this->settings[$model->alias]['dirMode'], true);
-                        }
-
-                        if (file_exists($filePath) && is_file($filePath)) {
-                            @unlink($filePath);
-                        }
-
-                        if (
-                            !file_put_contents($filePath, base64_decode($fileObject))
-                            || !chmod($filePath, $this->settings[$model->alias]['fileMode'])
-                        ) {
-                            return false;
-                        }
-
-                        if (file_exists($filePath) && is_file($filePath)) {
                             /**
-                             * afterAttach
+                             * create entity from record data
                              */
-                            if (!empty($this->settings[$model->alias]['afterAttach'])) {
-                                $res = $this->_userfunc($model, $this->settings[$model->alias]['afterAttach'], array($filePath));
+                            if ($this->settings[$model->alias]['withObject']) {
+                                $fileObject = $bind['file_object'];
+                            } else {
+                                $all = $this->runtime[$model->alias]['bindedModel']->findById($bind['id']);
+                                $fileObject = $all[$this->settings[$model->alias]['model']]['file_object'];
+                            }
 
-                                if (!$res) {
-                                    return false;
+                            if (!$fileObject) {
+                                continue;
+                            }
+
+                            if (!is_dir(dirname($filePath))) {
+                                mkdir(dirname($filePath), $this->settings[$model->alias]['dirMode'], true);
+                            }
+
+                            if (file_exists($filePath) && is_file($filePath)) {
+                                @unlink($filePath);
+                            }
+
+                            if (
+                                !file_put_contents($filePath, base64_decode($fileObject))
+                                || !chmod($filePath, $this->settings[$model->alias]['fileMode'])
+                                ) {
+                                return false;
+                            }
+
+                            if (file_exists($filePath) && is_file($filePath)) {
+                                /**
+                                 * afterAttach
+                                 */
+                                if (!empty($this->settings[$model->alias]['afterAttach'])) {
+                                    $res = $this->_userfunc($model, $this->settings[$model->alias]['afterAttach'], array($filePath));
+
+                                    if (!$res) {
+                                        return false;
+                                    }
                                 }
                             }
                         }
