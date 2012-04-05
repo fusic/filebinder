@@ -40,6 +40,25 @@ class BindableBehavior extends ModelBehavior {
     }
 
     /**
+     * setSettings
+     *
+     * @param &$model, $settings
+     */
+    public function setSettings(&$model, $settings){
+        $before = $this->getSettings($model);
+        $this->setUp($model, Set::merge($before, $settings));
+    }
+
+    /**
+     * getSettings
+     *
+     * @param &$model
+     */
+    public function getSettings(&$model){
+        return $this->settings[$model->alias];
+    }
+
+    /**
      * beforeValidate
      *
      * @param &$model

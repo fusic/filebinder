@@ -16,13 +16,27 @@ class BindableTestCase extends CakeTestCase{
                              'plugin.filebinder.filebinder_post');
 
     function setUp() {
-        $this->FilebinderPost = ClassRegistry::init('FilebinderPost');
+        $this->FilebinderPost = new FilebinderPost(); // jpn: 初期化するため
         $this->FilebinderPostFixture = ClassRegistry::init('FilebinderPostFixture');
     }
 
     function tearDown() {
         unset($this->FilebinderPost);
         unset($this->FilebinderPostFixture);
+    }
+
+    /**
+     * testSettings
+     *
+     * jpn: BindableBehaviorの設定変更ができる
+     */
+    public function testSetSettings(){
+        $settings = $this->FilebinderPost->getSettings();
+        $settings['storage'] = false;
+        $before = $settings;
+        $this->FilebinderPost->setSettings($settings);
+        $after = $this->FilebinderPost->getSettings();
+        $this->assertIdentical($before, $after);
     }
 
     /**
@@ -134,6 +148,102 @@ class BindableTestCase extends CakeTestCase{
         $result = $this->FilebinderPost->find('first', $query);
 
         $this->assertIdentical(file_exists($result['FilebinderPost']['logo']['file_path']), true);
+
+        // rm file
+        if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
+            unlink($result['FilebinderPost']['logo']['file_path']);
+        }
+    }
+
+    /**
+     * testSaveWithObject
+     *
+     * en:
+     * jpn: withObject設定をtrueをすると実データを取得する
+     */
+    function testSaveWithObject(){
+        $tmpPath = TMP . 'tests' . DS . 'bindup.png';
+        $filePath = TMP . 'tests' . DS;
+
+        // change settings
+        $settings = $this->FilebinderPost->getSettings();
+        $settings['withObject'] = true;
+        $this->FilebinderPost->setSettings($settings);
+
+        // set test.png
+        $this->_setTestFile($tmpPath);
+
+        $this->FilebinderPost->bindFields = array(
+                                                  array('field' => 'logo',
+                                                        'tmpPath'  => CACHE,
+                                                        'filePath' => $filePath,
+                                                        ),
+                                                  );
+
+        $data = array('FilebinderPost' => array('title' => 'Title',
+                                                'logo' => array('model' => 'FilebinderPost',
+                                                                'field_name' => 'logo',
+                                                                'file_name' => 'logo.png',
+                                                                'file_content_type' => 'image/png',
+                                                                'file_size' => 1395,
+                                                                'tmp_bind_path' => $tmpPath
+                                                                )));
+        $result = $this->FilebinderPost->save($data);
+        $id = $this->FilebinderPost->getLastInsertId();
+        $query = array();
+        $query['conditions'] = array('FilebinderPost.id' => $id);
+        $this->FilebinderPost->withObject(true);
+        $result = $this->FilebinderPost->find('first', $query);
+
+        $this->assertTrue(is_string($result['FilebinderPost']['logo']['file_object']));
+
+        // rm file
+        if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
+            unlink($result['FilebinderPost']['logo']['file_path']);
+        }
+    }
+
+    /**
+     * testSaveNoStrage
+     *
+     * en:
+     * jpn: DBにファイルを保存しない設定のときはwithObjectのときもデータは入っていない
+     */
+    function testSaveNoStrage(){
+        $tmpPath = TMP . 'tests' . DS . 'bindup.png';
+        $filePath = TMP . 'tests' . DS;
+
+        // change settings
+        $settings = $this->FilebinderPost->getSettings();
+        $settings['storage'] = false;
+        $this->FilebinderPost->setSettings($settings);
+
+        // set test.png
+        $this->_setTestFile($tmpPath);
+
+        $this->FilebinderPost->bindFields = array(
+                                                  array('field' => 'logo',
+                                                        'tmpPath'  => CACHE,
+                                                        'filePath' => $filePath,
+                                                        ),
+                                                  );
+
+        $data = array('FilebinderPost' => array('title' => 'Title',
+                                                'logo' => array('model' => 'FilebinderPost',
+                                                                'field_name' => 'logo',
+                                                                'file_name' => 'logo.png',
+                                                                'file_content_type' => 'image/png',
+                                                                'file_size' => 1395,
+                                                                'tmp_bind_path' => $tmpPath
+                                                                )));
+        $result = $this->FilebinderPost->save($data);
+        $id = $this->FilebinderPost->getLastInsertId();
+        $query = array();
+        $query['conditions'] = array('FilebinderPost.id' => $id);
+        $this->FilebinderPost->withObject(true);
+        $result = $this->FilebinderPost->find('first', $query);
+
+        $this->assertIdentical($result['FilebinderPost']['logo']['file_object'], null);
 
         // rm file
         if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
