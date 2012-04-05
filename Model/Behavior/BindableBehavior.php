@@ -5,6 +5,7 @@ class BindableBehavior extends ModelBehavior {
     public $runtime = array();
 
     const STORAGE_DB = 'Db';
+    const STORAGE_S3 = 'S3';
 
     /**
      * setUp
@@ -265,8 +266,48 @@ class BindableBehavior extends ModelBehavior {
                 if (!rename($tmpFile, $filePath) || !chmod($filePath, $this->settings[$model->alias]['fileMode'])) {
                     return false;
                 }
+
+                /**
+                 * S3 storage
+                 */
+                $s3Storage = in_array(BindableBehavior::STORAGE_S3, (array)$this->settings[$model->alias]['storage']);
+                if ($s3Storage) {
+                    if (!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.key') || !Configure::read('Filebinder.S3.secret')) {
+                        //__('Validation Error: S3 Parameter Error');
+                        return false;
+                    }
+                    $options = array('key' => Configure::read('Filebinder.S3.key'),
+                                     'secret' => Configure::read('Filebinder.S3.secret'),
+                                     );
+                    $bucket = !empty($bindFields[$fieldName]['bucket']) ? $bindFields[$fieldName]['bucket'] : Configure::read('Filebinder.S3.bucket');
+                    if (empty($bucket)) {
+                        //__('Validation Error: S3 Parameter Error');
+                        return false;
+                    }
+                    $s3 = new AmazonS3($options);
+                    $region = !empty($bindFields[$fieldName]['region']) ? $bindFields[$fieldName]['region'] : Configure::read('Filebinder.S3.region');
+                    if (!empty($region)) {
+                        $s3->set_region($region);
+                    }
+                    $acl = !empty($bindFields[$fieldName]['acl']) ? $bindFields[$fieldName]['acl'] : Configure::read('Filebinder.S3.acl');
+                    if (empty($acl)) {
+                        $acl = AmazonS3::ACL_PUBLIC;
+                    }
+                    $responce = $s3->create_object($bucket,
+                                                   $model->transferTo(array_diff_key(array('model_id' => $model_id) + $value, Set::normalize(array('tmp_bind_path')))),
+                                                   array(
+                                                         'fileUpload' => $filePath,
+                                                         'acl' => $acl,
+                                                         ));
+                    if (!$responce->isOK()) {
+                        //__('Validation Error: S3 Upload Error');
+                        return false;
+                    }
+                }
             }
+
             if ($filePath && file_exists($filePath) && is_file($filePath)) {
+
                 /**
                  * afterAttach
                  */
