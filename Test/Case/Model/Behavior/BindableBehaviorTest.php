@@ -156,12 +156,12 @@ class BindableTestCase extends CakeTestCase{
     }
 
     /**
-     * testSaveWithObject
+     * testFindWithObject
      *
      * en:
      * jpn: withObject設定をtrueをすると実データを取得する
      */
-    function testSaveWithObject(){
+    function testFindWithObject(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
@@ -376,6 +376,62 @@ class BindableTestCase extends CakeTestCase{
         }
     }
 
+    /**
+     * testFindWithObjectS3
+     *
+     * jpn: S3に保存しているデータを擬似的にfile_objectに格納して取得可能
+     */
+    public function testFindWithObjectS3(){
+        $tmpPath = TMP . 'tests' . DS . 'bindup.png';
+        $filePath = TMP . 'tests' . DS;
+
+        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php'))) {
+            return;
+        }
+
+        // change settings
+        $settings = $this->FilebinderPost->getSettings();
+        $settings['storage'] = BindableBehavior::STORAGE_S3;
+        $settings['withObject'] = true;
+        $this->FilebinderPost->setSettings($settings);
+
+        // set test.png
+        $this->_setTestFile($tmpPath);
+
+        // set S3 Access Key
+        Configure::write('Filebinder.S3.key', AWS_ACCESS_KEY);
+        Configure::write('Filebinder.S3.secret', AWS_SECRET_ACCESS_KEY);
+
+        $this->FilebinderPost->bindFields = array(
+                                                  array('field' => 'logo',
+                                                        'tmpPath'  => CACHE,
+                                                        'filePath' => $filePath,
+                                                        'bucket' => AWS_S3_BUCKET,
+                                                        'acl' => AmazonS3::ACL_PUBLIC,
+                                                        ),
+                                                  );
+
+        $data = array('FilebinderPost' => array('title' => 'Title',
+                                                'logo' => array('model' => 'FilebinderPost',
+                                                                'field_name' => 'logo',
+                                                                'file_name' => 'logo.png',
+                                                                'file_content_type' => 'image/png',
+                                                                'file_size' => 1395,
+                                                                'tmp_bind_path' => $tmpPath
+                                                                )));
+        $result = $this->FilebinderPost->save($data);
+        $id = $this->FilebinderPost->getLastInsertId();
+        $query = array();
+        $query['conditions'] = array('FilebinderPost.id' => $id);
+        $result = $this->FilebinderPost->find('first', $query);
+
+        $this->assertTrue(is_string($result['FilebinderPost']['logo']['file_object']));
+
+        // rm file
+        if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
+            unlink($result['FilebinderPost']['logo']['file_path']);
+        }
+    }
 
     /**
      * testDelete

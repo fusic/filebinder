@@ -864,9 +864,9 @@ class BindableBehavior extends ModelBehavior {
                             }
                             $responce = $s3->get_object($bucket,
                                                         $model->transferTo(array_diff_key($bind, Set::normalize(array('file_object')))),
-                                                           array(
-                                                                 'fileDownload' => $filePath,
-                                                                 ));
+                                                        array(
+                                                              'fileDownload' => $filePath,
+                                                              ));
                             if (!$responce->isOK()) {
                                 //__('Validation Error: S3 Upload Error');
                                 return false;
@@ -886,6 +886,47 @@ class BindableBehavior extends ModelBehavior {
                             }
                         }
                     }
+
+                    /**
+                     * withObject support
+                     */
+                    if ($this->settings[$model->alias]['withObject'] && empty($tmpData[$key][$modelName][$fieldName]['file_object'])) {
+                        /**
+                         * S3 storage
+                         */
+                        $s3Storage = in_array(BindableBehavior::STORAGE_S3, (array)$this->settings[$model->alias]['storage']);
+                        if ($s3Storage) {
+                            if (!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.key') || !Configure::read('Filebinder.S3.secret')) {
+                                //__('Validation Error: S3 Parameter Error');
+                                return false;
+                            }
+                            $options = array('key' => Configure::read('Filebinder.S3.key'),
+                                             'secret' => Configure::read('Filebinder.S3.secret'),
+                                             );
+                            $bucket = !empty($bindFields[$fieldName]['bucket']) ? $bindFields[$fieldName]['bucket'] : Configure::read('Filebinder.S3.bucket');
+                            if (empty($bucket)) {
+                                //__('Validation Error: S3 Parameter Error');
+                                return false;
+                            }
+                            $s3 = new AmazonS3($options);
+                            $region = !empty($bindFields[$fieldName]['region']) ? $bindFields[$fieldName]['region'] : Configure::read('Filebinder.S3.region');
+                            if (!empty($region)) {
+                                $s3->set_region($region);
+                            }
+                            $tmpFilePath = '/tmp/' . sha1(uniqid('', true));
+                            $responce = $s3->get_object($bucket,
+                                                        $model->transferTo(array_diff_key($bind, Set::normalize(array('file_object')))),
+                                                        array(
+                                                              'fileDownload' => $tmpFilePath,
+                                                              ));
+                            if (!$responce->isOK()) {
+                                //__('Validation Error: S3 Upload Error');
+                                return false;
+                            }
+                            $tmpData[$key][$modelName][$fieldName]['file_object'] = base64_encode(file_get_contents($tmpFilePath));
+                        }
+                    }
+
                 } else {
                     $tmpData[$key][$modelName][$fieldName] = null;
                 }
