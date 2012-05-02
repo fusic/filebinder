@@ -129,12 +129,14 @@ class BindableBehavior extends ModelBehavior {
      */
     public function beforeSave(&$model) {
         $modelName = $model->alias;
+        $model->bindedData = $model->data;
         foreach ($model->data[$modelName] as $fieldName => $value) {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
                 continue;
             }
 
             if (empty($value) || empty($value['tmp_bind_path'])) {
+                unset($model->data[$modelName][$fieldName]);
                 continue;
             }
 
@@ -179,7 +181,8 @@ class BindableBehavior extends ModelBehavior {
             }
 
             $bind_id = $this->runtime[$model->alias]['bindedModel']->getLastInsertId();
-            $model->data[$modelName][$fieldName] = $data[$this->runtime[$model->alias]['bindedModel']->alias] + array('id' => $bind_id);
+            unset($model->data[$modelName][$fieldName]);
+            $model->bindedData[$modelName][$fieldName] = $data[$this->runtime[$model->alias]['bindedModel']->alias] + array($this->runtime[$model->alias]['bindedModel']->primaryKey => $bind_id);
         }
 
         return true;
@@ -198,11 +201,11 @@ class BindableBehavior extends ModelBehavior {
         if ($created) {
             $model_id = $model->getLastInsertId();
         } else {
-            if (empty($model->data[$modelName][$this->runtime[$model->alias]['primaryKey']])) {
+            if (empty($model->bindedData[$modelName][$this->runtime[$model->alias]['primaryKey']])) {
                 // SoftDeletable
                 return;
             }
-            $model_id = $model->data[$modelName][$this->runtime[$model->alias]['primaryKey']];
+            $model_id = $model->bindedData[$modelName][$this->runtime[$model->alias]['primaryKey']];
         }
 
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
@@ -214,7 +217,7 @@ class BindableBehavior extends ModelBehavior {
         }
 
         // set model_id
-        foreach ($model->data[$modelName] as $fieldName => $value) {
+        foreach ($model->bindedData[$modelName] as $fieldName => $value) {
             if (in_array($fieldName, $deleteFields) && $value) {
                 $delete = true;
                 $fieldName = substr($fieldName, 7);
@@ -249,14 +252,13 @@ class BindableBehavior extends ModelBehavior {
             $filePath = $baseDir . $model->transferTo(array_diff_key(array('model_id' => $model_id) + $value, Set::normalize(array('tmp_bind_path'))));
 
             $bind = array();
-            $bind['id'] = $value['id'];
+            $bind[$this->runtime[$model->alias]['bindedModel']->primaryKey] = $value[$this->runtime[$model->alias]['bindedModel']->primaryKey];
             $bind['model_id'] = $model_id;
 
             $this->runtime[$model->alias]['bindedModel']->create();
             if (!$this->runtime[$model->alias]['bindedModel']->save($bind)) {
                 return false;
             }
-
             $tmpFile = $value['tmp_bind_path'];
 
             if (file_exists($tmpFile) && is_file($tmpFile)) {
@@ -795,8 +797,6 @@ class BindableBehavior extends ModelBehavior {
             return $data;
         }
 
-
-
         $query = array();
         $query['fields'] = array('id',
                                  'model',
@@ -815,6 +815,13 @@ class BindableBehavior extends ModelBehavior {
         $query['recursive'] = -1;
         $query['conditions'] = array('model' => $modelName,
                                      'model_id' => $model_ids);
+
+        // Mongodb.MondodbSource Support
+        $dataSource = $this->runtime[$model->alias]['bindedModel']->getDataSource();
+        if ($dataSource->config['datasource'] === 'Mongodb.MongodbSource') {
+            $query['conditions'] = array('model' => $modelName,
+                                         'model_id' => array('$in' => $model_ids));
+        }
 
         $binds = $this->runtime[$model->alias]['bindedModel']->find('all', $query);
         $binds = Set::combine($binds, array('%1$s.%2$s' , '/' . $this->settings[$model->alias]['model'] . '/model_id', '/' . $this->settings[$model->alias]['model'] . '/field_name'), '/' . $this->settings[$model->alias]['model']);

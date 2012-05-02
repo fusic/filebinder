@@ -62,7 +62,6 @@ class RingComponent extends Component {
             $this->Session->delete('Filebinder.' . $model->alias);
             return false;
         }
-
         $value = reset($this->controller->request->data[$model->alias]);
         $key = key($this->controller->request->data[$model->alias]);
 
