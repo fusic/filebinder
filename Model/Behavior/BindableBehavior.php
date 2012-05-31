@@ -10,10 +10,10 @@ class BindableBehavior extends ModelBehavior {
     /**
      * setUp
      *
-     * @param &$model
+     * @param $model
      * @param $settings
      */
-    public function setUp(&$model, $settings = array()){
+    public function setUp(Model $model, $settings = array()){
         $defaults = array('model' => 'Attachment', // attachment model
                           'filePath' => WWW_ROOT . 'img' . DS, // default attached file path
                           // 'dbStorage' => true, // backward compatible
@@ -43,9 +43,9 @@ class BindableBehavior extends ModelBehavior {
     /**
      * setSettings
      *
-     * @param &$model, $settings
+     * @param $model, $settings
      */
-    public function setSettings(&$model, $settings){
+    public function setSettings(Model $model, $settings){
         $before = $this->getSettings($model);
         $this->setUp($model, Set::merge($before, $settings));
     }
@@ -53,19 +53,19 @@ class BindableBehavior extends ModelBehavior {
     /**
      * getSettings
      *
-     * @param &$model
+     * @param $model
      */
-    public function getSettings(&$model){
+    public function getSettings(Model $model){
         return $this->settings[$model->alias];
     }
 
     /**
      * beforeValidate
      *
-     * @param &$model
+     * @param $model
      * @return
      */
-    public function beforeValidate(&$model){
+    public function beforeValidate(Model $model){
         return true;
     }
 
@@ -73,22 +73,22 @@ class BindableBehavior extends ModelBehavior {
      * withObject
      * find attachment with file object
      *
-     * @param &$model
+     * @param $model
      * @param $bool
      * @return
      */
-    public function withObject(&$model, $bool = true){
+    public function withObject(Model $model, $bool = true){
         $this->settings[$model->alias]['withObject'] = (bool)$bool;
     }
 
     /**
      * beforeFind
      *
-     * @param &$model
+     * @param $model
      * @param $queryData
      * @return
      */
-    public function beforeFind(&$model, $queryData = null){
+    public function beforeFind(Model $model, $queryData = null){
         if (empty($model->bindFields)) {
             return $queryData;
         }
@@ -114,20 +114,20 @@ class BindableBehavior extends ModelBehavior {
     /**
      * afterFind
      *
-     * @param &$model, $result
+     * @param $model, $result
      * @return
      */
-    public function afterFind(&$model, $result){
+    public function afterFind(Model $model, $result){
         return $this->bindFile($model, $result);
     }
 
     /**
      * beforeSave
      *
-     * @param &$model
+     * @param $model
      * @return
      */
-    public function beforeSave(&$model) {
+    public function beforeSave(Model $model) {
         $modelName = $model->alias;
         $model->bindedData = $model->data;
         foreach ($model->data[$modelName] as $fieldName => $value) {
@@ -191,11 +191,11 @@ class BindableBehavior extends ModelBehavior {
     /**
      * afterSave
      *
-     * @param &$model
+     * @param $model
      * @param $created
      * @return
      */
-    public function afterSave(&$model, $created){
+    public function afterSave(Model $model, $created){
         $modelName = $model->alias;
 
         if ($created) {
@@ -327,10 +327,10 @@ class BindableBehavior extends ModelBehavior {
     /**
      * afterDelete
      *
-     * @param &$model
+     * @param $model
      * @return
      */
-    public function afterDelete(&$model){
+    public function afterDelete(Model $model){
         $this->deleteEntity($model, $model->id);
         return true;
     }
@@ -348,7 +348,7 @@ class BindableBehavior extends ModelBehavior {
      *   - uniqid()
      *   - etc..
      *
-     * @param Model &$model
+     * @param Model Model $model
      * @param array $data binded file data
      *   - id: binded model id
      *   - model: model name
@@ -363,7 +363,7 @@ class BindableBehavior extends ModelBehavior {
      * @see BindableBehavior::afterSave()
      * @see BindableBehavior::afterFind()
      */
-    public function transferTo(&$model, $data) {
+    public function transferTo(Model $model, $data) {
         return $model->alias . DS . $data['model_id'] . DS . $data['field_name'] . DS . $data['file_name'];
     }
 
@@ -374,7 +374,7 @@ class BindableBehavior extends ModelBehavior {
      * @param mixed $modelId The model id
      * @return
      */
-    public function deleteEntity(&$model, $modelId, $fields = array()){
+    public function deleteEntity(Model $model, $modelId, $fields = array()){
         if (!$deleteFields = $this->_findBindedFields($model, $modelId, $fields)) {
             return false;
         }
@@ -467,7 +467,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $
      * @return
      */
-    public function alphaNumericFileName(&$model, $value){
+    public function alphaNumericFileName(Model $model, $value){
         $file = array_shift($value);
         if (!is_array($file)) {
             return false;
@@ -494,7 +494,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $extension
      * @return
      */
-    public function checkExtension(&$model, $value, $extension){
+    public function checkExtension(Model $model, $value, $extension){
         $file = array_shift($value);
         if (!is_array($file)) {
             return false;
@@ -519,12 +519,12 @@ class BindableBehavior extends ModelBehavior {
      * checkContentType
      * Validation method: check MIME type
      *
-     * @param &$model
+     * @param $model
      * @param $value
      * @param $mimeType
      * @return
      */
-    public function checkContentType(&$model, $value, $mimeType){
+    public function checkContentType(Model $model, $value, $mimeType){
         $file = array_shift($value);
         if (!is_array($file)) {
             return false;
@@ -546,12 +546,12 @@ class BindableBehavior extends ModelBehavior {
      * checkMaxFileSize
      * Validation method: check min file size
      *
-     * @param &$model
+     * @param $model
      * @param $value
      * @param $max
      * @return
      */
-    public function checkMaxFileSize(&$model, $value, $max){
+    public function checkMaxFileSize(Model $model, $value, $max){
         $file = array_shift($value);
         if (!is_array($file)) {
             return false;
@@ -573,12 +573,12 @@ class BindableBehavior extends ModelBehavior {
      * checkMinFileSize
      * Validation method: check min file size
      *
-     * @param &$model
+     * @param $model
      * @param $value
      * @param $min
      * @return
      */
-    public function checkMinFileSize(&$model, $value, $min){
+    public function checkMinFileSize(Model $model, $value, $min){
         $file = array_shift($value);
         if (!is_array($file)) {
             return false;
@@ -600,12 +600,12 @@ class BindableBehavior extends ModelBehavior {
      * checkFileSize
      * Validation method: check file size
      *
-     * @param &$model
+     * @param $model
      * @param $value
      * @param $max
      * @return
      */
-    public function checkFileSize(&$model, $value, $max){
+    public function checkFileSize(Model $model, $value, $max){
         return $this->checkMaxFileSize($model, $value, $max);
     }
 
@@ -613,11 +613,11 @@ class BindableBehavior extends ModelBehavior {
      * notEmptyFile
      * Validation method: check is empty
      *
-     * @param &$model
+     * @param $model
      * @param $value
      * @return
      */
-    public function notEmptyFile(&$model, $value){
+    public function notEmptyFile(Model $model, $value){
         return $this->checkMinFileSize($model, $value, -1);
     }
 
@@ -625,12 +625,12 @@ class BindableBehavior extends ModelBehavior {
      * funcCheckFile
      * Validation method: check file with user function
      *
-     * @param &$model
+     * @param $model
      * @param $value
      * @param $func
      * @return
      */
-    public function funcCheckFile(&$model, $value, $func){
+    public function funcCheckFile(Model $model, $value, $func){
         $file = array_shift($value);
         if (!is_array($file)) {
             return false;
@@ -682,13 +682,13 @@ class BindableBehavior extends ModelBehavior {
     /**
      * Find attached file data from binded model
      *
-     * @param &$Model $model
+     * @param $model $model
      * @param mixed $modelId The model id
      * @param mixed $fields The fields that searches in string or array
      * @return array
      * @access protected
      */
-    protected function _findBindedFields(&$model, $modelId, $fields = array()) {
+    protected function _findBindedFields(Model $model, $modelId, $fields = array()) {
         $query = array(
                        'conditions' => array(
                                              'model' => $model->alias,
@@ -726,13 +726,13 @@ class BindableBehavior extends ModelBehavior {
     /**
      * Call user function
      *
-     * @param &$model Model
+     * @param $model Model
      * @param $function mixed The callable function name
      * @param $args array The arguments array
      * @return mixed
      * @access protected
      */
-    protected function _userfunc(&$model, $function, $args = array()) {
+    protected function _userfunc(Model $model, $function, $args = array()) {
         if (is_array($function) && count($function) > 1) {
             list($class, $method) = $function;
 
@@ -760,10 +760,10 @@ class BindableBehavior extends ModelBehavior {
     /**
      * Bind file fields
      *
-     * @param &$model
+     * @param $model
      * @param $data The
      */
-    protected function bindFile(&$model, $data = array()) {
+    protected function bindFile(Model $model, $data = array()) {
         $modelName = $model->alias;
         if (empty($model->bindFields) || empty($data)) {
             return $data;
