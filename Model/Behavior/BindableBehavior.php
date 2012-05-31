@@ -35,8 +35,8 @@ class BindableBehavior extends ModelBehavior {
         $this->runtime[$model->alias] = $defaultRuntime;
 
         // Set runtimes
-        App::import('Model', $this->settings[$model->alias]['model']);
-        $this->runtime[$model->alias]['bindedModel'] =& ClassRegistry::init($this->settings[$model->alias]['model']);
+        App::uses($this->settings[$model->alias]['model'], 'Model');
+        $this->runtime[$model->alias]['bindedModel'] = ClassRegistry::init($this->settings[$model->alias]['model']);
         $this->runtime[$model->alias]['primaryKey'] = empty($model->primaryKey) ? 'id' : $model->primaryKey;
     }
 
