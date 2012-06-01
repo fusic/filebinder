@@ -24,7 +24,7 @@ class RingComponent extends Component {
      * @param &$controller
      * @return
      */
-    public function startup(&$controller) {
+    public function startup(Controller $controller) {
         $controller->helpers[]  =  'Filebinder.Label';
         if (!isset($controller->noUpdateHash) || !$controller->noUpdateHash) {
             $this->Session->write('Filebinder.hash', Security::hash(time()));
@@ -36,7 +36,7 @@ class RingComponent extends Component {
      *
      * @param &$controller
      */
-    public function beforeRender(&$controller){
+    public function beforeRender(Controller $controller){
         if ($this->_autoBindDown) {
             foreach ($this->_autoBindDown as $i => $bindDownModel) {
                 $this->bindDown($bindDownModel);
@@ -118,7 +118,7 @@ class RingComponent extends Component {
      * @param int $i
      * @access protected
      */
-    private function _bindUp(&$model, &$data, $i = null) {
+    private function _bindUp(Model $model, &$data, $i = null) {
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
 
         foreach ($data as $fieldName => $value) {
@@ -172,7 +172,7 @@ class RingComponent extends Component {
      * @param int $i
      * @access protected
      */
-    private function _bindDown(&$model, $data, $i = null) {
+    private function _bindDown(Model $model, $data, $i = null) {
         $sessionKey = is_int($i) ? "Filebinder.{$model->alias}.{$i}." : "Filebinder.{$model->alias}.";
 
         foreach ($data as $fieldName => $value) {
