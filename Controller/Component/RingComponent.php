@@ -13,18 +13,18 @@ class RingComponent extends Component {
      * @param array $settings Settings to set to the component
      * @return void
      */
-    public function __construct(ComponentCollection $collection, $settings  =  array()) {
+    public function __construct(ComponentCollection $collection, $settings = array()) {
         $this->controller = $collection->getController();
         parent::__construct($collection, $settings);
     }
 
     /**
-     * startup
+     * startUp
      *
-     * @param &$controller
+     * @param $controller
      * @return
      */
-    public function startup(Controller $controller) {
+    public function startUp(Controller $controller) {
         $controller->helpers[]  =  'Filebinder.Label';
         if (!isset($controller->noUpdateHash) || !$controller->noUpdateHash) {
             $this->Session->write('Filebinder.hash', Security::hash(time()));
