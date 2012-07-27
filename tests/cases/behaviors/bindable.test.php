@@ -369,7 +369,7 @@ class BindableTestCase extends CakeTestCase{
         if (!$to) {
             return false;
         }
-        $from = APP . 'plugins/filebinder/tests/files/test.png';
+        $from = dirname(__FILE__) . '/../../../tests/files/test.png';
         return copy($from, $to);
     }
 }
