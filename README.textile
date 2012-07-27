@@ -2,6 +2,8 @@ h1. Filebinder: Simple file attachment plugin for CakePHP
 
 !/fusic/filebinder/raw/master/documents/filebinder.png!
 
+!https://secure.travis-ci.org/fusic/filebinder.png?branch=master(Build Status)!:http://travis-ci.org/fusic/filebinder
+
 h2. Feature
 
 * Simple settings
