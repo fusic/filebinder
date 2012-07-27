@@ -715,7 +715,7 @@ class BindableTestCase extends CakeTestCase{
         if (!$to) {
             return false;
         }
-        $from = APP . 'Plugin/Filebinder/Test/File/test.png';
+        $from = dirname(__FILE__) . '/../../../../Test/File/test.png';
         return copy($from, $to);
     }
 }
