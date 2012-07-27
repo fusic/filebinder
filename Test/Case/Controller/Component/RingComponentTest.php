@@ -1,7 +1,7 @@
 <?php
 App::uses('Controller', 'Controller');
 App::uses('RingComponent', 'Filebinder.Controller/Component');
-
+session_start(); // http://mindthecode.com/using-sessions-in-phpunit-tests-with-cakephp/
 class FilebinderPost extends CakeTestModel{
 
     public $name = 'FilebinderPost';
@@ -215,7 +215,7 @@ class RingComponentTest extends CakeTestCase{
         if (!$to) {
             return false;
         }
-        $from = APP . 'Plugin/Filebinder/Test/File/test.png';
+        $from = dirname(__FILE__) . '/../../../../Test/File/test.png';
         return copy($from, $to);
     }
 }
