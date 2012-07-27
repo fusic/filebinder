@@ -3,11 +3,13 @@
 App::import('Core', 'Model');
 App::import('Fixture', 'FilebinderPost');
 
-class FilebinderPost extends CakeTestModel{
+if (!class_exists('FilebinderPost')) {
+    class FilebinderPost extends CakeTestModel{
 
-    public $name = 'FilebinderPost';
+        public $name = 'FilebinderPost';
 
-    public $actsAs = array('Filebinder.Bindable');
+        public $actsAs = array('Filebinder.Bindable');
+    }
 }
 
 class BindableTestCase extends CakeTestCase{

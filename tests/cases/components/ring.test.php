@@ -3,11 +3,13 @@
 App::import('Controller', 'Controller', false);
 App::import('Component', 'Filebinder.Ring');
 
-class FilebinderPost extends CakeTestModel{
+if (!class_exists('FilebinderPost')) {
+    class FilebinderPost extends CakeTestModel{
 
-    public $name = 'FilebinderPost';
+        public $name = 'FilebinderPost';
 
-    public $actsAs = array('Filebinder.Bindable');
+        public $actsAs = array('Filebinder.Bindable');
+    }
 }
 
 class FilebinderPostsTestController extends Controller{
