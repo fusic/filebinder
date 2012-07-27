@@ -1,0 +1,49 @@
+language: php
+
+php:
+  - 5.3
+
+env:
+  - DB=mysql CAKEPHP=2.1.5
+  - DB=mysql CAKEPHP=2.2.1
+
+before_script:
+  - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'CREATE DATABASE cakephp_test;'; fi"
+  - wget https://github.com/cakephp/cakephp/tarball/$CAKEPHP -O cake.tar.gz
+  - tar xf cake.tar.gz
+  - mv cakephp-cakephp-* ./cakephp
+  - chmod -R 777 ./cakephp/app/tmp
+  - echo "<?php
+    App::build(array(
+    'Plugin' => array('/home/vagrant/builds/fusic/'),
+    ));
+    CakePlugin::loadAll();
+    " > cakephp/app/Config/bootstrap.php
+  - echo "<?php
+    class DATABASE_CONFIG {
+    public \$default = array(
+      'datasource' => 'Database/Mysql',
+      'persistent' => false,
+      'host' => '0.0.0.0',
+      'login' => 'root',
+      'password' => '',
+      'database' => 'cakephp_test',
+      'prefix' => ''
+    );
+    public \$test = array(
+      'datasource' => 'Database/Mysql',
+      'persistent' => false,
+      'host' => '0.0.0.0',
+      'login' => 'root',
+      'password' => '',
+      'database' => 'cakephp_test',
+      'prefix' => '',
+      'encoding' => 'utf8'
+    );
+    }" > cakephp/app/Config/database.php
+  - cd ./cakephp
+
+script:
+  - ./lib/Cake/Console/cake test Filebinder Model/Behavior/BindableBehavior --stderr
+  - ./lib/Cake/Console/cake test Filebinder Controller/Component/RingComponent --stderr
+  - ./lib/Cake/Console/cake test Filebinder View/Helper/LabelHelper --stderr
