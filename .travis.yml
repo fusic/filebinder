@@ -17,7 +17,7 @@ before_script:
   - mv simpletest/ ./cakephp/app/vendors/
   - echo "<?php
     App::build(array(
-    'plugins' => array('/home/vagrant/builds/k1LoW/'),
+    'plugins' => array('/home/vagrant/builds/fusic/'),
     ));
     " > cakephp/app/config/bootstrap.php
   - echo "<?php
