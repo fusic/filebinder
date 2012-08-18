@@ -311,7 +311,7 @@ class BindableBehavior extends ModelBehavior {
                     $responce = $s3->create_object($bucket,
                                                    $model->transferTo(array_diff_key(array('model_id' => $model_id) + $value, Set::normalize(array('tmp_bind_path')))),
                                                    array(
-                                                         'fileUpload' => $filePath,
+                                                         'fileUpload' => $tmpFile,
                                                          'acl' => $acl,
                                                          ));
                     if (!$responce->isOK()) {
