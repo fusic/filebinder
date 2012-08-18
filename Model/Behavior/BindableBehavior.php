@@ -248,9 +248,6 @@ class BindableBehavior extends ModelBehavior {
                 continue;
             }
 
-            $baseDir = empty($bindFields[$fieldName]['filePath']) ? $this->settings[$model->alias]['filePath'] : $bindFields[$fieldName]['filePath'];
-            $filePath = $baseDir . $model->transferTo(array_diff_key(array('model_id' => $model_id) + $value, Set::normalize(array('tmp_bind_path'))));
-
             $bind = array();
             $bind[$this->runtime[$model->alias]['bindedModel']->primaryKey] = $value[$this->runtime[$model->alias]['bindedModel']->primaryKey];
             $bind['model_id'] = $model_id;
@@ -259,14 +256,28 @@ class BindableBehavior extends ModelBehavior {
             if (!$this->runtime[$model->alias]['bindedModel']->save($bind)) {
                 return false;
             }
+
+            $baseDir = empty($bindFields[$fieldName]['filePath']) ? $this->settings[$model->alias]['filePath'] : $bindFields[$fieldName]['filePath'];
+            if ($baseDir) {
+                $filePath = $baseDir . $model->transferTo(array_diff_key(array('model_id' => $model_id) + $value, Set::normalize(array('tmp_bind_path'))));
+            } else {
+                $filePath = false;
+            }
             $tmpFile = $value['tmp_bind_path'];
 
             if (file_exists($tmpFile) && is_file($tmpFile)) {
-                if (!is_dir(dirname($filePath))) {
-                    mkdir(dirname($filePath), $this->settings[$model->alias]['dirMode'], true);
-                }
-                if (!rename($tmpFile, $filePath) || !chmod($filePath, $this->settings[$model->alias]['fileMode'])) {
-                    return false;
+
+                /**
+                 * Local file
+                 */
+                if ($filePath) {
+                    if (!is_dir(dirname($filePath))) {
+                        mkdir(dirname($filePath), $this->settings[$model->alias]['dirMode'], true);
+                    }
+                    if (!copy($tmpFile, $filePath) || !chmod($filePath, $this->settings[$model->alias]['fileMode'])) {
+                        @unlink($tmpFile);
+                        return false;
+                    }
                 }
 
                 /**
@@ -276,6 +287,7 @@ class BindableBehavior extends ModelBehavior {
                 if ($s3Storage) {
                     if (!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.key') || !Configure::read('Filebinder.S3.secret')) {
                         //__('Validation Error: S3 Parameter Error');
+                        @unlink($tmpFile);
                         return false;
                     }
                     $options = array('key' => Configure::read('Filebinder.S3.key'),
@@ -284,6 +296,7 @@ class BindableBehavior extends ModelBehavior {
                     $bucket = !empty($bindFields[$fieldName]['bucket']) ? $bindFields[$fieldName]['bucket'] : Configure::read('Filebinder.S3.bucket');
                     if (empty($bucket)) {
                         //__('Validation Error: S3 Parameter Error');
+                        @unlink($tmpFile);
                         return false;
                     }
                     $s3 = new AmazonS3($options);
@@ -303,6 +316,7 @@ class BindableBehavior extends ModelBehavior {
                                                          ));
                     if (!$responce->isOK()) {
                         //__('Validation Error: S3 Upload Error');
+                        @unlink($tmpFile);
                         return false;
                     }
                 }
@@ -316,10 +330,12 @@ class BindableBehavior extends ModelBehavior {
                 if (!empty($this->settings[$model->alias]['afterAttach'])) {
                     $res = $this->_userfunc($model, $this->settings[$model->alias]['afterAttach'], array($filePath));
                     if (!$res) {
+                        @unlink($tmpFile);
                         return false;
                     }
                 }
             }
+            @unlink($tmpFile);
         }
 
     }
@@ -427,9 +443,13 @@ class BindableBehavior extends ModelBehavior {
                  * Local file
                  */
                 $baseDir = empty($value['filePath']) ? $this->settings[$model->alias]['filePath'] : $value['filePath'];
+                if ($baseDir) {
                 $filePath = $baseDir . $model->transferTo($deleteFields[$fieldName]);
+                } else {
+                    $filePath = false;
+                }
 
-                if (!@unlink($filePath)) {
+                if ($filePath && !@unlink($filePath)) {
                     $result = false;
                 }
             }
@@ -834,7 +854,11 @@ class BindableBehavior extends ModelBehavior {
                 if (array_key_exists($model_id . '.' . $fieldName, $binds)) {
                     $bind = $binds[$model_id . '.' . $fieldName][$this->settings[$model->alias]['model']];
                     $baseDir = empty($bindFields[$fieldName]['filePath']) ? $this->settings[$model->alias]['filePath'] : $bindFields[$fieldName]['filePath'];
-                    $filePath = $baseDir . $model->transferTo(array_diff_key($bind, Set::normalize(array('file_object'))));
+                    if ($baseDir) {
+                        $filePath = $baseDir . $model->transferTo(array_diff_key($bind, Set::normalize(array('file_object'))));
+                    } else {
+                        $filePath = false;
+                    }
                     $bind['file_path'] = $filePath;
                     $bind['bindedModel'] = $this->runtime[$model->alias]['bindedModel']->alias;
                     $tmpData[$key][$modelName][$fieldName] = $bind;
@@ -849,7 +873,7 @@ class BindableBehavior extends ModelBehavior {
                         if (isset($this->settings[$model->alias]['dbStorage'])) {
                             $dbStorage = $this->settings[$model->alias]['dbStorage'];
                         }
-                        if ($dbStorage) {
+                        if ($filePath && $dbStorage) {
 
                             /**
                              * create entity from record data
@@ -885,7 +909,7 @@ class BindableBehavior extends ModelBehavior {
                          * S3 storage
                          */
                         $s3Storage = in_array(BindableBehavior::STORAGE_S3, (array)$this->settings[$model->alias]['storage']);
-                        if ($s3Storage) {
+                        if ($filePath && $s3Storage) {
                             if (!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.key') || !Configure::read('Filebinder.S3.secret')) {
                                 //__('Validation Error: S3 Parameter Error');
                                 return false;
