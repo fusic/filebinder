@@ -308,8 +308,9 @@ class BindableBehavior extends ModelBehavior {
                     if (empty($acl)) {
                         $acl = AmazonS3::ACL_PUBLIC;
                     }
+                    $urlPrefix = !empty($bindFields[$fieldName]['urlPrefix']) ? $bindFields[$fieldName]['urlPrefix'] : Configure::read('Filebinder.S3.urlPrefix');
                     $responce = $s3->create_object($bucket,
-                                                   $model->transferTo(array_diff_key(array('model_id' => $model_id) + $value, Set::normalize(array('tmp_bind_path')))),
+                                                   $urlPrefix . $model->transferTo(array_diff_key(array('model_id' => $model_id) + $value, Set::normalize(array('tmp_bind_path')))),
                                                    array(
                                                          'fileUpload' => $tmpFile,
                                                          'acl' => $acl,
@@ -430,8 +431,9 @@ class BindableBehavior extends ModelBehavior {
                     if (!empty($region)) {
                         $s3->set_region($region);
                     }
+                    $urlPrefix = !empty($bindFields[$fieldName]['urlPrefix']) ? $bindFields[$fieldName]['urlPrefix'] : Configure::read('Filebinder.S3.urlPrefix');
                     $responce = $s3->delete_object($bucket,
-                                                   $model->transferTo($deleteFields[$fieldName])
+                                                   $urlPrefix . $model->transferTo($deleteFields[$fieldName])
                                                    );
                     if (!$responce->isOK()) {
                         //__('Validation Error: S3 Delete Error');
@@ -444,7 +446,7 @@ class BindableBehavior extends ModelBehavior {
                  */
                 $baseDir = empty($value['filePath']) ? $this->settings[$model->alias]['filePath'] : $value['filePath'];
                 if ($baseDir) {
-                $filePath = $baseDir . $model->transferTo($deleteFields[$fieldName]);
+                    $filePath = $baseDir . $model->transferTo($deleteFields[$fieldName]);
                 } else {
                     $filePath = false;
                 }
@@ -927,8 +929,9 @@ class BindableBehavior extends ModelBehavior {
                             if (!empty($region)) {
                                 $s3->set_region($region);
                             }
+                            $urlPrefix = !empty($bindFields[$fieldName]['urlPrefix']) ? $bindFields[$fieldName]['urlPrefix'] : Configure::read('Filebinder.S3.urlPrefix');
                             $responce = $s3->get_object($bucket,
-                                                        $model->transferTo(array_diff_key($bind, Set::normalize(array('file_object')))),
+                                                        $urlPrefix . $model->transferTo(array_diff_key($bind, Set::normalize(array('file_object')))),
                                                         array(
                                                               'fileDownload' => $filePath,
                                                               ));
@@ -978,9 +981,10 @@ class BindableBehavior extends ModelBehavior {
                             if (!empty($region)) {
                                 $s3->set_region($region);
                             }
+                            $urlPrefix = !empty($bindFields[$fieldName]['urlPrefix']) ? $bindFields[$fieldName]['urlPrefix'] : Configure::read('Filebinder.S3.urlPrefix');
                             $tmpFilePath = '/tmp/' . sha1(uniqid('', true));
                             $responce = $s3->get_object($bucket,
-                                                        $model->transferTo(array_diff_key($bind, Set::normalize(array('file_object')))),
+                                                        $urlPrefix . $model->transferTo(array_diff_key($bind, Set::normalize(array('file_object')))),
                                                         array(
                                                               'fileDownload' => $tmpFilePath,
                                                               ));
