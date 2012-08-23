@@ -261,7 +261,7 @@ class BindableTestCase extends CakeTestCase{
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
-        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php'))) {
+        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php')) && !class_exists('AmazonS3')) {
             return;
         }
 
@@ -321,7 +321,7 @@ class BindableTestCase extends CakeTestCase{
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
-        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php'))) {
+        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php')) && !class_exists('AmazonS3')) {
             return;
         }
 
@@ -385,7 +385,7 @@ class BindableTestCase extends CakeTestCase{
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
-        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php'))) {
+        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php')) && !class_exists('AmazonS3')) {
             return;
         }
 
@@ -528,7 +528,7 @@ class BindableTestCase extends CakeTestCase{
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
-        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php'))) {
+        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php')) && !class_exists('AmazonS3')) {
             return;
         }
 
@@ -567,9 +567,13 @@ class BindableTestCase extends CakeTestCase{
         $query['conditions'] = array('FilebinderPost.id' => $id);
         $result = $this->FilebinderPost->find('first', $query);
 
+        $this->assertTrue(file_exists($result['FilebinderPost']['logo']['file_path']));
+        $this->assertIdentical(file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']),
+                               file_get_contents($result['FilebinderPost']['logo']['file_path']));
+
         $this->FilebinderPost->delete($id);
 
-        $this->assertIdentical(file_exists($result['FilebinderPost']['logo']['file_path']), false);
+        $this->assertFalse(file_exists($result['FilebinderPost']['logo']['file_path']));
 
         $this->assertFalse(@file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
     }
