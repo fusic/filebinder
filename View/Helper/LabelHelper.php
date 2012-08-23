@@ -58,6 +58,14 @@ class LabelHelper extends AppHelper {
     function _makeSrc($file = null, $options = array()){
         $hash = $this->Session->read('Filebinder.hash');
         $prefix = empty($options['prefix']) ? '' : $options['prefix'];
+
+        /**
+         * S3 url
+         */
+        if (!empty($options['S3']) || !empty($options['s3'])) {
+            return $this->_makeS3Url($file, $options);
+        }
+
         $filePath = empty($file['file_path']) ? (empty($file['tmp_bind_path']) ? false : $file['tmp_bind_path']) : preg_replace('#/([^/]+)$#' , '/' . $prefix . '$1' , $file['file_path']);
         if (empty($file) || !$filePath) {
             return false;
@@ -100,4 +108,16 @@ class LabelHelper extends AppHelper {
         return $src;
     }
 
+    /**
+     * _makeS3Url
+     *
+     */
+    public function _makeS3Url($file, $options){
+        if (empty($file['model'])) {
+            return null;
+        }
+        $prefix = empty($options['prefix']) ? '' : $options['prefix'];
+        $http = empty($options['ssl']) ? 'http' : 'https';
+        return $http . '://' . Configure::read('Filebinder.S3.bucket') . '.s3.amazonaws.com/' . $file['model'] . '/' . $file['model_id'] . '/' . $file['field_name'] . '/' . $prefix . $file['file_name'];
+    }
 }
