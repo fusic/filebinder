@@ -434,6 +434,71 @@ class BindableTestCase extends CakeTestCase{
     }
 
     /**
+     * testSaveS3WithUrlPrefix
+     *
+     * en:
+     * jpn: urlPrefixパラメータを付与することでファイルを保存するS3のルートディレクトリを指定出来る
+     */
+    function testSaveS3WithUrlPrefix(){
+        $tmpPath = TMP . 'tests' . DS . 'bindup.png';
+        $filePath = TMP . 'tests' . DS;
+        $urlPrefix = 'testPrefix/';
+
+        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php')) && !class_exists('AmazonS3')) {
+            return;
+        }
+
+        // change settings
+        $settings = $this->FilebinderPost->getSettings();
+        $settings['storage'] = array(BindableBehavior::STORAGE_DB, BindableBehavior::STORAGE_S3);
+        $this->FilebinderPost->setSettings($settings);
+
+        // set test.png
+        $this->_setTestFile($tmpPath);
+
+        // set S3 Access Key
+        Configure::write('Filebinder.S3.key', AWS_ACCESS_KEY);
+        Configure::write('Filebinder.S3.secret', AWS_SECRET_ACCESS_KEY);
+        // Configure::write('Filebinder.S3.bucket', AWS_S3_BUCKET);
+        // Configure::write('Filebinder.S3.region', AmazonS3::REGION_TOKYO);
+
+        $this->FilebinderPost->bindFields = array(
+                                                  array('field' => 'logo',
+                                                        'tmpPath'  => CACHE,
+                                                        'filePath' => $filePath,
+                                                        'urlPrefix' => $urlPrefix,
+                                                        'bucket' => AWS_S3_BUCKET,
+                                                        'acl' => AmazonS3::ACL_PUBLIC,
+                                                        ),
+                                                  );
+
+        $data = array('FilebinderPost' => array('title' => 'Title',
+                                                'logo' => array('model' => 'FilebinderPost',
+                                                                'field_name' => 'logo',
+                                                                'file_name' => 'logo.png',
+                                                                'file_content_type' => 'image/png',
+                                                                'file_size' => 1395,
+                                                                'tmp_bind_path' => $tmpPath
+                                                                )));
+        $result = $this->FilebinderPost->save($data);
+        $id = $this->FilebinderPost->getLastInsertId();
+        $query = array();
+        $query['conditions'] = array('FilebinderPost.id' => $id);
+        $result = $this->FilebinderPost->find('first', $query);
+
+        $this->assertIdentical(file_get_contents($result['FilebinderPost']['logo']['file_path']),
+                               file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . $urlPrefix . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
+
+        $this->FilebinderPost->delete($id);
+
+        // rm file
+        if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
+            unlink($result['FilebinderPost']['logo']['file_path']);
+        }
+    }
+
+
+    /**
      * testSaveNoLocal
      *
      * en:
