@@ -271,13 +271,17 @@ class BindableBehavior extends ModelBehavior {
                  * Local file
                  */
                 if ($filePath) {
+                    $currentMask = umask();
+                    umask(0);
                     if (!is_dir(dirname($filePath))) {
                         mkdir(dirname($filePath), $this->settings[$model->alias]['dirMode'], true);
                     }
                     if (!copy($tmpFile, $filePath) || !chmod($filePath, $this->settings[$model->alias]['fileMode'])) {
                         @unlink($tmpFile);
+                        umask($currentMask);
                         return false;
                     }
+                    umask($currentMask);
                 }
 
                 /**
@@ -891,6 +895,8 @@ class BindableBehavior extends ModelBehavior {
                                 continue;
                             }
 
+                            $currentMask = umask();
+                            umask(0);
                             if (!is_dir(dirname($filePath))) {
                                 mkdir(dirname($filePath), $this->settings[$model->alias]['dirMode'], true);
                             }
@@ -903,8 +909,10 @@ class BindableBehavior extends ModelBehavior {
                                 !file_put_contents($filePath, base64_decode($fileObject))
                                 || !chmod($filePath, $this->settings[$model->alias]['fileMode'])
                                 ) {
+                                umask($currentMask);
                                 return false;
                             }
+                            umask($currentMask);
                         }
 
                         /**
@@ -930,6 +938,13 @@ class BindableBehavior extends ModelBehavior {
                                 $s3->set_region($region);
                             }
                             $urlPrefix = !empty($bindFields[$fieldName]['urlPrefix']) ? $bindFields[$fieldName]['urlPrefix'] : Configure::read('Filebinder.S3.urlPrefix');
+
+                            $currentMask = umask();
+                            umask(0);
+                            if (!is_dir(dirname($filePath))) {
+                                mkdir(dirname($filePath), $this->settings[$model->alias]['dirMode'], true);
+                            }
+
                             $responce = $s3->get_object($bucket,
                                                         $urlPrefix . $model->transferTo(array_diff_key($bind, Set::normalize(array('file_object')))),
                                                         array(
@@ -939,6 +954,7 @@ class BindableBehavior extends ModelBehavior {
                                 //__('Validation Error: S3 Upload Error');
                                 return false;
                             }
+                            umask($currentMask);
                         }
 
                         if (file_exists($filePath) && is_file($filePath)) {
