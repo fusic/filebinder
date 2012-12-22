@@ -137,7 +137,7 @@ class RingComponent extends Component {
             $fileSize = filesize($tmpFile);
 
             $tmpPath = empty($bindFields[$fieldName]['tmpPath']) ? CACHE : $bindFields[$fieldName]['tmpPath'];
-            $tmpBindPath = $tmpPath . 'ring_' . Security::hash($model->alias . $fieldName . $fileName . time()) . $fileName;
+            $tmpBindPath = $tmpPath . 'ring_' . date('YmdHis') . '_' . Security::hash($model->alias . $fieldName . $fileName . time()) . $fileName;
 
             // move_uploaded_file
             move_uploaded_file($tmpFile, $tmpBindPath);
