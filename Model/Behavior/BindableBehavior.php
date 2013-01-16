@@ -117,7 +117,7 @@ class BindableBehavior extends ModelBehavior {
      * @param $model, $result
      * @return
      */
-    public function afterFind(Model $model, $result){
+    public function afterFind(Model $model, $result, $primary){
         return $this->bindFile($model, $result);
     }
 
