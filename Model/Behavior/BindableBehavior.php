@@ -570,7 +570,7 @@ class BindableBehavior extends ModelBehavior {
 
     /**
      * checkMaxFileSize
-     * Validation method: check min file size
+     * Validation method: check max file size
      *
      * @param $model
      * @param $value
