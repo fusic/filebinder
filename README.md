@@ -1,6 +1,6 @@
 # Filebinder: Simple file attachment plugin for CakePHP
 
-![Image](/fusic/filebinder/raw/2.0/Document/filebinder.png)
+![Image](https://raw.github.com/fusic/filebinder/2.0/Document/filebinder.png)
 
 [![Build Status](https://travis-ci.org/fusic/filebinder.png?branch=2.0)](https://travis-ci.org/fusic/filebinder)
 
@@ -30,19 +30,19 @@ Filebinder manage 'virtual table' and entity.
 
 ### 'Simple attachment' model image
 
-![Image](/fusic/filebinder/raw/2.0/Document/filebinder_image.png)
+![Image](https://raw.github.com/fusic/filebinder/2.0/Document/filebinder_image.png)
 
 ### 'Multi fields' model image
 
-![Image](/fusic/filebinder/raw/2.0/Document/filebinder_multi_fields.png)
+![Image](https://raw.github.com/fusic/filebinder/2.0/Document/filebinder_multi_fields.png)
 
 ### 'Multi models' model image
 
-![Image](/fusic/filebinder/raw/2.0/Document/filebinder_multi_models.png)
+![Image](https://raw.github.com/fusic/filebinder/2.0/Document/filebinder_multi_models.png)
 
 ### Entity file path image
 
-![Image](/fusic/filebinder/raw/2.0/Document/filebinder_filepath.png)
+![Image](https://raw.github.com/fusic/filebinder/2.0/Document/filebinder_filepath.png)
 
 ## Usage
 
