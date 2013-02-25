@@ -154,7 +154,7 @@ Create attachment table.
       <h2><?php printf(__('Add %s', true), __('Post', true)); ?></h2>
       <?php echo $this->Form->create('Post', array('action' => 'add', 'type' => 'file'));?>
       <?php echo $this->Form->input('title', array('type' => 'text'));?>
-      <?php echo $this->Form->input('body'));?>
+      <?php echo $this->Form->input('body');?>
       <?php echo $this->Form->input('image', array('type' => 'file'));?>
       <?php echo $this->Form->submit(__('Submit', true));?>
       <?php echo $this->Form->end();?>
