@@ -48,9 +48,9 @@ class FilebinderController extends FilebinderAppController {
         } else {
             $query = array();
             $query['recursive'] = -1;
-            $query['fields'] = array('id',
+            $query['fields'] = array($this->{$model}->primaryKey,
                                      $fieldName);
-            $query['conditions'] = array('id' => $model_id);
+            $query['conditions'] = array($this->{$model}->primaryKey => $model_id);
             $file = $this->{$model}->find('first', $query);
 
             if (empty($fileName)) {
