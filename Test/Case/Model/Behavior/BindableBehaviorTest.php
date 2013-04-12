@@ -12,15 +12,16 @@ class FilebinderPost extends CakeTestModel{
 
 class BindableTestCase extends CakeTestCase{
 
-    public $fixtures = array('plugin.filebinder.attachment',
-                             'plugin.filebinder.filebinder_post');
+    public $fixtures = array(
+        'plugin.filebinder.attachment',
+        'plugin.filebinder.filebinder_post');
 
-    function setUp() {
+    public function setUp() {
         $this->FilebinderPost = new FilebinderPost(); // jpn: 初期化するため
         $this->FilebinderPostFixture = ClassRegistry::init('FilebinderPostFixture');
     }
 
-    function tearDown() {
+    public function tearDown() {
         unset($this->FilebinderPost);
         unset($this->FilebinderPostFixture);
     }
@@ -45,39 +46,40 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: Model::bindFieldsに設定してある対象のデータがある場合Model::find()時に整形して取得する
      */
-    function testFind(){
+    public function testFind(){
         $filePath = TMP . 'tests' . DS;
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        ),
-                                                  );
+            array(
+                'field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+            ),
+        );
 
         $query = array();
         $query['conditions'] = array('FilebinderPost.id' => 1);
         $result = $this->FilebinderPost->find('first', $query);
 
         $expected = array(
-                          'id' => 1,
-                          'title' => 'Title',
-                          'body' => 'Filebinder.Bindable Test',
-                          'created' => '2011-08-23 17:44:58',
-                          'modified' => '2011-08-23 12:05:02',
-                          'logo' => array(
-                                          'id' => 100,
-                                          'model' => 'FilebinderPost',
-                                          'model_id' => 1,
-                                          'field_name' => 'logo',
-                                          'file_name' => 'logo.png',
-                                          'file_content_type' => 'image/png',
-                                          'file_size' => '771311',
-                                          'created' => '2011-08-22 19:29:32',
-                                          'modified' => '2011-08-22 19:29:32',
-                                          'file_path' => $filePath . 'FilebinderPost/1/logo/logo.png',
-                                          'bindedModel' => 'Attachment'
-                                          ),
-                          );
+            'id' => 1,
+            'title' => 'Title',
+            'body' => 'Filebinder.Bindable Test',
+            'created' => '2011-08-23 17:44:58',
+            'modified' => '2011-08-23 12:05:02',
+            'logo' => array(
+                'id' => 100,
+                'model' => 'FilebinderPost',
+                'model_id' => 1,
+                'field_name' => 'logo',
+                'file_name' => 'logo.png',
+                'file_content_type' => 'image/png',
+                'file_size' => '771311',
+                'created' => '2011-08-22 19:29:32',
+                'modified' => '2011-08-22 19:29:32',
+                'file_path' => $filePath . 'FilebinderPost/1/logo/logo.png',
+                'bindedModel' => 'Attachment'
+            ),
+        );
 
         $this->assertEqual($result['FilebinderPost'], $expected);
     }
@@ -88,27 +90,27 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: 対象のデータがない場合もnull値がセットされたフィールドを生成して返す
      */
-    function testFindNoAttachment(){
+    public function testFindNoAttachment(){
         $filePath = TMP . 'tests' . DS;
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        ),
-                                                  );
+            array('field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+            ),
+        );
 
         $query = array();
         $query['conditions'] = array('FilebinderPost.id' => 401);
         $result = $this->FilebinderPost->find('first', $query);
 
         $expected = array(
-                          'id' => 401,
-                          'title' => 'No Attachment',
-                          'body' => 'Filebinder.Bindable Test',
-                          'created' => '2011-08-23 17:44:58',
-                          'modified' => '2011-08-23 12:05:02',
-                          'logo' => null // Set null
-                          );
+            'id' => 401,
+            'title' => 'No Attachment',
+            'body' => 'Filebinder.Bindable Test',
+            'created' => '2011-08-23 17:44:58',
+            'modified' => '2011-08-23 12:05:02',
+            'logo' => null // Set null
+        );
 
         $this->assertEqual($result['FilebinderPost'], $expected);
     }
@@ -119,7 +121,7 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: Ring::bindUp()で整形されたデータをModel::save()したときModel::find()で正常に取得できる
      */
-    function testSave(){
+    public function testSave(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
@@ -127,20 +129,22 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath);
 
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        ),
-                                                  );
+            array(
+                'field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+            ),
+        );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                                                'logo' => array('model' => 'FilebinderPost',
-                                                                'field_name' => 'logo',
-                                                                'file_name' => 'logo.png',
-                                                                'file_content_type' => 'image/png',
-                                                                'file_size' => 1395,
-                                                                'tmp_bind_path' => $tmpPath
-                                                                )));
+        $data = array('FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -161,7 +165,7 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: withObject設定をtrueをすると実データを取得する
      */
-    function testFindWithObject(){
+    public function testFindWithObject(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
@@ -174,20 +178,22 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath);
 
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        ),
-                                                  );
+            array('field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+            ),
+        );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                                                'logo' => array('model' => 'FilebinderPost',
-                                                                'field_name' => 'logo',
-                                                                'file_name' => 'logo.png',
-                                                                'file_content_type' => 'image/png',
-                                                                'file_size' => 1395,
-                                                                'tmp_bind_path' => $tmpPath
-                                                                )));
+        $data = array('FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -209,7 +215,7 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: DBにファイルを保存しない設定のときはwithObjectのときもデータは入っていない
      */
-    function testSaveNoStrage(){
+    public function testSaveNoStrage(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
@@ -222,20 +228,22 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath);
 
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        ),
-                                                  );
+            array(
+                'field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+            ),
+        );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                                                'logo' => array('model' => 'FilebinderPost',
-                                                                'field_name' => 'logo',
-                                                                'file_name' => 'logo.png',
-                                                                'file_content_type' => 'image/png',
-                                                                'file_size' => 1395,
-                                                                'tmp_bind_path' => $tmpPath
-                                                                )));
+        $data = array('FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -257,11 +265,11 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: ファイルをS3にも保存できる
      */
-    function testSaveS3(){
+    public function testSaveS3(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
-        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php')) && !class_exists('AmazonS3')) {
+        if(!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.bucket')) {
             return;
         }
 
@@ -276,26 +284,27 @@ class BindableTestCase extends CakeTestCase{
         // set S3 Access Key
         Configure::write('Filebinder.S3.key', AWS_ACCESS_KEY);
         Configure::write('Filebinder.S3.secret', AWS_SECRET_ACCESS_KEY);
-        // Configure::write('Filebinder.S3.bucket', AWS_S3_BUCKET);
+        Configure::write('Filebinder.S3.bucket', AWS_S3_BUCKET);
         // Configure::write('Filebinder.S3.region', AmazonS3::REGION_TOKYO);
 
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        'bucket' => AWS_S3_BUCKET,
-                                                        'acl' => AmazonS3::ACL_PUBLIC,
-                                                        ),
-                                                  );
+            array(
+                'field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+                'bucket' => AWS_S3_BUCKET,
+                'acl' => AmazonS3::ACL_PUBLIC,
+            ),
+        );
 
         $data = array('FilebinderPost' => array('title' => 'Title',
-                                                'logo' => array('model' => 'FilebinderPost',
-                                                                'field_name' => 'logo',
-                                                                'file_name' => 'logo.png',
-                                                                'file_content_type' => 'image/png',
-                                                                'file_size' => 1395,
-                                                                'tmp_bind_path' => $tmpPath
-                                                                )));
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -303,7 +312,7 @@ class BindableTestCase extends CakeTestCase{
         $result = $this->FilebinderPost->find('first', $query);
 
         $this->assertIdentical(file_get_contents($result['FilebinderPost']['logo']['file_path']),
-                               file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
+            file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
 
         // rm file
         if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
@@ -317,11 +326,11 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: S3に保存したデータからローカルファイルを復旧する
      */
-    function testSalvageS3(){
+    public function testSalvageS3(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
-        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php')) && !class_exists('AmazonS3')) {
+        if(!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.bucket')) {
             return;
         }
 
@@ -338,22 +347,22 @@ class BindableTestCase extends CakeTestCase{
         Configure::write('Filebinder.S3.secret', AWS_SECRET_ACCESS_KEY);
 
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        'bucket' => AWS_S3_BUCKET,
-                                                        'acl' => AmazonS3::ACL_PRIVATE,
-                                                        ),
-                                                  );
+            array('field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+                'bucket' => AWS_S3_BUCKET,
+                'acl' => AmazonS3::ACL_PRIVATE,
+            ),
+        );
 
         $data = array('FilebinderPost' => array('title' => 'Title',
-                                                'logo' => array('model' => 'FilebinderPost',
-                                                                'field_name' => 'logo',
-                                                                'file_name' => 'logo.png',
-                                                                'file_content_type' => 'image/png',
-                                                                'file_size' => 1395,
-                                                                'tmp_bind_path' => $tmpPath
-                                                                )));
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -385,7 +394,7 @@ class BindableTestCase extends CakeTestCase{
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
-        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php')) && !class_exists('AmazonS3')) {
+        if(!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.bucket')) {
             return;
         }
 
@@ -403,22 +412,22 @@ class BindableTestCase extends CakeTestCase{
         Configure::write('Filebinder.S3.secret', AWS_SECRET_ACCESS_KEY);
 
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        'bucket' => AWS_S3_BUCKET,
-                                                        'acl' => AmazonS3::ACL_PUBLIC,
-                                                        ),
-                                                  );
+            array('field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+                'bucket' => AWS_S3_BUCKET,
+                'acl' => AmazonS3::ACL_PUBLIC,
+            ),
+        );
 
         $data = array('FilebinderPost' => array('title' => 'Title',
-                                                'logo' => array('model' => 'FilebinderPost',
-                                                                'field_name' => 'logo',
-                                                                'file_name' => 'logo.png',
-                                                                'file_content_type' => 'image/png',
-                                                                'file_size' => 1395,
-                                                                'tmp_bind_path' => $tmpPath
-                                                                )));
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -439,12 +448,12 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: urlPrefixパラメータを付与することでファイルを保存するS3のルートディレクトリを指定出来る
      */
-    function testSaveS3WithUrlPrefix(){
+    public function testSaveS3WithUrlPrefix(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
         $urlPrefix = 'testPrefix/';
 
-        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php')) && !class_exists('AmazonS3')) {
+        if(!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.bucket')) {
             return;
         }
 
@@ -463,23 +472,25 @@ class BindableTestCase extends CakeTestCase{
         // Configure::write('Filebinder.S3.region', AmazonS3::REGION_TOKYO);
 
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        'urlPrefix' => $urlPrefix,
-                                                        'bucket' => AWS_S3_BUCKET,
-                                                        'acl' => AmazonS3::ACL_PUBLIC,
-                                                        ),
-                                                  );
+            array(
+                'field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+                'urlPrefix' => $urlPrefix,
+                'bucket' => AWS_S3_BUCKET,
+                'acl' => AmazonS3::ACL_PUBLIC,
+            ),
+        );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                                                'logo' => array('model' => 'FilebinderPost',
-                                                                'field_name' => 'logo',
-                                                                'file_name' => 'logo.png',
-                                                                'file_content_type' => 'image/png',
-                                                                'file_size' => 1395,
-                                                                'tmp_bind_path' => $tmpPath
-                                                                )));
+        $data = array('FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -487,7 +498,7 @@ class BindableTestCase extends CakeTestCase{
         $result = $this->FilebinderPost->find('first', $query);
 
         $this->assertIdentical(file_get_contents($result['FilebinderPost']['logo']['file_path']),
-                               file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . $urlPrefix . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
+            file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . $urlPrefix . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
 
         $this->FilebinderPost->delete($id);
 
@@ -504,7 +515,7 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: filePath = falseにした場合、ローカルにファイルを保存しない
      */
-    function testSaveNoLocal(){
+    public function testSaveNoLocal(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = false;
 
@@ -518,20 +529,21 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath);
 
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        ),
-                                                  );
+            array('field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+            ),
+        );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                                                'logo' => array('model' => 'FilebinderPost',
-                                                                'field_name' => 'logo',
-                                                                'file_name' => 'logo.png',
-                                                                'file_content_type' => 'image/png',
-                                                                'file_size' => 1395,
-                                                                'tmp_bind_path' => $tmpPath
-                                                                )));
+        $data = array('FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -550,7 +562,7 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: 削除した場合もひもづく仮想フィールドも削除される。同時に実データも削除される
      */
-    function testDelete(){
+    public function testDelete(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
@@ -558,20 +570,21 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath);
 
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        ),
-                                                  );
+            array('field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+            ),
+        );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                                                'logo' => array('model' => 'FilebinderPost',
-                                                                'field_name' => 'logo',
-                                                                'file_name' => 'logo.png',
-                                                                'file_content_type' => 'image/png',
-                                                                'file_size' => 1395,
-                                                                'tmp_bind_path' => $tmpPath
-                                                                )));
+        $data = array('FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -589,11 +602,11 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: 削除した場合もひもづく仮想フィールドも削除される。同時に実データ、S3のデータも削除される
      */
-    function testDeleteS3(){
+    public function testDeleteS3(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
-        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php')) && !class_exists('AmazonS3')) {
+        if(!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.bucket')) {
             return;
         }
 
@@ -610,22 +623,22 @@ class BindableTestCase extends CakeTestCase{
         Configure::write('Filebinder.S3.secret', AWS_SECRET_ACCESS_KEY);
 
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        'bucket' => AWS_S3_BUCKET,
-                                                        'acl' => AmazonS3::ACL_PUBLIC,
-                                                        ),
-                                                  );
+            array('field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+                'bucket' => AWS_S3_BUCKET,
+                'acl' => AmazonS3::ACL_PUBLIC,
+            ),
+        );
 
         $data = array('FilebinderPost' => array('title' => 'Title',
-                                                'logo' => array('model' => 'FilebinderPost',
-                                                                'field_name' => 'logo',
-                                                                'file_name' => 'logo.png',
-                                                                'file_content_type' => 'image/png',
-                                                                'file_size' => 1395,
-                                                                'tmp_bind_path' => $tmpPath
-                                                                )));
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -634,7 +647,7 @@ class BindableTestCase extends CakeTestCase{
 
         $this->assertTrue(file_exists($result['FilebinderPost']['logo']['file_path']));
         $this->assertIdentical(file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']),
-                               file_get_contents($result['FilebinderPost']['logo']['file_path']));
+            file_get_contents($result['FilebinderPost']['logo']['file_path']));
 
         $this->FilebinderPost->delete($id);
 
@@ -649,18 +662,18 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: ྪファイルがアップされていない場合でも通常通り削除できる
      */
-    function testDeleteNoAttachment(){
+    public function testDeleteNoAttachment(){
         $filePath = TMP . 'tests' . DS;
 
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        ),
-                                                  );
+            array('field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+            ),
+        );
 
         $data = array('FilebinderPost' => array('title' => 'Title',
-                                                'logo' => null));
+                'logo' => null));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -678,7 +691,7 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: 仮想フィールドにdelete_プレフィックスをつけた値を与えたとき仮想フィールドの実ファイルを削除する
      */
-    function testDelete_bindedFileOnly(){
+    public function testDelete_bindedFileOnly(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
@@ -686,20 +699,20 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath);
 
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        ),
-                                                  );
+            array('field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+            ),
+        );
 
         $data = array('FilebinderPost' => array('title' => 'Title',
-                                                'logo' => array('model' => 'FilebinderPost',
-                                                                'field_name' => 'logo',
-                                                                'file_name' => 'logo.png',
-                                                                'file_content_type' => 'image/png',
-                                                                'file_size' => 1395,
-                                                                'tmp_bind_path' => $tmpPath
-                                                                )));
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -707,10 +720,10 @@ class BindableTestCase extends CakeTestCase{
         $result = $this->FilebinderPost->find('first', $query);
 
         $data = array('FilebinderPost' => array('id' => $id,
-                                                'title' => 'Title',
-                                                'logo' => null,
-                                                'delete_logo' => '1',
-                                                ));
+                'title' => 'Title',
+                'logo' => null,
+                'delete_logo' => '1',
+            ));
         $this->FilebinderPost->save($data);
 
         $this->assertIdentical(file_exists($result['FilebinderPost']['logo']['file_path']), false);
@@ -722,7 +735,7 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: 仮想フィールドにdelete_プレフィックスをつけた値がfalse(0)の場合は削除しない
      */
-    function testNotDelete_bindedFile(){
+    public function testNotDelete_bindedFile(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
@@ -730,20 +743,20 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath);
 
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        ),
-                                                  );
+            array('field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+            ),
+        );
 
         $data = array('FilebinderPost' => array('title' => 'Title',
-                                                'logo' => array('model' => 'FilebinderPost',
-                                                                'field_name' => 'logo',
-                                                                'file_name' => 'logo.png',
-                                                                'file_content_type' => 'image/png',
-                                                                'file_size' => 1395,
-                                                                'tmp_bind_path' => $tmpPath
-                                                                )));
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -751,10 +764,10 @@ class BindableTestCase extends CakeTestCase{
         $result = $this->FilebinderPost->find('first', $query);
 
         $data = array('FilebinderPost' => array('id' => $id,
-                                                'title' => 'Title',
-                                                'logo' => null,
-                                                'delete_logo' => '0',
-                                                ));
+                'title' => 'Title',
+                'logo' => null,
+                'delete_logo' => '0',
+            ));
         $this->FilebinderPost->save($data);
 
         $this->assertIdentical(file_exists($result['FilebinderPost']['logo']['file_path']), true);
@@ -766,7 +779,7 @@ class BindableTestCase extends CakeTestCase{
      * en:
      * jpn: 仮想フィールドの値を更新した場合、元の実データは削除される
      */
-    function testUpdateFile(){
+    public function testUpdateFile(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $tmpPath2 = TMP . 'tests' . DS . 'bindup2.png';
         $filePath = TMP . 'tests' . DS;
@@ -776,20 +789,20 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath2);
 
         $this->FilebinderPost->bindFields = array(
-                                                  array('field' => 'logo',
-                                                        'tmpPath'  => CACHE,
-                                                        'filePath' => $filePath,
-                                                        ),
-                                                  );
+            array('field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+            ),
+        );
 
         $data = array('FilebinderPost' => array('title' => 'Title',
-                                                'logo' => array('model' => 'FilebinderPost',
-                                                                'field_name' => 'logo',
-                                                                'file_name' => 'logo.png', // file_name:logo.png
-                                                                'file_content_type' => 'image/png',
-                                                                'file_size' => 1395,
-                                                                'tmp_bind_path' => $tmpPath
-                                                                )));
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png', // file_name:logo.png
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -797,14 +810,14 @@ class BindableTestCase extends CakeTestCase{
         $result = $this->FilebinderPost->find('first', $query);
 
         $data = array('FilebinderPost' => array('id' => $id,
-                                                'title' => 'Title',
-                                                'logo' => array('model' => 'FilebinderPost',
-                                                                'field_name' => 'logo',
-                                                                'file_name' => 'logo2.png', // file_name:logo2.png
-                                                                'file_content_type' => 'image/png',
-                                                                'file_size' => 1395,
-                                                                'tmp_bind_path' => $tmpPath2
-                                                                )));
+                'title' => 'Title',
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo2.png', // file_name:logo2.png
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath2
+                )));
         $result2 = $this->FilebinderPost->save($data);
         $this->assertIdentical(file_exists($result['FilebinderPost']['logo']['file_path']), false);
         $id = $this->FilebinderPost->getLastInsertId();
@@ -826,7 +839,7 @@ class BindableTestCase extends CakeTestCase{
      *
      * @return
      */
-    function _setTestFile($to = null){
+    private function _setTestFile($to = null){
         if (!$to) {
             return false;
         }

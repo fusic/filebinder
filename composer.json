@@ -1,0 +1,6 @@
+{
+    "name": "Filebinder",
+    "require": {
+        "amazonwebservices/aws-sdk-for-php": "1.*"
+    }
+}
