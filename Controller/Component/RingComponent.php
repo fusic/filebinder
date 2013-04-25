@@ -55,7 +55,8 @@ class RingComponent extends Component {
         if (empty($modelName)) {
             $modelName = $this->controller->modelClass;
         }
-        if (!$model =& $this->_getModel($modelName)) {
+        $model = ClassRegistry::init($modelName);
+        if (!$model) {
             return false;
         }
         if (empty($this->controller->request->data[$model->alias])) {
@@ -89,7 +90,8 @@ class RingComponent extends Component {
         if (empty($modelName)) {
             $modelName = $this->controller->modelClass;
         }
-        if (!$model =& $this->_getModel($modelName)) {
+        $model = ClassRegistry::init($modelName);
+        if (!$model) {
             return false;
         }
         $this->Session->delete('Filebinder.' . $model->alias);

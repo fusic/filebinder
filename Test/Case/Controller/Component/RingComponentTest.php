@@ -77,6 +77,7 @@ class RingComponentTest extends CakeTestCase{
                                                                     ),
                                                               );
 
+        $this->Controller->request = new CakeRequest(null, false);
         $this->Controller->request->data = array('FilebinderPost' => array());
         $this->Controller->request->data['FilebinderPost']['title'] = 'Title';
         $this->Controller->request->data['FilebinderPost']['logo'] = array('name' => 'logo.png',
@@ -111,6 +112,7 @@ class RingComponentTest extends CakeTestCase{
                                                                     ),
                                                               );
 
+        $this->Controller->request = new CakeRequest(null, false);
         $this->Controller->request->data = array('FilebinderPost' => array());
         $this->Controller->request->data['FilebinderPost']['title'] = 'Title';
         $this->Controller->request->data['FilebinderPost']['logo'] = array('name' => 'logo.png',
@@ -149,7 +151,7 @@ class RingComponentTest extends CakeTestCase{
                                                                     'filePath' => TMP . 'tests' . DS,
                                                                     ),
                                                               );
-
+        $this->Controller->request = new CakeRequest(null, false);
         $this->Controller->request->data = array('FilebinderPost' => array());
         $this->Controller->request->data['FilebinderPost']['title'] = 'Title';
         $this->Controller->request->data['FilebinderPost']['logo'] = array('name' => 'logo.png',
@@ -187,6 +189,7 @@ class RingComponentTest extends CakeTestCase{
                                                                     ),
                                                               );
 
+        $this->Controller->request = new CakeRequest(null, false);
         $this->Controller->request->data = array('FilebinderPost' => array());
         $this->Controller->request->data['FilebinderPost']['title'] = 'Title';
         $this->Controller->request->data['FilebinderPost']['logo'] = array('name' => 'logo.png',
