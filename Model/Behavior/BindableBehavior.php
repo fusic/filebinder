@@ -595,7 +595,7 @@ class BindableBehavior extends ModelBehavior {
         $fileSize = $file['file_size'];
         $max = $this->calcFileSizeUnit($max);
 
-        if ($fileSize >= $max) {
+        if ($fileSize > $max) {
             return false;
         }
         return true;
@@ -622,7 +622,7 @@ class BindableBehavior extends ModelBehavior {
         $fileSize = $file['file_size'];
         $min = $this->calcFileSizeUnit($min);
 
-        if ($fileSize <= $min) {
+        if ($fileSize < $min) {
             return false;
         }
         return true;

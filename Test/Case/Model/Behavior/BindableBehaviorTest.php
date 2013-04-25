@@ -310,9 +310,10 @@ class BindableTestCase extends CakeTestCase{
         $query = array();
         $query['conditions'] = array('FilebinderPost.id' => $id);
         $result = $this->FilebinderPost->find('first', $query);
+        $urlPrefix = Configure::read('Filebinder.S3.urlPrefix');
 
         $this->assertIdentical(file_get_contents($result['FilebinderPost']['logo']['file_path']),
-            file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
+            file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . $urlPrefix . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
 
         // rm file
         if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
@@ -644,16 +645,17 @@ class BindableTestCase extends CakeTestCase{
         $query = array();
         $query['conditions'] = array('FilebinderPost.id' => $id);
         $result = $this->FilebinderPost->find('first', $query);
+        $urlPrefix = Configure::read('Filebinder.S3.urlPrefix');
 
         $this->assertTrue(file_exists($result['FilebinderPost']['logo']['file_path']));
-        $this->assertIdentical(file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']),
+        $this->assertIdentical(file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . $urlPrefix . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']),
             file_get_contents($result['FilebinderPost']['logo']['file_path']));
 
         $this->FilebinderPost->delete($id);
 
         $this->assertFalse(file_exists($result['FilebinderPost']['logo']['file_path']));
 
-        $this->assertFalse(@file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
+        $this->assertFalse(@file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . $urlPrefix . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
     }
 
     /**
@@ -832,6 +834,34 @@ class BindableTestCase extends CakeTestCase{
         if (file_exists($result2['FilebinderPost']['logo']['file_path'])) {
             unlink($result2['FilebinderPost']['logo']['file_path']);
         }
+    }
+
+    /**
+     * testCheckMaxFileSize
+     *
+     * en:
+     * jpn: '1MB'指定の場合は1MBまで許可すること
+     */
+    public function testCheckMaxFileSize(){
+        $data = array(
+            'file' => array('file_size' => 1 * 1024 * 1024),
+        );
+        $result = $this->FilebinderPost->checkMaxFileSize($data, '1MB');
+        $this->assertTrue($result);
+    }
+
+   /**
+     * testCheckMinFileSize
+     *
+     * en:
+     * jpn: '1MB'指定の場合は1MBまで許可すること
+     */
+    public function testCheckMinFileSize(){
+        $data = array(
+            'file' => array('file_size' => 1 * 1024 * 1024),
+        );
+        $result = $this->FilebinderPost->checkMinFileSize($data, '1MB');
+        $this->assertTrue($result);
     }
 
     /**
