@@ -20,13 +20,14 @@ class BindableBehavior extends ModelBehavior {
     public function setUp(Model $model, $settings = array()){
         $defaults = array(
             'model' => 'Attachment', // attachment model
-            'filePath' => WWW_ROOT . 'img' . DS, // default attached file path
+            'filePath' => WWW_ROOT . 'img' . DS, // default attached local file path. if 'false', not save local
             // 'dbStorage' => true, // backward compatible
             'storage' => BindableBehavior::STORAGE_DB, // file entity save table
             'beforeAttach' => null, // hook function
             'afterAttach' => null, // hook function
             'withObject' => false, // find attachment with file object
             'exchangeFile' => true, // save new file after deleting old file
+            'restoreFromStorage' => true, // if local file not exists, restore from strage
             'dirMode' => 0755,
             'fileMode' => 0644,
         );
@@ -880,6 +881,8 @@ class BindableBehavior extends ModelBehavior {
                     $bind['bindedModel'] = $this->runtime[$model->alias]['bindedModel']->alias;
                     $tmpData[$key][$modelName][$fieldName] = $bind;
 
+                    $restoreFromStorage = $this->settings[$model->alias]['restoreFromStorage'];
+
                     if ((!file_exists($filePath) || filemtime($filePath) < strtotime($bind['modified']))) {
 
                         /**
@@ -890,7 +893,7 @@ class BindableBehavior extends ModelBehavior {
                         if (isset($this->settings[$model->alias]['dbStorage'])) {
                             $dbStorage = $this->settings[$model->alias]['dbStorage'];
                         }
-                        if ($filePath && $dbStorage) {
+                        if ($restoreFromStorage && $filePath && $dbStorage) {
 
                             /**
                              * create entity from record data
@@ -930,7 +933,7 @@ class BindableBehavior extends ModelBehavior {
                          * S3 storage
                          */
                         $s3Storage = in_array(BindableBehavior::STORAGE_S3, (array)$this->settings[$model->alias]['storage']);
-                        if ($filePath && $s3Storage) {
+                        if ($restoreFromStorage && $filePath && $s3Storage) {
                             if (!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.key') || !Configure::read('Filebinder.S3.secret')) {
                                 //__('Validation Error: S3 Parameter Error');
                                 return false;

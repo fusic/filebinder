@@ -259,6 +259,117 @@ class BindableTestCase extends CakeTestCase{
         }
     }
 
+   /**
+     * testRestore
+     *
+     * en:
+     * jpn: DBに保存したデータからローカルファイルを復旧する
+     */
+    public function testRestore(){
+        $tmpPath = TMP . 'tests' . DS . 'bindup.png';
+        $filePath = TMP . 'tests' . DS;
+
+        // change settings
+        $settings = $this->FilebinderPost->getSettings();
+        $settings['storage'] = BindableBehavior::STORAGE_DB;
+        $this->FilebinderPost->setSettings($settings);
+
+        // set test.png
+        $this->_setTestFile($tmpPath);
+
+        $this->FilebinderPost->bindFields = array(
+            array('field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+            ),
+        );
+
+        $data = array('FilebinderPost' => array('title' => 'Title',
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
+        $result = $this->FilebinderPost->save($data);
+        $id = $this->FilebinderPost->getLastInsertId();
+        $query = array();
+        $query['conditions'] = array('FilebinderPost.id' => $id);
+        $result = $this->FilebinderPost->find('first', $query);
+
+        // rm file
+        if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
+            unlink($result['FilebinderPost']['logo']['file_path']);
+        }
+
+        $this->assertFalse(file_exists($result['FilebinderPost']['logo']['file_path']));
+
+        $result = $this->FilebinderPost->find('first', $query);
+        $this->assertTrue(file_exists($result['FilebinderPost']['logo']['file_path']));
+
+        // rm file
+        if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
+            unlink($result['FilebinderPost']['logo']['file_path']);
+        }
+    }
+
+   /**
+     * testRestoreFalse
+     *
+     * en:
+     * jpn: restoreFromStorage = falseの場合はDBに保存したデータからファイルを復旧しない
+     */
+    public function testRestoreFalse(){
+        $tmpPath = TMP . 'tests' . DS . 'bindup.png';
+        $filePath = TMP . 'tests' . DS;
+
+        // change settings
+        $settings = $this->FilebinderPost->getSettings();
+        $settings['storage'] = BindableBehavior::STORAGE_DB;
+        $settings['restoreFromStorage'] = false;
+        $this->FilebinderPost->setSettings($settings);
+
+        // set test.png
+        $this->_setTestFile($tmpPath);
+
+        $this->FilebinderPost->bindFields = array(
+            array('field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+            ),
+        );
+
+        $data = array('FilebinderPost' => array('title' => 'Title',
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
+        $result = $this->FilebinderPost->save($data);
+        $id = $this->FilebinderPost->getLastInsertId();
+        $query = array();
+        $query['conditions'] = array('FilebinderPost.id' => $id);
+        $result = $this->FilebinderPost->find('first', $query);
+
+        // rm file
+        if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
+            unlink($result['FilebinderPost']['logo']['file_path']);
+        }
+
+        $this->assertFalse(file_exists($result['FilebinderPost']['logo']['file_path']));
+
+        $result = $this->FilebinderPost->find('first', $query);
+        $this->assertFalse(file_exists($result['FilebinderPost']['logo']['file_path']));
+
+        // rm file
+        if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
+            unlink($result['FilebinderPost']['logo']['file_path']);
+        }
+    }
+
     /**
      * testSaveS3
      *
@@ -322,12 +433,12 @@ class BindableTestCase extends CakeTestCase{
     }
 
     /**
-     * testSalvageS3
+     * testRestoreS3
      *
      * en:
      * jpn: S3に保存したデータからローカルファイルを復旧する
      */
-    public function testSalvageS3(){
+    public function testRestoreS3(){
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
@@ -379,6 +490,72 @@ class BindableTestCase extends CakeTestCase{
 
         $result = $this->FilebinderPost->find('first', $query);
         $this->assertTrue(file_exists($result['FilebinderPost']['logo']['file_path']));
+
+        // rm file
+        if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
+            unlink($result['FilebinderPost']['logo']['file_path']);
+        }
+    }
+
+    /**
+     * testRestoreFalseS3
+     *
+     * en:
+     * jpn: restoreFromStorage = falseの場合はS3に保存したファイルを復旧しない
+     */
+    public function testRestoreFalseS3(){
+        $tmpPath = TMP . 'tests' . DS . 'bindup.png';
+        $filePath = TMP . 'tests' . DS;
+
+        if(!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.bucket')) {
+            return;
+        }
+
+        // change settings
+        $settings = $this->FilebinderPost->getSettings();
+        $settings['storage'] = BindableBehavior::STORAGE_S3;
+        $settings['restoreFromStorage'] = false;
+        $this->FilebinderPost->setSettings($settings);
+
+        // set test.png
+        $this->_setTestFile($tmpPath);
+
+        // set S3 Access Key
+        Configure::write('Filebinder.S3.key', AWS_ACCESS_KEY);
+        Configure::write('Filebinder.S3.secret', AWS_SECRET_ACCESS_KEY);
+
+        $this->FilebinderPost->bindFields = array(
+            array('field' => 'logo',
+                'tmpPath'  => CACHE,
+                'filePath' => $filePath,
+                'bucket' => AWS_S3_BUCKET,
+                'acl' => AmazonS3::ACL_PRIVATE,
+            ),
+        );
+
+        $data = array('FilebinderPost' => array('title' => 'Title',
+                'logo' => array('model' => 'FilebinderPost',
+                    'field_name' => 'logo',
+                    'file_name' => 'logo.png',
+                    'file_content_type' => 'image/png',
+                    'file_size' => 1395,
+                    'tmp_bind_path' => $tmpPath
+                )));
+        $result = $this->FilebinderPost->save($data);
+        $id = $this->FilebinderPost->getLastInsertId();
+        $query = array();
+        $query['conditions'] = array('FilebinderPost.id' => $id);
+        $result = $this->FilebinderPost->find('first', $query);
+
+        // rm file
+        if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
+            unlink($result['FilebinderPost']['logo']['file_path']);
+        }
+
+        $this->assertFalse(file_exists($result['FilebinderPost']['logo']['file_path']));
+
+        $result = $this->FilebinderPost->find('first', $query);
+        $this->assertFalse(file_exists($result['FilebinderPost']['logo']['file_path']));
 
         // rm file
         if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
