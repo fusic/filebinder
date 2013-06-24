@@ -1,8 +1,8 @@
 <?php
 class AttachmentFixture extends CakeTestFixture {
-    var $name = 'Attachment';
+    public $name = 'Attachment';
 
-    var $fields = array(
+    public $fields = array(
         'id' => array('type' => 'integer', 'null' => false, 'default' => NULL, 'length' => 20, 'key' => 'primary'),
         'model' => array('type' => 'text', 'null' => true, 'default' => NULL, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
         'model_id' => array('type' => 'integer', 'null' => true, 'default' => NULL),
@@ -18,7 +18,7 @@ class AttachmentFixture extends CakeTestFixture {
         'tableParameters' => array('charset' => 'utf8', 'collate' => 'utf8_general_ci', 'engine' => 'InnoDB')
     );
 
-    var $records = array(
+    public $records = array(
         array(
             'id' => 100,
             'model' => 'FilebinderPost',

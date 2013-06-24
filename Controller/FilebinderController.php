@@ -3,10 +3,10 @@ App::uses('Security', 'Utility');
 
 class FilebinderController extends FilebinderAppController {
 
-    var $name = 'Filebinder';
-    var $uses = array();
-    var $components = array('Session');
-    var $noUpdateHash = true;
+    public $name = 'Filebinder';
+    public $uses = array('Attachment');
+    public $components = array('Session');
+    public $noUpdateHash = true;
 
     /**
      * loader
@@ -18,16 +18,26 @@ class FilebinderController extends FilebinderAppController {
      * @param string $hash
      * @return
      */
-    function loader($model = null, $model_id = null, $fieldName = null, $hash = null, $fileName = null){
+    public function loader($model = null, $model_id = null, $fieldName = null, $fileName = null){
         $this->layout = false;
         $this->autoRender = false;
         Configure::write('debug', 0);
 
-        if (!$model || $model_id == null || !$fieldName || !$hash) {
+        if (!$model || $model_id == null || !$fieldName || empty($this->request->query['key']) || empty($this->request->query['expire'])) {
             throw new NotFoundException(__('Invalid access'));
             return;
         }
-        if (Security::hash($model . $model_id . $fieldName . $this->Session->read('Filebinder.hash')) !== $hash) {
+        $key = $this->request->query['key'];
+        $expire = $this->request->query['expire'];
+
+        if ($expire < time()) {
+            throw new NotFoundException(__('Invalid access'));
+            return;
+        }
+
+        $secret = $this->Session->read('Filebinder.secret');
+
+        if (Security::hash($model . $model_id . $fieldName . $secret . $expire) !== $key) {
             throw new NotFoundException(__('Invalid access'));
             return;
         }

@@ -56,7 +56,7 @@ class LabelHelper extends AppHelper {
      * @return
      */
     function _makeSrc($file = null, $options = array()){
-        $hash = $this->Session->read('Filebinder.hash');
+        $secret = $this->Session->read('Filebinder.secret');
         $prefix = empty($options['prefix']) ? '' : $options['prefix'];
 
         /**
@@ -91,6 +91,9 @@ class LabelHelper extends AppHelper {
                 $url[$p] = false;
             }
 
+            $expire = strtotime('+1 minute');
+            $key = Security::hash($file['model'] . $file['model_id'] . $file['field_name'] . $secret . $expire);
+
             $url = array_merge($url, array(
                  'plugin' => 'filebinder',
                  'controller' => 'filebinder',
@@ -98,8 +101,8 @@ class LabelHelper extends AppHelper {
                  $file['model'],
                  $file['model_id'],
                  $file['field_name'],
-                 Security::hash($file['model'] . $file['model_id'] . $file['field_name'] . $hash),
-                 $prefix . $file['file_name']
+                 $prefix . $file['file_name'],
+                 '?' => array('key' => $key, 'expire' => $expire),
             ));
 
             return $url;

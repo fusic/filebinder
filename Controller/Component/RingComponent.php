@@ -3,8 +3,8 @@ App::uses('Security', 'Utility');
 
 class RingComponent extends Component {
 
-    var $components = array('Session');
-    var $_autoBindDown = array();
+    public $components = array('Session');
+    public $_autoBindDown = array();
 
     /**
      * __construct
@@ -26,8 +26,12 @@ class RingComponent extends Component {
      */
     public function startUp(Controller $controller) {
         $controller->helpers[]  =  'Filebinder.Label';
-        if (!isset($controller->noUpdateHash) || !$controller->noUpdateHash) {
-            $this->Session->write('Filebinder.hash', Security::hash(time()));
+        if (!$this->Session->read('Filebinder.secret')) {
+            if (Configure::read('Filebinder.secret')) {
+                $this->Session->write('Filebinder.secret', Configure::read('Filebinder.secret'));
+            } else {
+                $this->Session->write('Filebinder.secret', Security::hash(time()));
+            }
         }
     }
 
