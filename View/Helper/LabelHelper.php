@@ -70,45 +70,48 @@ class LabelHelper extends AppHelper {
         if (empty($file) || !$filePath) {
             return false;
         }
-        if (!preg_match('#' . WWW_ROOT . '#', $filePath)) {
-            if (!empty($file['tmp_bind_path'])) {
-                if (empty($file['model_id']) || file_exists($file['tmp_bind_path'])) {
-                    $file['model_id'] = 0;
-                    $file['file_name'] = preg_replace('#.+/([^/]+)$#' , '$1' , $file['tmp_bind_path']);
-                }
+
+        if (preg_match('#' . WWW_ROOT . '#', $filePath)) {
+            $src = preg_replace('#' . WWW_ROOT . '#', DS, $filePath);
+            return $src;
+        }
+
+        if (!empty($file['tmp_bind_path'])) {
+            if (empty($file['model_id']) || file_exists($file['tmp_bind_path'])) {
+                $file['model_id'] = 0;
+                $file['file_name'] = preg_replace('#.+/([^/]+)$#' , '$1' , $file['tmp_bind_path']);
             }
+        }
 
-            // over 1.3
-            $prefixes = Configure::read('Routing.prefixes');
+        // over 1.3
+        $prefixes = Configure::read('Routing.prefixes');
 
-            if (!$prefixes && Configure::read('Routing.admin')) {
-                $prefixes = Configure::read('Routing.admin');
-            }
+        if (!$prefixes && Configure::read('Routing.admin')) {
+            $prefixes = Configure::read('Routing.admin');
+        }
 
-            $url = array();
+        $url = array();
 
-            foreach ((array)$prefixes as $p) {
-                $url[$p] = false;
-            }
+        foreach ((array)$prefixes as $p) {
+            $url[$p] = false;
+        }
 
-            $expire = strtotime('+1 minute');
-            $key = Security::hash($file['model'] . $file['model_id'] . $file['field_name'] . $secret . $expire);
+        $expire = Configure::read('Filebinder.expire') ? strtotime(Configure::read('Filebinder.expire')) : strtotime('+1 minute');
 
-            $url = array_merge($url, array(
-                 'plugin' => 'filebinder',
-                 'controller' => 'filebinder',
-                 'action' => 'loader',
-                 $file['model'],
-                 $file['model_id'],
-                 $file['field_name'],
-                 $prefix . $file['file_name'],
-                 '?' => array('key' => $key, 'expire' => $expire),
+        $key = Security::hash($file['model'] . $file['model_id'] . $file['field_name'] . $secret . $expire);
+
+        $url = array_merge($url, array(
+                'plugin' => 'filebinder',
+                'controller' => 'filebinder',
+                'action' => 'loader',
+                $file['model'],
+                $file['model_id'],
+                $file['field_name'],
+                $prefix . $file['file_name'],
+                '?' => array('key' => $key, 'expire' => $expire),
             ));
 
-            return $url;
-        }
-        $src = preg_replace('#' . WWW_ROOT . '#', DS, $filePath);
-        return $src;
+        return $url;
     }
 
     /**
