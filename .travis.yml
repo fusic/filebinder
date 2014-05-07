@@ -6,8 +6,9 @@ php:
 
 env:
   - DB=mysql CAKEPHP=2.1.5
-  - DB=mysql CAKEPHP=2.2.7
-  - DB=mysql CAKEPHP=2.3.3
+  - DB=mysql CAKEPHP=2.2.9
+  - DB=mysql CAKEPHP=2.3.10
+  - DB=mysql CAKEPHP=2.4.9
 
 before_script:
   - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'CREATE DATABASE cakephp_test;'; fi"
