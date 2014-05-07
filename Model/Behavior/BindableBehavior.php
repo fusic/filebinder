@@ -50,7 +50,8 @@ class BindableBehavior extends ModelBehavior {
     /**
      * setSettings
      *
-     * @param $model, $settings
+     * @param $model
+     * @param $settings
      */
     public function setSettings(Model $model, $settings){
         $before = $this->getSettings($model);
@@ -70,9 +71,10 @@ class BindableBehavior extends ModelBehavior {
      * beforeValidate
      *
      * @param $model
+     * @param $options
      * @return
      */
-    public function beforeValidate(Model $model){
+    public function beforeValidate(Model $model, $options = array()){
         return true;
     }
 
@@ -121,10 +123,12 @@ class BindableBehavior extends ModelBehavior {
     /**
      * afterFind
      *
-     * @param $model, $result
+     * @param $model
+     * @param $result
+     * @param $primary
      * @return
      */
-    public function afterFind(Model $model, $result, $primary){
+    public function afterFind(Model $model, $result, $primary = false){
         return $this->bindFile($model, $result);
     }
 
@@ -132,9 +136,10 @@ class BindableBehavior extends ModelBehavior {
      * beforeSave
      *
      * @param $model
+     * @param $options
      * @return
      */
-    public function beforeSave(Model $model) {
+    public function beforeSave(Model $model, $options = array()) {
         $modelName = $model->alias;
         $model->bindedData = $model->data;
         foreach ($model->data[$modelName] as $fieldName => $value) {
@@ -200,9 +205,10 @@ class BindableBehavior extends ModelBehavior {
      *
      * @param $model
      * @param $created
+     * @param $options
      * @return
      */
-    public function afterSave(Model $model, $created){
+    public function afterSave(Model $model, $created, $options = array()){
         $modelName = $model->alias;
 
         if ($created) {
@@ -400,6 +406,7 @@ class BindableBehavior extends ModelBehavior {
      *
      * @param Model $&model
      * @param mixed $modelId The model id
+     * @param fields
      * @return
      */
     public function deleteEntity(Model $model, $modelId, $fields = array()){

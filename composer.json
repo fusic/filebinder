@@ -1,23 +1,26 @@
 {
-    "name": "fusic/filebinder",
-    "description": "Simple file attachment plugin for CakePHP",
-    "type": "cakephp-plugin",
-    "keywords": ["cakephp", "file", "attachement"],
-    "homepage": "https://github.com/fusic/filebinder",
-    "license": "MIT",
-    "authors": [
-	{
+  "name": "fusic/filebinder",
+  "description": "Simple file attachment plugin for CakePHP",
+  "type": "cakephp-plugin",
+  "keywords": ["cakephp", "file", "attachement"],
+  "homepage": "https://github.com/fusic/filebinder",
+  "license": "MIT",
+  "authors": [
+	  {
 	    "name": "Ken'ichiro Oyama",
 	    "homepage": "https://github.com/k1LoW",
 	    "role": "Author"
-	},
-	{
+	  },
+	  {
 	    "name": "Fusic CO.,LTD.",
 	    "homepage": "http://fusic.co.jp"
-	}
-    ],
-    "require": {
-	"amazonwebservices/aws-sdk-for-php": "1.*",
-        "composer/installers": "*"
-    }
+	  }
+  ],
+  "require": {
+	  "amazonwebservices/aws-sdk-for-php": "1.*",
+    "composer/installers": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "3.7.*"
+  }
 }
