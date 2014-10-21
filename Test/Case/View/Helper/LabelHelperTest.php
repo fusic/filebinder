@@ -28,11 +28,13 @@ class LabelHelperTest extends CakeTestCase {
      * @return
      */
     public function test_makeSrc(){
-        $file = array('file_path' => WWW_ROOT . 'files/FilebinderPost/1/logo/logo.png',
-                      'model' => 'FilebinderPost',
-                      'model_id' => '1',
-                      'field_name' => 'logo',
-                      'file_name' => 'logo.png');
+        $file = array(
+            'file_path' => WWW_ROOT . 'files/FilebinderPost/1/logo/logo.png',
+            'model' => 'FilebinderPost',
+            'model_id' => '1',
+            'field_name' => 'logo',
+            'file_name' => 'logo.png'
+        );
         $result = $this->Label->_makeSrc($file);
         $this->assertIdentical($result, '/files/FilebinderPost/1/logo/logo.png');
     }

@@ -14,7 +14,8 @@ class BindableTestCase extends CakeTestCase{
 
     public $fixtures = array(
         'plugin.filebinder.attachment',
-        'plugin.filebinder.filebinder_post');
+        'plugin.filebinder.filebinder_post'
+    );
 
     public function setUp() {
         $this->FilebinderPost = new FilebinderPost(); // jpn: 初期化するため
@@ -94,8 +95,8 @@ class BindableTestCase extends CakeTestCase{
         $filePath = TMP . 'tests' . DS;
         $this->FilebinderPost->bindFields = array(
             array('field' => 'logo',
-                'tmpPath'  => CACHE,
-                'filePath' => $filePath,
+                  'tmpPath'  => CACHE,
+                  'filePath' => $filePath,
             ),
         );
 
@@ -136,9 +137,11 @@ class BindableTestCase extends CakeTestCase{
             ),
         );
 
-        $data = array('FilebinderPost' => array(
+        $data = array(
+            'FilebinderPost' => array(
                 'title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo.png',
                     'file_content_type' => 'image/png',
@@ -178,13 +181,15 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath);
 
         $this->FilebinderPost->bindFields = array(
-            array('field' => 'logo',
+            array(
+                'field' => 'logo',
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
             ),
         );
 
-        $data = array('FilebinderPost' => array(
+        $data = array(
+            'FilebinderPost' => array(
                 'title' => 'Title',
                 'logo' => array(
                     'model' => 'FilebinderPost',
@@ -235,14 +240,15 @@ class BindableTestCase extends CakeTestCase{
             ),
         );
 
-        $data = array('FilebinderPost' => array(
+        $data = array(
+            'FilebinderPost' => array(
                 'title' => 'Title',
                 'logo' => array('model' => 'FilebinderPost',
-                    'field_name' => 'logo',
-                    'file_name' => 'logo.png',
-                    'file_content_type' => 'image/png',
-                    'file_size' => 1395,
-                    'tmp_bind_path' => $tmpPath
+                                'field_name' => 'logo',
+                                'file_name' => 'logo.png',
+                                'file_content_type' => 'image/png',
+                                'file_size' => 1395,
+                                'tmp_bind_path' => $tmpPath
                 )));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
@@ -259,7 +265,7 @@ class BindableTestCase extends CakeTestCase{
         }
     }
 
-   /**
+    /**
      * testRestore
      *
      * en:
@@ -278,14 +284,18 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath);
 
         $this->FilebinderPost->bindFields = array(
-            array('field' => 'logo',
+            array(
+                'field' => 'logo',
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
             ),
         );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+        $data = array(
+            'FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo.png',
                     'file_content_type' => 'image/png',
@@ -314,7 +324,7 @@ class BindableTestCase extends CakeTestCase{
         }
     }
 
-   /**
+    /**
      * testRestoreFalse
      *
      * en:
@@ -334,14 +344,18 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath);
 
         $this->FilebinderPost->bindFields = array(
-            array('field' => 'logo',
+            array(
+                'field' => 'logo',
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
             ),
         );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+        $data = array(
+            'FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo.png',
                     'file_content_type' => 'image/png',
@@ -408,8 +422,11 @@ class BindableTestCase extends CakeTestCase{
             ),
         );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+        $data = array(
+            'FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo.png',
                     'file_content_type' => 'image/png',
@@ -424,7 +441,7 @@ class BindableTestCase extends CakeTestCase{
         $urlPrefix = Configure::read('Filebinder.S3.urlPrefix');
 
         $this->assertIdentical(file_get_contents($result['FilebinderPost']['logo']['file_path']),
-            file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . $urlPrefix . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
+                               file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . $urlPrefix . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
 
         // rm file
         if (file_exists($result['FilebinderPost']['logo']['file_path'])) {
@@ -459,7 +476,8 @@ class BindableTestCase extends CakeTestCase{
         Configure::write('Filebinder.S3.secret', AWS_SECRET_ACCESS_KEY);
 
         $this->FilebinderPost->bindFields = array(
-            array('field' => 'logo',
+            array(
+                'field' => 'logo',
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
                 'bucket' => AWS_S3_BUCKET,
@@ -467,8 +485,11 @@ class BindableTestCase extends CakeTestCase{
             ),
         );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+        $data = array(
+            'FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo.png',
                     'file_content_type' => 'image/png',
@@ -525,7 +546,8 @@ class BindableTestCase extends CakeTestCase{
         Configure::write('Filebinder.S3.secret', AWS_SECRET_ACCESS_KEY);
 
         $this->FilebinderPost->bindFields = array(
-            array('field' => 'logo',
+            array(
+                'field' => 'logo',
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
                 'bucket' => AWS_S3_BUCKET,
@@ -533,8 +555,11 @@ class BindableTestCase extends CakeTestCase{
             ),
         );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+        $data = array(
+            'FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo.png',
                     'file_content_type' => 'image/png',
@@ -590,7 +615,8 @@ class BindableTestCase extends CakeTestCase{
         Configure::write('Filebinder.S3.secret', AWS_SECRET_ACCESS_KEY);
 
         $this->FilebinderPost->bindFields = array(
-            array('field' => 'logo',
+            array(
+                'field' => 'logo',
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
                 'bucket' => AWS_S3_BUCKET,
@@ -598,8 +624,11 @@ class BindableTestCase extends CakeTestCase{
             ),
         );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+        $data = array(
+            'FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo.png',
                     'file_content_type' => 'image/png',
@@ -660,9 +689,11 @@ class BindableTestCase extends CakeTestCase{
             ),
         );
 
-        $data = array('FilebinderPost' => array(
+        $data = array(
+            'FilebinderPost' => array(
                 'title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo.png',
                     'file_content_type' => 'image/png',
@@ -676,7 +707,7 @@ class BindableTestCase extends CakeTestCase{
         $result = $this->FilebinderPost->find('first', $query);
 
         $this->assertIdentical(file_get_contents($result['FilebinderPost']['logo']['file_path']),
-            file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . $urlPrefix . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
+                               file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . $urlPrefix . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']));
 
         $this->FilebinderPost->delete($id);
 
@@ -707,15 +738,18 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath);
 
         $this->FilebinderPost->bindFields = array(
-            array('field' => 'logo',
+            array(
+                'field' => 'logo',
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
             ),
         );
 
-        $data = array('FilebinderPost' => array(
+        $data = array(
+            'FilebinderPost' => array(
                 'title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo.png',
                     'file_content_type' => 'image/png',
@@ -748,15 +782,18 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath);
 
         $this->FilebinderPost->bindFields = array(
-            array('field' => 'logo',
+            array(
+                'field' => 'logo',
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
             ),
         );
 
-        $data = array('FilebinderPost' => array(
+        $data = array(
+            'FilebinderPost' => array(
                 'title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo.png',
                     'file_content_type' => 'image/png',
@@ -801,7 +838,8 @@ class BindableTestCase extends CakeTestCase{
         Configure::write('Filebinder.S3.secret', AWS_SECRET_ACCESS_KEY);
 
         $this->FilebinderPost->bindFields = array(
-            array('field' => 'logo',
+            array(
+                'field' => 'logo',
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
                 'bucket' => AWS_S3_BUCKET,
@@ -809,8 +847,11 @@ class BindableTestCase extends CakeTestCase{
             ),
         );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+        $data = array(
+            'FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo.png',
                     'file_content_type' => 'image/png',
@@ -826,7 +867,7 @@ class BindableTestCase extends CakeTestCase{
 
         $this->assertTrue(file_exists($result['FilebinderPost']['logo']['file_path']));
         $this->assertIdentical(file_get_contents('http://' . AWS_S3_BUCKET . '.s3.amazonaws.com/' . $urlPrefix . 'FilebinderPost/' . $result['FilebinderPost']['id'] . '/' . 'logo/' . $result['FilebinderPost']['logo']['file_name']),
-            file_get_contents($result['FilebinderPost']['logo']['file_path']));
+                               file_get_contents($result['FilebinderPost']['logo']['file_path']));
 
         $this->FilebinderPost->delete($id);
 
@@ -845,14 +886,18 @@ class BindableTestCase extends CakeTestCase{
         $filePath = TMP . 'tests' . DS;
 
         $this->FilebinderPost->bindFields = array(
-            array('field' => 'logo',
+            array(
+                'field' => 'logo',
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
             ),
         );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                'logo' => null));
+        $data = array(
+            'FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => null
+            ));
         $result = $this->FilebinderPost->save($data);
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
@@ -878,14 +923,18 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath);
 
         $this->FilebinderPost->bindFields = array(
-            array('field' => 'logo',
+            array(
+                'field' => 'logo',
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
             ),
         );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+        $data = array(
+            'FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo.png',
                     'file_content_type' => 'image/png',
@@ -898,7 +947,9 @@ class BindableTestCase extends CakeTestCase{
         $query['conditions'] = array('FilebinderPost.id' => $id);
         $result = $this->FilebinderPost->find('first', $query);
 
-        $data = array('FilebinderPost' => array('id' => $id,
+        $data = array(
+            'FilebinderPost' => array(
+                'id' => $id,
                 'title' => 'Title',
                 'logo' => null,
                 'delete_logo' => '1',
@@ -922,14 +973,18 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath);
 
         $this->FilebinderPost->bindFields = array(
-            array('field' => 'logo',
+            array(
+                'field' => 'logo',
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
             ),
         );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+        $data = array(
+            'FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo.png',
                     'file_content_type' => 'image/png',
@@ -942,7 +997,9 @@ class BindableTestCase extends CakeTestCase{
         $query['conditions'] = array('FilebinderPost.id' => $id);
         $result = $this->FilebinderPost->find('first', $query);
 
-        $data = array('FilebinderPost' => array('id' => $id,
+        $data = array(
+            'FilebinderPost' => array(
+                'id' => $id,
                 'title' => 'Title',
                 'logo' => null,
                 'delete_logo' => '0',
@@ -968,14 +1025,18 @@ class BindableTestCase extends CakeTestCase{
         $this->_setTestFile($tmpPath2);
 
         $this->FilebinderPost->bindFields = array(
-            array('field' => 'logo',
+            array(
+                'field' => 'logo',
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
             ),
         );
 
-        $data = array('FilebinderPost' => array('title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+        $data = array(
+            'FilebinderPost' => array(
+                'title' => 'Title',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo.png', // file_name:logo.png
                     'file_content_type' => 'image/png',
@@ -988,9 +1049,12 @@ class BindableTestCase extends CakeTestCase{
         $query['conditions'] = array('FilebinderPost.id' => $id);
         $result = $this->FilebinderPost->find('first', $query);
 
-        $data = array('FilebinderPost' => array('id' => $id,
+        $data = array(
+            'FilebinderPost' => array(
+                'id' => $id,
                 'title' => 'Title',
-                'logo' => array('model' => 'FilebinderPost',
+                'logo' => array(
+                    'model' => 'FilebinderPost',
                     'field_name' => 'logo',
                     'file_name' => 'logo2.png', // file_name:logo2.png
                     'file_content_type' => 'image/png',
@@ -1027,7 +1091,7 @@ class BindableTestCase extends CakeTestCase{
         $this->assertTrue($result);
     }
 
-   /**
+    /**
      * testCheckMinFileSize
      *
      * en:
