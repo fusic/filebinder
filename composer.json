@@ -17,7 +17,7 @@
 	    }
     ],
     "require": {
-	    "amazonwebservices/aws-sdk-for-php": "1.*",
+	    "aws/aws-sdk-php": "*",
         "composer/installers": "*"
     },
     "require-dev": {

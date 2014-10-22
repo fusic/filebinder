@@ -394,7 +394,7 @@ class BindableTestCase extends CakeTestCase{
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
-        if(!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.bucket')) {
+        if(!class_exists('Aws\S3\S3Client') || !Configure::read('Filebinder.S3.bucket')) {
             return;
         }
 
@@ -418,7 +418,7 @@ class BindableTestCase extends CakeTestCase{
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
                 'bucket' => AWS_S3_BUCKET,
-                'acl' => AmazonS3::ACL_PUBLIC,
+                'acl' => Aws\S3\Enum\CannedAcl::PUBLIC_READ,
             ),
         );
 
@@ -434,6 +434,7 @@ class BindableTestCase extends CakeTestCase{
                     'tmp_bind_path' => $tmpPath
                 )));
         $result = $this->FilebinderPost->save($data);
+
         $id = $this->FilebinderPost->getLastInsertId();
         $query = array();
         $query['conditions'] = array('FilebinderPost.id' => $id);
@@ -459,7 +460,7 @@ class BindableTestCase extends CakeTestCase{
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
-        if(!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.bucket')) {
+        if(!class_exists('Aws\S3\S3Client') || !Configure::read('Filebinder.S3.bucket')) {
             return;
         }
 
@@ -481,7 +482,7 @@ class BindableTestCase extends CakeTestCase{
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
                 'bucket' => AWS_S3_BUCKET,
-                'acl' => AmazonS3::ACL_PRIVATE,
+                'acl' => Aws\S3\Enum\CannedAcl::PRIVATE_ACCESS,
             ),
         );
 
@@ -528,7 +529,7 @@ class BindableTestCase extends CakeTestCase{
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
-        if(!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.bucket')) {
+        if(!class_exists('Aws\S3\S3Client') || !Configure::read('Filebinder.S3.bucket')) {
             return;
         }
 
@@ -551,7 +552,7 @@ class BindableTestCase extends CakeTestCase{
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
                 'bucket' => AWS_S3_BUCKET,
-                'acl' => AmazonS3::ACL_PRIVATE,
+                'acl' => Aws\S3\Enum\CannedAcl::PRIVATE_ACCESS,
             ),
         );
 
@@ -597,7 +598,7 @@ class BindableTestCase extends CakeTestCase{
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
-        if(!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.bucket')) {
+        if(!class_exists('Aws\S3\S3Client') || !Configure::read('Filebinder.S3.bucket')) {
             return;
         }
 
@@ -620,7 +621,7 @@ class BindableTestCase extends CakeTestCase{
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
                 'bucket' => AWS_S3_BUCKET,
-                'acl' => AmazonS3::ACL_PUBLIC,
+                'acl' => 'public-read',
             ),
         );
 
@@ -660,7 +661,7 @@ class BindableTestCase extends CakeTestCase{
         $filePath = TMP . 'tests' . DS;
         $urlPrefix = 'testPrefix/';
 
-        if(!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.bucket')) {
+        if(!class_exists('Aws\S3\S3Client') || !Configure::read('Filebinder.S3.bucket')) {
             return;
         }
 
@@ -685,7 +686,7 @@ class BindableTestCase extends CakeTestCase{
                 'filePath' => $filePath,
                 'urlPrefix' => $urlPrefix,
                 'bucket' => AWS_S3_BUCKET,
-                'acl' => AmazonS3::ACL_PUBLIC,
+                'acl' => 'public-read',
             ),
         );
 
@@ -821,7 +822,7 @@ class BindableTestCase extends CakeTestCase{
         $tmpPath = TMP . 'tests' . DS . 'bindup.png';
         $filePath = TMP . 'tests' . DS;
 
-        if(!class_exists('AmazonS3') || !Configure::read('Filebinder.S3.bucket')) {
+        if(!class_exists('Aws\S3\S3Client') || !Configure::read('Filebinder.S3.bucket')) {
             return;
         }
 
@@ -843,7 +844,7 @@ class BindableTestCase extends CakeTestCase{
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
                 'bucket' => AWS_S3_BUCKET,
-                'acl' => AmazonS3::ACL_PUBLIC,
+                'acl' => 'public-read',
             ),
         );
 
