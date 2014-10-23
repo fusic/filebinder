@@ -3,7 +3,7 @@ App::uses('AppHelper', 'View/Helper');
 
 class LabelHelper extends AppHelper {
 
-    var $helpers = array('Html', 'Session');
+    public $helpers = array('Html', 'Session');
 
     /**
      * image
@@ -11,7 +11,7 @@ class LabelHelper extends AppHelper {
      * @param $file
      * @return
      */
-    function image($file = null, $options = array()){
+    public function image($file = null, $options = array()){
         if (!$this->_makeSrc($file, $options)) {
             return empty($options['noFile']) ? '' : $options['noFile'];
         }
@@ -24,7 +24,7 @@ class LabelHelper extends AppHelper {
      * $param $file
      * @return
      */
-    function link($file = null, $options = array()){
+    public function link($file = null, $options = array()){
         $src = $this->_makeSrc($file, $options);
         if (!$src) {
             return empty($options['noFile']) ? '' : $options['noFile'];
@@ -40,7 +40,7 @@ class LabelHelper extends AppHelper {
      * @param
      * @return
      */
-    function url($file = null, $options = array()){
+    public function url($file = null, $options = array()){
         $src = $this->_makeSrc($file, $options);
         if (!$src) {
             return empty($options['noFile']) ? '' : $options['noFile'];
@@ -55,7 +55,7 @@ class LabelHelper extends AppHelper {
      * @param $options
      * @return
      */
-    function _makeSrc($file = null, $options = array()){
+    public function _makeSrc($file = null, $options = array()){
         $secret = $this->Session->read('Filebinder.secret');
         $prefix = empty($options['prefix']) ? '' : $options['prefix'];
 
