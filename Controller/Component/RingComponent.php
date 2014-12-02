@@ -6,6 +6,8 @@ class RingComponent extends Component {
     public $components = array('Session');
     public $_autoBindDown = array();
 
+    public static $sessionKey = 'Filebinder';
+
     /**
      * __construct
      *
@@ -26,11 +28,11 @@ class RingComponent extends Component {
      */
     public function startUp(Controller $controller) {
         $controller->helpers[]  =  'Filebinder.Label';
-        if (!$this->Session->read('Filebinder.secret')) {
+        if (!$this->Session->read(self::$sessionKey . '.secret')) {
             if (Configure::read('Filebinder.secret')) {
-                $this->Session->write('Filebinder.secret', Configure::read('Filebinder.secret'));
+                $this->Session->write(self::$sessionKey . '.secret', Configure::read('Filebinder.secret'));
             } else {
-                $this->Session->write('Filebinder.secret', Security::hash(time()));
+                $this->Session->write(self::$sessionKey . '.secret', Security::hash(time()));
             }
         }
     }
@@ -64,7 +66,7 @@ class RingComponent extends Component {
             return false;
         }
         if (empty($this->controller->request->data[$model->alias])) {
-            $this->Session->delete('Filebinder.' . $model->alias);
+            $this->Session->delete(self::$sessionKey . '.' . $model->alias);
             return false;
         }
         $value = reset($this->controller->request->data[$model->alias]);
@@ -98,7 +100,7 @@ class RingComponent extends Component {
         if (!$model) {
             return false;
         }
-        $this->Session->delete('Filebinder.' . $model->alias);
+        $this->Session->delete(self::$sessionKey . '.' . $model->alias);
         if (empty($this->controller->request->data[$model->alias])) {
             return false;
         }
@@ -158,7 +160,7 @@ class RingComponent extends Component {
             $data[$fieldName] = $ring;
         }
 
-        $sessionKey = is_int($i) ? "Filebinder.{$model->alias}.{$i}" : "Filebinder.{$model->alias}";
+        $sessionKey = is_int($i) ? self::$sessionKey . ".{$model->alias}.{$i}" : self::$sessionKey . ".{$model->alias}";
 
         if ($this->Session->check($sessionKey)) {
             $sessionData = $this->Session->read($sessionKey);
@@ -179,7 +181,7 @@ class RingComponent extends Component {
      * @access protected
      */
     private function _bindDown(Model $model, $data, $i = null) {
-        $sessionKey = is_int($i) ? "Filebinder.{$model->alias}.{$i}." : "Filebinder.{$model->alias}.";
+        $sessionKey = is_int($i) ? self::$sessionKey . ".{$model->alias}.{$i}." : self::$sessionKey . ".{$model->alias}.";
 
         foreach ($data as $fieldName => $value) {
             if (!in_array($fieldName, Set::extract('/field', $model->bindFields))) {
