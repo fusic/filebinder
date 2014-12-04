@@ -49,7 +49,7 @@ Filebinder manage 'virtual table' and entity.
 Example of how to add image file with confirm page.
 
     <?php
-    lass Post extends AppModel {
+    class Post extends AppModel {
        public $name = 'Post';
        public $actsAs = array('Filebinder.Bindable');
        public $displayField = 'title';
