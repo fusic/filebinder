@@ -5,6 +5,10 @@ class LabelHelper extends AppHelper {
 
     public $helpers = array('Html', 'Session');
 
+    public $settings = array(
+        'sessionKey' => 'Filebinder',
+    );
+
     /**
      * image
      *
@@ -56,7 +60,7 @@ class LabelHelper extends AppHelper {
      * @return
      */
     public function _makeSrc($file = null, $options = array()){
-        $secret = $this->Session->read('Filebinder.secret');
+        $secret = $this->Session->read($this->settings['sessionKey'] . '.secret');
         $prefix = empty($options['prefix']) ? '' : $options['prefix'];
 
         /**
