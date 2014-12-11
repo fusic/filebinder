@@ -27,7 +27,7 @@ class RingComponent extends Component {
      * @return
      */
     public function startUp(Controller $controller) {
-        $controller->helpers[]  =  'Filebinder.Label';
+        $controller->helpers['Filebinder.Label'] = array('sessionKey' => self::$sessionKey);
         if (!$this->Session->read(self::$sessionKey . '.secret')) {
             if (Configure::read('Filebinder.secret')) {
                 $this->Session->write(self::$sessionKey . '.secret', Configure::read('Filebinder.secret'));

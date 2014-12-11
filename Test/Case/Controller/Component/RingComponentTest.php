@@ -57,7 +57,7 @@ class RingComponentTest extends CakeTestCase{
         $this->Controller->Components->init($this->Controller);
         $this->initialized = true;
         $this->Controller->Ring->startup($this->Controller);
-        $this->assertTrue(in_array('Filebinder.Label', $this->Controller->helpers));
+        $this->assertTrue(in_array('Filebinder.Label', $this->Controller->helpers) || array_key_exists('Filebinder.Label', $this->Controller->helpers));
     }
 
     /**
