@@ -193,7 +193,7 @@ class RingComponent extends Component {
             }
             // file upload error
             if (empty($value['file_size'])) {
-                $this->controller->request->data[$modelName][$fieldName] = null;
+                $this->controller->request->data[$model->alias][$fieldName] = null;
                 continue;
             }
             if (isset($model->validationErrors[$fieldName])) {
