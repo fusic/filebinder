@@ -479,7 +479,7 @@ class BindableBehavior extends ModelBehavior {
                     $filePath = false;
                 }
 
-                if ($filePath && !@unlink($filePath)) {
+                if ($filePath && file_exists($filePath) && !@unlink($filePath)) {
                     $result = false;
                 }
             }
