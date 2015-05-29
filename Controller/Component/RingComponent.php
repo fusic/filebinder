@@ -126,7 +126,7 @@ class RingComponent extends Component {
      * @param int $i
      * @access protected
      */
-    private function _bindUp(Model $model, &$data, $i = null) {
+    protected function _bindUp(Model $model, &$data, $i = null) {
         $bindFields = Set::combine($model->bindFields, '/field' , '/');
 
         foreach ($data as $fieldName => $value) {
@@ -180,7 +180,7 @@ class RingComponent extends Component {
      * @param int $i
      * @access protected
      */
-    private function _bindDown(Model $model, $data, $i = null) {
+    protected function _bindDown(Model $model, $data, $i = null) {
         $sessionKey = is_int($i) ? self::$sessionKey . ".{$model->alias}.{$i}." : self::$sessionKey . ".{$model->alias}.";
 
         foreach ($data as $fieldName => $value) {
@@ -211,7 +211,7 @@ class RingComponent extends Component {
      * @access Model
      * @access protected
      */
-    private function &_getModel($modelName) {
+    protected function &_getModel($modelName) {
         $model = null;
 
         if (!empty($this->controller->{$modelName})) {
@@ -234,7 +234,7 @@ class RingComponent extends Component {
      * @return bool
      * @access protected
      */
-    private function _checkFileUploaded($array) {
+    protected function _checkFileUploaded($array) {
         if (!is_array($array)) {
             return false;
         }
@@ -249,7 +249,7 @@ class RingComponent extends Component {
      * @param $array The array of bind-upped data
      * @return bool
      */
-    private function _checkBindUpped($array) {
+    protected function _checkBindUpped($array) {
         if (!is_array($array)) {
             return false;
         }
@@ -266,7 +266,7 @@ class RingComponent extends Component {
      * @return bool
      * @access protected
      */
-    private function _checkKeyExists($array, $keys) {
+    protected function _checkKeyExists($array, $keys) {
         $diff = array_intersect_key(Set::normalize($keys), $array);
 
         if (count($keys) !== count($diff)) {
