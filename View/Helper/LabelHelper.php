@@ -127,7 +127,7 @@ class LabelHelper extends AppHelper {
             return null;
         }
         $prefix = empty($options['prefix']) ? '' : $options['prefix'];
-        $urlPrefix = !empty($options['url_prefix']) ? $options['url_prefix'] : Configure::read('Filebinder.S3.url_prefix');
+        $urlPrefix = !empty($options['url_prefix']) ? $options['url_prefix'] : Configure::read('Filebinder.S3.urlPrefix');
         $http = empty($options['ssl']) ? 'http' : 'https';
         return $http . '://' . Configure::read('Filebinder.S3.bucket') . '.s3.amazonaws.com/' . $urlPrefix . $file['model'] . '/' . $file['model_id'] . '/' . $file['field_name'] . '/' . $prefix . $file['file_name'];
     }
