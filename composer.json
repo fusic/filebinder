@@ -7,17 +7,13 @@
     "license": "MIT",
     "authors": [
 	    {
-	        "name": "Ken'ichiro Oyama",
-	        "homepage": "https://github.com/k1LoW",
+	        "name": "fusic",
+	        "homepage": "https://github.com/fusic",
 	        "role": "Author"
-	    },
-	    {
-	        "name": "Fusic CO.,LTD.",
-	        "homepage": "http://fusic.co.jp"
 	    }
     ],
     "require": {
-	    "aws/aws-sdk-php": "2.*",
+	    "aws/aws-sdk-php": "3.*",
         "composer/installers": "*"
     },
     "require-dev": {
