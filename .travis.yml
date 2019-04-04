@@ -10,6 +10,9 @@ env:
   - DB=mysql CAKEPHP=2.4.10
   - DB=mysql CAKEPHP=2.5.8
   - DB=mysql CAKEPHP=2.6.7
+  - DB=mysql CAKEPHP=2.10.14
+  - DB=mysql CAKEPHP=2.10.15
+  - DB=mysql CAKEPHP=2.10.16
 
 before_script:
   - composer install --dev
