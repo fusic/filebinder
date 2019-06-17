@@ -6,7 +6,6 @@ if (file_exists(dirname(__FILE__) . '/../../vendor/autoload.php')) {
 
 use Aws\S3\S3Client;
 use Aws\Common\Enum\Region;
-use Aws\S3\Enum\CannedAcl;
 use Aws\S3\Exception\S3Exception;
 use Guzzle\Http\EntityBody;
 
@@ -315,9 +314,14 @@ class BindableBehavior extends ModelBehavior {
                         return false;
                     }
                     $options = array(
-                        'key' => Configure::read('Filebinder.S3.key'),
-                        'secret' => Configure::read('Filebinder.S3.secret'),
+                        'credentials' => array(
+                            'key' => Configure::read('Filebinder.S3.key'),
+                            'secret' => Configure::read('Filebinder.S3.secret'),
+                        ),
+                        'region' => Configure::read('Filebinder.S3.region'),
+                        'version' => 'latest'
                     );
+                    
                     $bucket = !empty($bindFields[$fieldName]['bucket']) ? $bindFields[$fieldName]['bucket'] : Configure::read('Filebinder.S3.bucket');
                     if (empty($bucket)) {
                         //__('Validation Error: S3 Parameter Error');
@@ -327,12 +331,9 @@ class BindableBehavior extends ModelBehavior {
                     $s3 = S3Client::factory($options);
 
                     $region = !empty($bindFields[$fieldName]['region']) ? $bindFields[$fieldName]['region'] : Configure::read('Filebinder.S3.region');
-                    if (!empty($region)) {
-                        $s3->setRegion($region);
-                    }
                     $acl = !empty($bindFields[$fieldName]['acl']) ? $bindFields[$fieldName]['acl'] : Configure::read('Filebinder.S3.acl');
                     if (empty($acl)) {
-                        $acl = CannedAcl::PUBLIC_READ;
+                        $acl = 'public-read';
                     }
                     $urlPrefix = !empty($bindFields[$fieldName]['urlPrefix']) ? $bindFields[$fieldName]['urlPrefix'] : Configure::read('Filebinder.S3.urlPrefix');
 
@@ -340,7 +341,7 @@ class BindableBehavior extends ModelBehavior {
                         $result = $s3->putObject(array(
                             'Bucket' => $bucket,
                             'Key' => $urlPrefix . $model->transferTo(array_diff_key(array('model_id' => $model_id) + $value, Set::normalize(array('tmp_bind_path')))),
-                            'Body' => EntityBody::factory(fopen($tmpFile, 'r')),
+                            'Body' => fopen($tmpFile, 'r'),
                             'ACL' => $acl,
                         ));
                     } catch (S3Exception $e) {
@@ -448,8 +449,12 @@ class BindableBehavior extends ModelBehavior {
                         return false;
                     }
                     $options = array(
-                        'key' => Configure::read('Filebinder.S3.key'),
-                        'secret' => Configure::read('Filebinder.S3.secret'),
+                        'credentials' => array(
+                            'key' => Configure::read('Filebinder.S3.key'),
+                            'secret' => Configure::read('Filebinder.S3.secret'),
+                        ),
+                        'region' => Configure::read('Filebinder.S3.region'),
+                        'version' => 'latest'
                     );
                     $bucket = !empty($bindFields[$fieldName]['bucket']) ? $bindFields[$fieldName]['bucket'] : Configure::read('Filebinder.S3.bucket');
                     if (empty($bucket)) {
@@ -457,10 +462,6 @@ class BindableBehavior extends ModelBehavior {
                         return false;
                     }
                     $s3 = S3Client::factory($options);
-                    $region = !empty($bindFields[$fieldName]['region']) ? $bindFields[$fieldName]['region'] : Configure::read('Filebinder.S3.region');
-                    if (!empty($region)) {
-                        $s3->setRegion($region);
-                    }
                     $urlPrefix = !empty($bindFields[$fieldName]['urlPrefix']) ? $bindFields[$fieldName]['urlPrefix'] : Configure::read('Filebinder.S3.urlPrefix');
 
                     $result = $s3->deleteObject(array(
@@ -956,8 +957,12 @@ class BindableBehavior extends ModelBehavior {
                                 return false;
                             }
                             $options = array(
-                                'key' => Configure::read('Filebinder.S3.key'),
-                                'secret' => Configure::read('Filebinder.S3.secret'),
+                                'credentials' => array(
+                                    'key' => Configure::read('Filebinder.S3.key'),
+                                    'secret' => Configure::read('Filebinder.S3.secret'),
+                                ),
+                                'region' => Configure::read('Filebinder.S3.region'),
+                                'version' => 'latest'
                             );
                             $bucket = !empty($bindFields[$fieldName]['bucket']) ? $bindFields[$fieldName]['bucket'] : Configure::read('Filebinder.S3.bucket');
                             if (empty($bucket)) {
@@ -965,10 +970,6 @@ class BindableBehavior extends ModelBehavior {
                                 return false;
                             }
                             $s3 = S3Client::factory($options);
-                            $region = !empty($bindFields[$fieldName]['region']) ? $bindFields[$fieldName]['region'] : Configure::read('Filebinder.S3.region');
-                            if (!empty($region)) {
-                                $s3->setRegion($region);
-                            }
                             $urlPrefix = !empty($bindFields[$fieldName]['urlPrefix']) ? $bindFields[$fieldName]['urlPrefix'] : Configure::read('Filebinder.S3.urlPrefix');
 
                             $currentMask = umask();

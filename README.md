@@ -187,13 +187,13 @@ Create attachment table.
     <?php
     Configure::write('Filebinder.S3.key', '************************');
     Configure::write('Filebinder.S3.secret', '********************************************');
-    Configure::write('Filebinder.S3.region', AmazonS3::REGION_TOKYO);
+    Configure::write('Filebinder.S3.region', 'ap-northeast-1');
 
 
     <?php
     class Post extends AppModel {
         public $name = 'Post';
-        public $actsAs = array('Filebinder.Bindable' => array('strage' => array('Db', 'S3'))); // using Database and Amazon S3 for object storage
+        public $actsAs = array('Filebinder.Bindable' => array('storage' => array('Db', 'S3'))); // using Database and Amazon S3 for object storage
         public $displayField = 'title';
            
         public $bindFields = array(array(
@@ -201,7 +201,7 @@ Create attachment table.
                                   'tmpPath' => '/var/www/html/myapp/app/webroot/files/cache/',
                                   'filePath' => '/var/www/html/myapp/app/webroot/files/',
                                   'bucket' => 'aws.foobacket', // bucket name,
-                                  'acl' => AmazonS3::ACL_PUBLIC, // S3 ACL
+                                  // 'acl' => AmazonS3::ACL_PUBLIC, // S3 ACL
                                   ));
     }
 
