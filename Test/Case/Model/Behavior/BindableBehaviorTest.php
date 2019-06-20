@@ -418,7 +418,7 @@ class BindableTestCase extends CakeTestCase{
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
                 'bucket' => AWS_S3_BUCKET,
-                'acl' => Aws\S3\Enum\CannedAcl::PUBLIC_READ,
+                'acl' => 'public-read',
             ),
         );
 
@@ -482,7 +482,7 @@ class BindableTestCase extends CakeTestCase{
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
                 'bucket' => AWS_S3_BUCKET,
-                'acl' => Aws\S3\Enum\CannedAcl::PRIVATE_ACCESS,
+                'acl' => 'private',
             ),
         );
 
@@ -552,7 +552,7 @@ class BindableTestCase extends CakeTestCase{
                 'tmpPath'  => CACHE,
                 'filePath' => $filePath,
                 'bucket' => AWS_S3_BUCKET,
-                'acl' => Aws\S3\Enum\CannedAcl::PRIVATE_ACCESS,
+                'acl' => 'private',
             ),
         );
 
