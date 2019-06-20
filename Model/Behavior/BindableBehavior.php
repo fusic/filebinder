@@ -321,7 +321,7 @@ class BindableBehavior extends ModelBehavior {
                         'region' => Configure::read('Filebinder.S3.region'),
                         'version' => 'latest'
                     );
-                    
+
                     $bucket = !empty($bindFields[$fieldName]['bucket']) ? $bindFields[$fieldName]['bucket'] : Configure::read('Filebinder.S3.bucket');
                     if (empty($bucket)) {
                         //__('Validation Error: S3 Parameter Error');
@@ -1013,8 +1013,13 @@ class BindableBehavior extends ModelBehavior {
                                 //__('Validation Error: S3 Parameter Error');
                                 return false;
                             }
-                            $options = array('key' => Configure::read('Filebinder.S3.key'),
-                                'secret' => Configure::read('Filebinder.S3.secret'),
+                            $options = array(
+                                'credentials' => array(
+                                    'key' => Configure::read('Filebinder.S3.key'),
+                                    'secret' => Configure::read('Filebinder.S3.secret'),
+                                ),
+                                'region' => Configure::read('Filebinder.S3.region'),
+                                'version' => 'latest'
                             );
                             $bucket = !empty($bindFields[$fieldName]['bucket']) ? $bindFields[$fieldName]['bucket'] : Configure::read('Filebinder.S3.bucket');
                             if (empty($bucket)) {
@@ -1022,10 +1027,6 @@ class BindableBehavior extends ModelBehavior {
                                 return false;
                             }
                             $s3 = S3Client::factory($options);
-                            $region = !empty($bindFields[$fieldName]['region']) ? $bindFields[$fieldName]['region'] : Configure::read('Filebinder.S3.region');
-                            if (!empty($region)) {
-                                $s3->setRegion($region);
-                            }
                             $urlPrefix = !empty($bindFields[$fieldName]['urlPrefix']) ? $bindFields[$fieldName]['urlPrefix'] : Configure::read('Filebinder.S3.urlPrefix');
                             $tmpFilePath = '/tmp/' . sha1(uniqid('', true));
 
